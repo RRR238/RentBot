@@ -12,6 +12,7 @@ from urllib.parse import urlparse
 from dotenv import load_dotenv
 import os
 import json
+from Shared.Geolocation import get_coordinates
 
 load_dotenv()  # Loads environment variables from .env file
 
@@ -66,6 +67,7 @@ class Nehnutelnosti_sk_processor:
             prices = self.get_price(soup)
             description = self.get_description(soup)
             images= self.get_images(detail_link)
+            coordinates = get_coordinates(location)
             # print(f"title: {title} \nlocation: {location} \nkey attributes: {key_attributes} "
             #       f"\nother properties: {other_properties} \nprices: {prices} \ndescription: {description}")
             return {
@@ -75,7 +77,8 @@ class Nehnutelnosti_sk_processor:
                     "other_properties":other_properties,
                     "prices":prices,
                     "description":description,
-                    "images":images
+                    "images":images,
+                    "coordinates":coordinates
                     }
         else:
             raise Exception(f"Failed to fetch page: {detail_link}, Status Code: {resp.status_code}")
@@ -303,4 +306,4 @@ processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
 # print(len(set(links)))
 # print(links[149])
-processor.process_offers('offers_nehnutelnosti_sk',1,3)
+#processor.process_offers('offers_nehnutelnosti_sk.json',1,3)
