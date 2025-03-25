@@ -3,6 +3,20 @@ from bs4 import BeautifulSoup
 from lxml import etree
 from DOM_identifiers import DOM_identifiers
 import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.keys import Keys
+from webdriver_manager.chrome import ChromeDriverManager
+from urllib.parse import urlparse
+from dotenv import load_dotenv
+import os
+import json
+
+load_dotenv()  # Loads environment variables from .env file
+
+nehnutelnosti_base_url = os.getenv('nehnutelnosti_base_url')
+auth_token = os.getenv('auth_token')
 
 
 class Nehnutelnosti_sk_processor:
@@ -16,7 +30,8 @@ class Nehnutelnosti_sk_processor:
 
     def get_page(self,url):
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
         "Authorization": self.auth_token
         }
 
@@ -34,7 +49,8 @@ class Nehnutelnosti_sk_processor:
                 if href.startswith('http'):
                     full_url = href  # It's already a full URL
                 else:
-                    full_url = f"https://www.nehnutelnosti.sk{href}"  # Prepend the domain to relative URLs
+                    parsed_url = urlparse(self.base_url)
+                    full_url = f"{parsed_url.scheme}://{parsed_url.netloc}{href}"  # Prepend the domain to relative URLs
                 detail_links.append(full_url)
 
         return detail_links
@@ -49,6 +65,7 @@ class Nehnutelnosti_sk_processor:
             other_properties = self.get_other_properties(soup)
             prices = self.get_price(soup)
             description = self.get_description(soup)
+            images= self.get_images(detail_link)
             # print(f"title: {title} \nlocation: {location} \nkey attributes: {key_attributes} "
             #       f"\nother properties: {other_properties} \nprices: {prices} \ndescription: {description}")
             return {
@@ -57,20 +74,25 @@ class Nehnutelnosti_sk_processor:
                     "key_attributes":key_attributes,
                     "other_properties":other_properties,
                     "prices":prices,
-                    "description":description
+                    "description":description,
+                    "images":images
                     }
         else:
             raise Exception(f"Failed to fetch page: {detail_link}, Status Code: {resp.status_code}")
 
-    def get_title(self, soup):
+    def get_title(self,
+                  soup,
+                  element_class='MuiTypography-root MuiTypography-h4 mui-1wj7mln'):
         title = soup.find('h1',
-                          class_ = 'MuiTypography-root MuiTypography-h4 mui-1wj7mln'
+                          class_ = element_class
                           ).text.strip()
         return title
 
-    def get_location(self, soup):
+    def get_location(self,
+                     soup,
+                     element_class='MuiTypography-root MuiTypography-body2 MuiTypography-noWrap mui-3vjwr4'):
         location = soup.find('p',
-                             class_='MuiTypography-root MuiTypography-body2 MuiTypography-noWrap mui-3vjwr4'
+                             class_=element_class
                              ).text.strip()
         return location
 
@@ -115,17 +137,20 @@ class Nehnutelnosti_sk_processor:
                  "energies":None,
                  "meter squared":None
                  }
-        price_rent = soup.find('p', "MuiTypography-root MuiTypography-h3 mui-fm8hb4"
+        price_rent = soup.find('p',
+                               "MuiTypography-root MuiTypography-h3 mui-fm8hb4"
                           ).text.strip()
 
-        paragraphs = soup.find_all('p', class_="MuiTypography-root MuiTypography-label2 mui-gsg6ma")
+        paragraphs = soup.find_all('p',
+                                   class_="MuiTypography-root MuiTypography-label2 mui-gsg6ma")
         price_energies = None
         for p in paragraphs:
             if "€" in p.text:  # Look for the one containing a price
                 price_energies = p.text.strip()
                 break
         price_ms = soup.find('p', "MuiTypography-root MuiTypography-label2 mui-ifbhxp"
-                                   ).text.strip() if "€" in soup.find('p', "MuiTypography-root MuiTypography-label2 mui-ifbhxp"
+                                   ).text.strip() if "€" in soup.find('p',
+                                "MuiTypography-root MuiTypography-label2 mui-ifbhxp"
                                    ).text.strip() else None
 
         if price_rent:
@@ -145,7 +170,8 @@ class Nehnutelnosti_sk_processor:
 
     def get_other_properties(self, soup):
 
-        container = soup.find('div','MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-1 mui-lgq25d')
+        container = soup.find('div',
+            'MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-1 mui-lgq25d')
         paragraphs = container.find_all("p") if container else []
         paragraph_texts = [p.get_text(strip=True) for p in paragraphs]
         data_dict = dict(zip(paragraph_texts[::2], paragraph_texts[1::2]))
@@ -160,20 +186,55 @@ class Nehnutelnosti_sk_processor:
             print("Element not found")
             return None
 
-    def process_offers_single_page(self, page_url, sleep=5):
+    def get_images(self,detail_link, wait_for_load_page=2, wait_for_load_images=0.5):
+        options = webdriver.ChromeOptions()
+        options.add_argument("--headless")  # Run in headless mode (optional)
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+        parts = detail_link.split("/detail/")
+        url = f"{parts[0]}/detail/galeria/foto/{parts[1]}"
+        # Open the webpage
+        driver.get(url)
+        time.sleep(wait_for_load_page)  # Wait for page to load
+
+        # Scroll down multiple times to load all lazy-loaded images
+        for _ in range(5):  # Adjust scroll times if needed
+            driver.find_element(By.TAG_NAME, "body").send_keys(Keys.PAGE_DOWN)
+            time.sleep(wait_for_load_images)  # Give time for images to load
+
+        # Find all images
+        images = driver.find_elements(By.TAG_NAME, "img")
+        image_urls = set()  # Use set to remove duplicates
+
+        for img in images:
+            src = img.get_attribute("src") or img.get_attribute("data-src")
+            if src and "static" not in src:  # Filter out non-relevant images
+                image_urls.add(src)
+
+        images = []
+        # Print the extracted image URLs
+        for url in set(image_urls):
+            if not url.endswith(".png"):
+                images.append(url)
+
+        driver.quit()
+
+        return images
+
+    def process_offers_single_page(self, page_url, current_page, sleep=5):
         page = self.get_page(page_url)
         detail_links = self.get_details_links(BeautifulSoup(page.text,'html.parser'))
-        print(detail_links)
         process_n = 1
-        for link in detail_links:
-            print(f"processing{process_n}/{len(detail_links)}")
+        offers = []
+        for link in set(detail_links):
+            print(f"processing{process_n}/{len(set(detail_links))} on page {current_page}")
             #check if the link is already in DB - if so, skip case
             if link in self.processed_offers:
                 continue
             try:
                 results = self.process_detail(link)
                 results["source"] = link
-                print(results)
+                offers.append(results)
                 self.processed_offers.append(link)
                 time.sleep(sleep)
             except Exception as e:
@@ -182,11 +243,13 @@ class Nehnutelnosti_sk_processor:
 
             process_n+=1
             #save results to DB
+        return offers
 
-    def process_offers(self,start_page=1, end_page=None):
+    def process_offers(self,json_file,start_page=1, end_page=None):
         last_page = self.last_page_number_check()
         current_page = start_page
 
+        all_offers = {}
         while True:
             if end_page:
                 if current_page > end_page:
@@ -196,12 +259,15 @@ class Nehnutelnosti_sk_processor:
 
             url = f"{self.base_url}&page={current_page}"
             try:
-                self.process_offers_single_page(url)
+                all_offers[current_page] = self.process_offers_single_page(url,current_page)
             except Exception as e:
                 print(f"failed to process page: {url}, error: {e}")
                 self.failed_pages.append(url)
 
             current_page += 1
+
+        with open(json_file, 'w') as json_file:
+            json.dump(all_offers, json_file, indent=4)
 
         print(f"failed to process pages: {len(self.failed_pages)} "
               f"\nfailed to process offers: {len(self.failed_offers)}")
@@ -230,10 +296,11 @@ class Nehnutelnosti_sk_processor:
 
 
 
-processor = Nehnutelnosti_sk_processor("https://www.nehnutelnosti.sk/vysledky/prenajom?categories=2&categories=200000",
-                                       "Bearer a6693587a95b5087")
+processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
+                                       auth_token)
 #processor.pagination_check()
-# page = processor.get_page("https://www.nehnutelnosti.sk/vysledky/prenajom?categories=2&categories=200000")
+# page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
-# processor.process_detail(links[0])
-processor.process_offers(1,3)
+# print(len(set(links)))
+# print(links[149])
+processor.process_offers('offers_nehnutelnosti_sk',1,3)
