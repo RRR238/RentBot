@@ -13,4 +13,3 @@ class DOM_identifiers:
     nehnutelnosti_xpaths = ['//*[@id="main-detail-content"]/div[1]/div/div[1]/div/div[2]/div/div[2]/div/text()[2]',
                   '//*[@id="main-detail-content"]/div[1]/div/div[1]/div/div[2]/div/div[2]/div/text()[5]',
                   '//*[@id="main-detail-content"]/div[1]/div/div[1]/div/div[2]/div/div[2]/div/text()[8]']
-

@@ -54,7 +54,7 @@ class Nehnutelnosti_sk_processor:
                     full_url = f"{parsed_url.scheme}://{parsed_url.netloc}{href}"  # Prepend the domain to relative URLs
                 detail_links.append(full_url)
 
-        return detail_links
+        return list(set(detail_links))
 
     def process_detail(self, detail_link):
         resp = self.get_page(detail_link)
@@ -81,7 +81,8 @@ class Nehnutelnosti_sk_processor:
                     "coordinates":coordinates
                     }
         else:
-            raise Exception(f"Failed to fetch page: {detail_link}, Status Code: {resp.status_code}")
+            raise Exception(f"Failed to fetch page: {detail_link}, "
+                            f"Status Code: {resp.status_code}")
 
     def get_title(self,
                   soup,
@@ -229,7 +230,7 @@ class Nehnutelnosti_sk_processor:
         detail_links = self.get_details_links(BeautifulSoup(page.text,'html.parser'))
         process_n = 1
         offers = []
-        for link in set(detail_links):
+        for link in detail_links:
             print(f"processing{process_n}/{len(set(detail_links))} on page {current_page}")
             #check if the link is already in DB - if so, skip case
             if link in self.processed_offers:
@@ -269,8 +270,8 @@ class Nehnutelnosti_sk_processor:
 
             current_page += 1
 
-        with open(json_file, 'w') as json_file:
-            json.dump(all_offers, json_file, indent=4)
+        with open(json_file, 'w',encoding="utf-8") as json_file:
+            json.dump(all_offers, json_file, ensure_ascii=False, indent=4)
 
         print(f"failed to process pages: {len(self.failed_pages)} "
               f"\nfailed to process offers: {len(self.failed_offers)}")
@@ -304,6 +305,7 @@ processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
 #processor.pagination_check()
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
-# print(len(set(links)))
+# print(processor.process_detail(links[0]))
+# print(len(links))
 # print(links[149])
-#processor.process_offers('offers_nehnutelnosti_sk.json',1,3)
+processor.process_offers('offers_nehnutelnosti_sk.json',1,1)
