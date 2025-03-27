@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from lxml import etree
-from DOM_identifiers import DOM_identifiers
+import DOM_identifiers
 import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -110,10 +110,13 @@ class Nehnutelnosti_sk_processor:
         container = soup.find('div', 'MuiBox-root mui-1e434qh')
         paragraphs = container.find_all("p") if container else []
 
-        results = {"house":False,
+        results = {
+                    "house":False,
                    "loft":False,
                    "mezonet":False,
                    "apartmen":False,
+                   "flat":False,
+                   "studio":False,
                    "rooms":None,
                    "size":None,
                    "property_status":None
@@ -121,15 +124,23 @@ class Nehnutelnosti_sk_processor:
         for i in range(len(paragraphs)):
             svg = paragraphs[i].find("svg")
             path_data = svg.find("path")['d']
+            attribute = dom.xpath(xpaths[i])[0].lower()
             for j in icons.keys():
                 if icons[j] == path_data:
-                    if "dom" in dom.xpath(xpaths[i])[0].lower():
+                    if "dom" in attribute:
                         results["house"] = True
-                    elif "byt" in dom.xpath(xpaths[i])[0].lower():
-                        results["apartmen"] = True
+                    elif "byt" in attribute:
+                        results["flat"] = True
                         results["rooms"] = j[0]
+                    elif "apartmán" in attribute:
+                        results["apartmen"] = True
+                    elif "garsónka" in attribute:
+                        results["studio"] = True
                     else:
-                        results[j] = dom.xpath(xpaths[i])[0]
+                        if results[j]==False:
+                            results[j] = True
+                        else:
+                            results[j] = attribute #dom.xpath(xpaths[i])[0]
 
         if results['size']:
             results['size'] = results['size'].split()[0]
@@ -172,18 +183,20 @@ class Nehnutelnosti_sk_processor:
                                         .strip())
         return prices
 
-    def get_other_properties(self, soup):
+    def get_other_properties(self,
+                             soup,
+                             element = 'div',
+                             element_class = 'MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-1 mui-lgq25d'):
 
-        container = soup.find('div',
-            'MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-1 mui-lgq25d')
+        container = soup.find(element,element_class)
         paragraphs = container.find_all("p") if container else []
         paragraph_texts = [p.get_text(strip=True) for p in paragraphs]
         data_dict = dict(zip(paragraph_texts[::2], paragraph_texts[1::2]))
 
         return data_dict
 
-    def get_description(self, soup):
-        desc = soup.find(id="description-wrapper")
+    def get_description(self, soup, id="description-wrapper"):
+        desc = soup.find(id=id)
         if desc:
             return desc.text.strip().replace("Čítať ďalej","")
         else:
@@ -276,13 +289,14 @@ class Nehnutelnosti_sk_processor:
         print(f"failed to process pages: {len(self.failed_pages)} "
               f"\nfailed to process offers: {len(self.failed_offers)}")
 
-    def last_page_number_check(self):
+    def last_page_number_check(self,
+                               element_id = "nav[aria-label='pagination navigation'] a"):
         url = self.base_url
         response = self.get_page(url)
         soup = BeautifulSoup(response.text, 'html.parser')
 
         # Find the currently active page (aria-current="true")
-        pagination_buttons = soup.select("nav[aria-label='pagination navigation'] a")
+        pagination_buttons = soup.select(element_id)
 
         # Extract page numbers from the "Go to page X" buttons
         page_numbers = []
