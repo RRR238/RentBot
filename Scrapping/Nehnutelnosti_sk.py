@@ -40,12 +40,12 @@ class Nehnutelnosti_sk_processor:
 
         return response
 
-    def get_details_links(self, soup):
+    def get_details_links(self, soup, keyword='detail'):
         links = soup.find_all('a', href=True)
         detail_links = []
         for link in links:
             href = link['href']
-            if 'detail' in href:  # Check if the 'href' contains 'detail'
+            if keyword in href:  # Check if the 'href' contains 'detail'
                 # If the URL is relative, prepend the domain
                 if href.startswith('http'):
                     full_url = href  # It's already a full URL
@@ -86,16 +86,18 @@ class Nehnutelnosti_sk_processor:
 
     def get_title(self,
                   soup,
+                  element = 'h1',
                   element_class='MuiTypography-root MuiTypography-h4 mui-1wj7mln'):
-        title = soup.find('h1',
+        title = soup.find(element,
                           class_ = element_class
                           ).text.strip()
         return title
 
     def get_location(self,
                      soup,
+                     element='p',
                      element_class='MuiTypography-root MuiTypography-body2 MuiTypography-noWrap mui-3vjwr4'):
-        location = soup.find('p',
+        location = soup.find(element,
                              class_=element_class
                              ).text.strip()
         return location
@@ -136,23 +138,34 @@ class Nehnutelnosti_sk_processor:
 
         return results
 
-    def get_price(self,soup):
+    def get_price(self,
+                  soup,
+                  rent_element='p',
+                  rent_class="MuiTypography-root MuiTypography-h3 mui-fm8hb4",
+                  meter_squared_element='p',
+                  meter_squared_class="MuiTypography-root MuiTypography-label2 mui-ifbhxp"):
+
         prices ={"rent":None,
                  "energies":None,
                  "meter squared":None
                  }
-        price_rent = soup.find('p',
-                               "MuiTypography-root MuiTypography-h3 mui-fm8hb4"
+        price_rent = soup.find(rent_element,
+                               rent_class
                           ).text.strip()
 
-        paragraphs = soup.find_all('p',
-                                   class_="MuiTypography-root MuiTypography-label2 mui-gsg6ma")
         price_energies = None
-        for p in paragraphs:
-            if "€" in p.text:  # Look for the one containing a price
-                price_energies = p.text.strip()
-                break
-        price_ms = soup.find('p', "MuiTypography-root MuiTypography-label2 mui-ifbhxp"
+        try:
+            paragraphs = soup.find_all('p',
+                                       class_="MuiTypography-root MuiTypography-label2 mui-gsg6ma")
+            for p in paragraphs:
+                if "€" in p.text:  # Look for the one containing a price
+                    price_energies = p.text.strip()
+                    break
+        except:
+            pass
+
+        price_ms = soup.find(meter_squared_element,
+                             meter_squared_class
                                    ).text.strip() if "€" in soup.find('p',
                                 "MuiTypography-root MuiTypography-label2 mui-ifbhxp"
                                    ).text.strip() else None
@@ -300,12 +313,12 @@ class Nehnutelnosti_sk_processor:
 
 
 
-processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
-                                       auth_token)
+#processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
+ #                                      auth_token)
 #processor.pagination_check()
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
 # print(processor.process_detail(links[0]))
 # print(len(links))
 # print(links[149])
-processor.process_offers('offers_nehnutelnosti_sk.json',1,1)
+#processor.process_offers('offers_nehnutelnosti_sk.json',1,1)
