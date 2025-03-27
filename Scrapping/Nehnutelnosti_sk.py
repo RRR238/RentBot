@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from lxml import etree
-from DOM_identifiers import DOM_identifiers
+import DOM_identifiers
 import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -17,7 +17,7 @@ from Shared.Geolocation import get_coordinates
 load_dotenv()  # Loads environment variables from .env file
 
 nehnutelnosti_base_url = os.getenv('nehnutelnosti_base_url')
-auth_token = os.getenv('auth_token')
+auth_token = os.getenv('auth_token_nehnutelnosti')
 
 
 class Nehnutelnosti_sk_processor:
@@ -112,10 +112,13 @@ class Nehnutelnosti_sk_processor:
         container = soup.find('div', 'MuiBox-root mui-1e434qh')
         paragraphs = container.find_all("p") if container else []
 
-        results = {"house":False,
+        results = {
+                    "house":False,
                    "loft":False,
                    "mezonet":False,
                    "apartmen":False,
+                   "flat":False,
+                   "studio":False,
                    "rooms":None,
                    "size":None,
                    "property_status":None
@@ -123,18 +126,32 @@ class Nehnutelnosti_sk_processor:
         for i in range(len(paragraphs)):
             svg = paragraphs[i].find("svg")
             path_data = svg.find("path")['d']
+            attribute = dom.xpath(xpaths[i])[0].lower()
             for j in icons.keys():
                 if icons[j] == path_data:
-                    if "dom" in dom.xpath(xpaths[i])[0].lower():
+                    if "dom" in attribute:
                         results["house"] = True
-                    elif "byt" in dom.xpath(xpaths[i])[0].lower():
+                    elif "byt" in attribute:
+                        results["flat"] = True
+                        try:
+                            results["rooms"] = int(j[0])
+                        except:
+                            results["rooms"] = j[0]
+                    elif "apartmán" in attribute:
                         results["apartmen"] = True
-                        results["rooms"] = j[0]
+                    elif "garsónka" in attribute:
+                        results["studio"] = True
                     else:
-                        results[j] = dom.xpath(xpaths[i])[0]
+                        if results[j]==False:
+                            results[j] = True
+                        else:
+                            results[j] = attribute #dom.xpath(xpaths[i])[0]
 
         if results['size']:
-            results['size'] = results['size'].split()[0]
+            try:
+                results['size'] = int(results['size'].split()[0])
+            except:
+                results['size'] = results['size'].split()[0]
 
         return results
 
@@ -174,29 +191,47 @@ class Nehnutelnosti_sk_processor:
             prices["rent"] = (price_rent.replace("\xa0", "")
                               .split("€")[0]
                               .strip())
+            try:
+                prices["rent"] = int(prices["rent"])
+            except:
+                pass
+
         if price_energies:
             prices["energies"] = (price_energies.replace("\xa0", ""
                                                         ).split("€")[0]
                                                         .strip()
                                                         .replace("+ ",""))
+            try:
+                prices["energies"] = int(prices["energies"])
+            except:
+                pass
+
         if price_ms:
             prices["meter squared"] = (price_ms.replace("\xa0", "")
                                         .split("€")[0]
                                         .strip())
+
+            try:
+                prices["meter squared"] = int(prices["meter squared"])
+            except:
+                pass
+
         return prices
 
-    def get_other_properties(self, soup):
+    def get_other_properties(self,
+                             soup,
+                             element = 'div',
+                             element_class = 'MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-1 mui-lgq25d'):
 
-        container = soup.find('div',
-            'MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-1 mui-lgq25d')
+        container = soup.find(element,element_class)
         paragraphs = container.find_all("p") if container else []
         paragraph_texts = [p.get_text(strip=True) for p in paragraphs]
         data_dict = dict(zip(paragraph_texts[::2], paragraph_texts[1::2]))
 
         return data_dict
 
-    def get_description(self, soup):
-        desc = soup.find(id="description-wrapper")
+    def get_description(self, soup, id="description-wrapper"):
+        desc = soup.find(id=id)
         if desc:
             return desc.text.strip().replace("Čítať ďalej","")
         else:
@@ -289,13 +324,14 @@ class Nehnutelnosti_sk_processor:
         print(f"failed to process pages: {len(self.failed_pages)} "
               f"\nfailed to process offers: {len(self.failed_offers)}")
 
-    def last_page_number_check(self):
+    def last_page_number_check(self,
+                               element_id = "nav[aria-label='pagination navigation'] a"):
         url = self.base_url
         response = self.get_page(url)
         soup = BeautifulSoup(response.text, 'html.parser')
 
         # Find the currently active page (aria-current="true")
-        pagination_buttons = soup.select("nav[aria-label='pagination navigation'] a")
+        pagination_buttons = soup.select(element_id)
 
         # Extract page numbers from the "Go to page X" buttons
         page_numbers = []
@@ -313,12 +349,12 @@ class Nehnutelnosti_sk_processor:
 
 
 
-#processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
- #                                      auth_token)
+processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
+                                       auth_token)
 #processor.pagination_check()
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
 # print(processor.process_detail(links[0]))
 # print(len(links))
 # print(links[149])
-#processor.process_offers('offers_nehnutelnosti_sk.json',1,1)
+processor.process_offers('offers_nehnutelnosti_sk.json',1,1)
