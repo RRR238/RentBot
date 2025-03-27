@@ -17,7 +17,7 @@ from Shared.Geolocation import get_coordinates
 load_dotenv()  # Loads environment variables from .env file
 
 nehnutelnosti_base_url = os.getenv('nehnutelnosti_base_url')
-auth_token = os.getenv('auth_token_nehnutelnosti')
+auth_token_nehnutelnosti = os.getenv('auth_token_nehnutelnosti')
 
 
 class Nehnutelnosti_sk_processor:
@@ -238,13 +238,24 @@ class Nehnutelnosti_sk_processor:
             print("Element not found")
             return None
 
-    def get_images(self,detail_link, wait_for_load_page=2, wait_for_load_images=0.5):
+    def get_images_url(self,
+                       detail_link):
+
+        parts = detail_link.split("/detail/")
+        url = f"{parts[0]}/detail/galeria/foto/{parts[1]}"
+
+        return url
+
+    def get_images(self,
+                   detail_link,
+                   wait_for_load_page=2,
+                   wait_for_load_images=0.5):
+
         options = webdriver.ChromeOptions()
         options.add_argument("--headless")  # Run in headless mode (optional)
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
-        parts = detail_link.split("/detail/")
-        url = f"{parts[0]}/detail/galeria/foto/{parts[1]}"
+        url = self.get_images_url(detail_link)
         # Open the webpage
         driver.get(url)
         time.sleep(wait_for_load_page)  # Wait for page to load
@@ -349,12 +360,12 @@ class Nehnutelnosti_sk_processor:
 
 
 
-processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
-                                       auth_token)
+#processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
+                              #         auth_token)
 #processor.pagination_check()
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
 # print(processor.process_detail(links[0]))
 # print(len(links))
 # print(links[149])
-processor.process_offers('offers_nehnutelnosti_sk.json',1,1)
+#processor.process_offers('offers_nehnutelnosti_sk.json',1,1)
