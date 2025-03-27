@@ -17,7 +17,7 @@ from Shared.Geolocation import get_coordinates
 load_dotenv()  # Loads environment variables from .env file
 
 nehnutelnosti_base_url = os.getenv('nehnutelnosti_base_url')
-auth_token = os.getenv('auth_token')
+auth_token = os.getenv('auth_token_nehnutelnosti')
 
 
 class Nehnutelnosti_sk_processor:
@@ -133,7 +133,10 @@ class Nehnutelnosti_sk_processor:
                         results["house"] = True
                     elif "byt" in attribute:
                         results["flat"] = True
-                        results["rooms"] = j[0]
+                        try:
+                            results["rooms"] = int(j[0])
+                        except:
+                            results["rooms"] = j[0]
                     elif "apartmán" in attribute:
                         results["apartmen"] = True
                     elif "garsónka" in attribute:
@@ -145,7 +148,10 @@ class Nehnutelnosti_sk_processor:
                             results[j] = attribute #dom.xpath(xpaths[i])[0]
 
         if results['size']:
-            results['size'] = results['size'].split()[0]
+            try:
+                results['size'] = int(results['size'].split()[0])
+            except:
+                results['size'] = results['size'].split()[0]
 
         return results
 
@@ -185,15 +191,31 @@ class Nehnutelnosti_sk_processor:
             prices["rent"] = (price_rent.replace("\xa0", "")
                               .split("€")[0]
                               .strip())
+            try:
+                prices["rent"] = int(prices["rent"])
+            except:
+                pass
+
         if price_energies:
             prices["energies"] = (price_energies.replace("\xa0", ""
                                                         ).split("€")[0]
                                                         .strip()
                                                         .replace("+ ",""))
+            try:
+                prices["energies"] = int(prices["energies"])
+            except:
+                pass
+
         if price_ms:
             prices["meter squared"] = (price_ms.replace("\xa0", "")
                                         .split("€")[0]
                                         .strip())
+
+            try:
+                prices["meter squared"] = int(prices["meter squared"])
+            except:
+                pass
+
         return prices
 
     def get_other_properties(self,
@@ -327,12 +349,12 @@ class Nehnutelnosti_sk_processor:
 
 
 
-#processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
- #                                      auth_token)
+processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
+                                       auth_token)
 #processor.pagination_check()
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
 # print(processor.process_detail(links[0]))
 # print(len(links))
 # print(links[149])
-#processor.process_offers('offers_nehnutelnosti_sk.json',1,1)
+processor.process_offers('offers_nehnutelnosti_sk.json',1,1)

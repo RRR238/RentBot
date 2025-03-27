@@ -1,6 +1,13 @@
 from Nehnutelnosti_sk import Nehnutelnosti_sk_processor
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # Loads environment variables from .env file
+
+nehnutelnosti_base_url = os.getenv('reality_base_url')
+auth_token = os.getenv('auth_token_reality')
 
 class Reality_sk_processor(Nehnutelnosti_sk_processor):
 
