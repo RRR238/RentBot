@@ -369,3 +369,4 @@ class Nehnutelnosti_sk_processor:
 # print(len(links))
 # print(links[149])
 #processor.process_offers('offers_nehnutelnosti_sk.json',1,1)
+
