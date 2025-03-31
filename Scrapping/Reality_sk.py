@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 from selenium.webdriver.chrome.options import Options
 from Shared.Geolocation import get_coordinates
+import re
 
 load_dotenv()  # Loads environment variables from .env file
 
@@ -60,7 +61,7 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
                                     ).find('h3', class_='contact-title big col-12 col-md-6 mb-0').text.strip(
                                     ).split("€")[0]
         try:
-            price_rent = int(price_rent.replace(" ",""))
+            price_rent = int(re.sub(r'\s+', '', price_rent))
         except:
             pass
 
@@ -68,9 +69,11 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
                                 ).find('h3', class_='contact-title big col-12 col-md-6 mb-0'
                                 ).find_all('small'
                                 )[0].text.strip(
-                                ).split("€")[0]
+                                ).split("€")[0].replace(
+                                ',','.'
+                                )
         try:
-            price_ms = int(price_rent.replace(" ",""))
+            price_ms = int(re.sub(r'\s+', '', price_ms))
         except:
             pass
 
@@ -118,7 +121,12 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
                     results[j] = True
             elif j == 'Úžitková plocha':
                 try:
-                    results["size"] = float(info[j].replace("m²","").replace(" ",""))
+                    results["size"] = float(re.sub(r'\s+',
+                                            '', info[j].replace(
+                                            "m²","").replace(
+                                            ',','.')
+                                                )
+                                            )
                 except:
                     results["size"] = info[j].replace("m²","")
             else:
@@ -188,6 +196,10 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
                    wait_for_load_images=2):
 
         chrome_options = Options()
+        chrome_options.add_experimental_option(
+                                        "excludeSwitches",
+                                        ["enable-logging"]
+                                        )
         chrome_options.add_argument(
             self.user_agent)
 
@@ -361,6 +373,6 @@ processor = Reality_sk_processor(reality_base_url,
 # print(imgs)
 # print(imgs[0])
 
-processor.process_offers('offers_reality_sk.json',1,1)
+processor.process_offers('offers_reality_sk.json',1,2)
 
 
