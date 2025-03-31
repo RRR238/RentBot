@@ -173,18 +173,18 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
 
 # processor = Reality_sk_processor(reality_base_url,
 #                                  auth_token_reality)
-#
+# #
 # page = processor.get_page(reality_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
-# print(links[0])
+# # print(links[0])
 # detail = processor.get_page(links[0])
-# # #print(BeautifulSoup(detail.text,'html.parser'))
-# # print(processor.get_title(BeautifulSoup(detail.text,'html.parser'),element_class="detail-title pt-4 pb-2"))
-# # # print(processor.get_location(BeautifulSoup(detail.text,'html.parser'),element='div',element_class="d-inline-block ml-2"))
-# # # print(processor.get_price(BeautifulSoup(detail.text,'html.parser')))
-# # print(processor.get_key_attributes(BeautifulSoup(detail.text,'html.parser')))
-# # #processor.get_description(BeautifulSoup(detail.text,'html.parser'))
-# # #processor.get_other_properties(BeautifulSoup(detail.text,'html.parser'))
+# # # #print(BeautifulSoup(detail.text,'html.parser'))
+# print(processor.get_title(BeautifulSoup(detail.text,'html.parser'),element_class="detail-title pt-4 pb-2"))
+# # # # print(processor.get_location(BeautifulSoup(detail.text,'html.parser'),element='div',element_class="d-inline-block ml-2"))
+# # # # print(processor.get_price(BeautifulSoup(detail.text,'html.parser')))
+# print(processor.get_key_attributes(BeautifulSoup(detail.text,'html.parser')))
+# # # #processor.get_description(BeautifulSoup(detail.text,'html.parser'))
+# # # #processor.get_other_properties(BeautifulSoup(detail.text,'html.parser'))
 # print(processor.get_images_url(links[0]))
 # imgs = processor.get_images(links[0])
 # print(imgs)
@@ -194,135 +194,129 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
 
 # r = processor.get_page('https://s.unitedclassifieds.sk/jul/_niCsd7zT_fss?st=1KIW2RgpCgH1PV6amN6FcSPRDk8XrlxpnIRCmSGX85E&ts=1742678865&e=0')
 # print(r.status_code)
-import requests
-url = 'https://img.unitedclassifieds.sk/foto/NzAweDU3NS9maWx0ZXJzOnF1YWxpdHkoMTAwKS9qdWw=/_txDjYgRk_fss?st=JJT-J9LJsnvqYWtSTtyJXVPqb0MXNSwTgqNd_gFd70k&amp;ts=1742678882&amp;e=0'
 
-headers = {
-    'accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-    'accept-encoding': 'gzip, deflate, br, zstd',
-    'accept-language': 'en-US,en;q=0.9',
-    'cache-control': 'no-cache',
-    'pragma': 'no-cache',
-    'priority': 'u=1, i',
-    'referer': 'https://www.reality.sk/',  # Replace with the actual referring page
-    'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Google Chrome";v="134"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Windows"',
-    'sec-fetch-dest': 'image',
-    'sec-fetch-mode': 'no-cors',
-    'sec-fetch-site': 'cross-site',
-    'sec-fetch-storage-access': 'active',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
-    "Authorization": "8ae3c79ded93973f"
-}
+# url = 'https://s.unitedclassifieds.sk/rsf/YmDu3Ptp__fss?st=5xSuTCrsdaYFIeLEC0V00GBVGKBgWf3V4bEB7NS0pVk&amp;ts=1741169967&amp;e=0'
+# srcset='https://img.unitedclassifieds.sk/foto/NzAweDU3NS9maWx0ZXJzOnF1YWxpdHkoMTAwKS9yc2Y=/YmDu3Ptp__fss?st=rIW8NezwvmGZw547SfVFNHGpKMVww4-_uenqeepqd0w&amp;ts=1741169967&amp;e=0'
+# next_url = 'https://img.unitedclassifieds.sk/foto/MTAwMHg3NTAvZmlsdGVyczpxdWFsaXR5KDEwMCkvcnNm/YmDu3Ptp__fss?st=U9jsj9wgwYhamNIBu2TmX0ExjSzm9Kt9bejpTmBUbx0&amp;ts=1741169967&amp;e=0'
+# nextr_one = 'https://s.unitedclassifieds.sk/rsf/YmDu3Ptp__fss?st=5xSuTCrsdaYFIeLEC0V00GBVGKBgWf3V4bEB7NS0pVk&amp;ts=1741169967&amp;e=0'
+#
+#
+# subdiv ='https://img.unitedclassifieds.sk/foto/OTZ4NzYvZmlsdGVyczpxdWFsaXR5KDY1KS9yc2Y=/YmDu3Ptp__fss?st=Dj-uwfKOxnvgRtWNZol0KCXq9p3jly7kgXuvW5FPDi0&amp;ts=1741169967&amp;e=0'
+#
+# import requests
+# #url = subdiv
+#
+# headers = {
+#     'accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+#     'accept-encoding': 'gzip, deflate, br, zstd',
+#     'accept-language': 'en-US,en;q=0.9',
+#     'cache-control': 'no-cache',
+#     'pragma': 'no-cache',
+#     'priority': 'u=1, i',
+#     'referer': 'https://www.reality.sk/',  # Replace with the actual referring page
+#     'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Google Chrome";v="134"',
+#     'sec-ch-ua-mobile': '?0',
+#     'sec-ch-ua-platform': '"Windows"',
+#     'sec-fetch-dest': 'image',
+#     'sec-fetch-mode': 'no-cors',
+#     'sec-fetch-site': 'cross-site',
+#     'sec-fetch-storage-access': 'active',
+#     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
+#     "Authorization": "8ae3c79ded93973f"
+# }
+#
+# response = requests.get(url, headers=headers)
+# if response.status_code != 200:
+#     print(f"Error fetching image: {response.status_code}")
+# else:
+#     image = Image.open(BytesIO(response.content))
+#     width, height = image.size
+#     print(f"Image Size: {width}x{height} pixels")
+#     # Show image
+#     image.show()
+
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager  # For automatic driver management
+from selenium.webdriver.common.action_chains import ActionChains
+import time
+
+# Initialize WebDriver (Make sure you have the correct WebDriver for your browser)
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 import time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# Set up Chrome options
+# Initialize WebDriver (Make sure you have the correct WebDriver for your browser)
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+
+# Set up the WebDriver
 chrome_options = Options()
-chrome_options.add_argument("--start-maximized")  # Optional, opens browser maximized
+chrome_options.add_argument("user-data-dir=C:\\Users\\YourUser\\AppData\\Local\\Google\\Chrome\\User Data")  # Change to your path
+chrome_options.add_argument("profile-directory=Default")  # Use your default profile
 
-# Initialize the driver
-service = Service(ChromeDriverManager().install())  # Automatically downloads the latest driver
-driver = webdriver.Chrome(service=service, options=chrome_options)
+driver = webdriver.Chrome(options=chrome_options)
+
+driver.get('https://www.reality.sk/2-izbovy-byt-foto/afyreal-prenajom-slnecny-2i-byt-na-18-posch-vyhlad-na-panoramu-mesta-klingerka/JulW6Wu5_HY/')
+time.sleep(5)
 
 
-# Function to handle the consent popup
-def handle_consent_popup():
+# Refresh the page to apply the cookie
+try:
+    # Wait for the button to be clickable
+    wait = WebDriverWait(driver, 10)  # Wait up to 10 seconds
+    cookie_button = wait.until(EC.element_to_be_clickable(
+        (By.XPATH, "//div[@class='message-component message-column']//button[contains(text(), 'Prijať všetko')]")))
+
+    # Click the button
+    cookie_button.click()
+    print("✅ Cookies accepted.")
+    time.sleep(2)
+except Exception as e:
+    print("⚠️ Cookie button not found or error:", e)
+
+# Find all images to determine how many times to click
+images = driver.find_elements(By.CLASS_NAME, "lg-item")
+image_count = len(images)
+
+# Locate the previous button
+prev_button = driver.find_element(By.CLASS_NAME, "lg-next")
+
+# Store image URLs
+image_sources = []
+
+# Loop through each image
+for _ in range(image_count):
+    # Find the currently visible image inside the specific div
     try:
-        # Wait for the iframe to load where the cookie consent is located
-        consent_iframe = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "sp_message_iframe_1109517"))  # Adjust the iframe ID if needed
-        )
+        current_image = driver.find_element(By.CSS_SELECTOR, ".lg-item.lg-loaded.lg-complete.lg-current img")
+        img_src = current_image.get_attribute("src")
 
-        # Switch to the consent iframe
-        driver.switch_to.frame(consent_iframe)
+        if img_src and img_src not in image_sources:
+            image_sources.append(img_src)
 
-        # Find and click the 'Accept' button (adjust the button text or selector as needed)
-        accept_button = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable((By.XPATH, '//button[text()="Accept"]'))  # Adjust XPath if necessary
-        )
-        accept_button.click()
+        # Click the previous button to navigate through images
+        prev_button.click()
+        time.sleep(1)  # Allow time for transition (increased wait time for image change)
 
-        # Switch back to the main page
-        driver.switch_to.default_content()
-        print("✅ Consent popup handled.")
     except Exception as e:
-        print("❌ Consent popup not found or could not be handled:", e)
+        print(f"Error: {e}")
 
+# Print all extracted image URLs
+for src in image_sources:
+    print(src)
 
-# Open the URL
-url = "https://www.reality.sk/1-izbovy-byt-foto/kompletne-zariadeny-1-izbovy-byt-s-lodziou-skolska-banska-bystrica/Ju0_KMv9Ive/"
-driver.get(url)
-
-# Maximize the window (optional)
-driver.maximize_window()
-
-# Handle the consent popup (if it appears)
-handle_consent_popup()
-
-# Now proceed with the rest of the scraping logic or image extraction
-
-# Example of waiting for thumbnails and clicking on them
-thumbnails = WebDriverWait(driver, 10).until(
-    EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".lg-thumb-item"))
-)
-
-
-# Function to click on each thumbnail and open high-res images
-def click_thumbnails_and_get_images():
-    for thumb in thumbnails:
-        try:
-            # Scroll the thumbnail into view
-            driver.execute_script("arguments[0].scrollIntoView(true);", thumb)
-            time.sleep(1)  # Give the page time to adjust the view
-
-            # Ensure the thumbnail is clickable
-            WebDriverWait(driver, 10).until(EC.element_to_be_clickable(thumb))
-
-            # Click the thumbnail to open the high-res image
-            thumb.click()
-
-            # Wait for the lightbox or modal to load (adjust the wait time if necessary)
-            time.sleep(2)  # Waiting for high-res image to be visible
-
-            # You can extract the image URL or any other information here
-            # For example, to get the src of the currently displayed image:
-            image_element = driver.find_element(By.CSS_SELECTOR, ".lg-image")
-            high_res_image_url = image_element.get_attribute("src")
-            print("✅ High-Resolution Image URL:", high_res_image_url)
-
-            # Optionally, you can close the lightbox or modal after getting the image URL
-            close_button = driver.find_element(By.CSS_SELECTOR, ".lg-close")
-            close_button.click()
-            time.sleep(1)  # Give the page time to close the lightbox
-
-        except Exception as e:
-            print("❌ Error handling thumbnail:", e)
-
-
-# Click on thumbnails and get the high-res images
-click_thumbnails_and_get_images()
-
-# Close the browser after operation is completed
+# Close the driver after finishing
 driver.quit()
 
-# response = requests.get(url, headers=headers)
-#
-# if response.status_code == 200:
-#     image = Image.open(BytesIO(response.content))
-#     width, height = image.size
-#     print(f"Image dimensions: {width}x{height}")  # Example: 1920x1080
-#     if width >= 1000 and height >= 1000:  # Adjust threshold as needed
-#         print("High-quality image detected ✅")
-#     else:
-#         print("Low-quality image ❌")
-# else:
-#     print(f"Failed to fetch image, status code: {response.status_code}")
+
+
