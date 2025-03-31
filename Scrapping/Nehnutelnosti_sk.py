@@ -17,14 +17,19 @@ from Shared.Geolocation import get_coordinates
 load_dotenv()  # Loads environment variables from .env file
 
 nehnutelnosti_base_url = os.getenv('nehnutelnosti_base_url')
-auth_token = os.getenv('auth_token_nehnutelnosti')
+auth_token_nehnutelnosti = os.getenv('auth_token_nehnutelnosti')
 
 
 class Nehnutelnosti_sk_processor:
 
-    def __init__(self,base_url,auth_token):
+    def __init__(self,
+                 base_url,
+                 auth_token,
+                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                 ):
         self.auth_token = auth_token
         self.base_url = base_url
+        self.user_agent = user_agent
         self.processed_offers = []
         self.failed_offers = []
         self.failed_pages = []
@@ -32,7 +37,7 @@ class Nehnutelnosti_sk_processor:
     def get_page(self,url):
         headers = {
             "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            self.user_agent,
         "Authorization": self.auth_token
         }
 
@@ -238,13 +243,24 @@ class Nehnutelnosti_sk_processor:
             print("Element not found")
             return None
 
-    def get_images(self,detail_link, wait_for_load_page=2, wait_for_load_images=0.5):
+    def get_images_url(self,
+                       detail_link):
+
+        parts = detail_link.split("/detail/")
+        url = f"{parts[0]}/detail/galeria/foto/{parts[1]}"
+
+        return url
+
+    def get_images(self,
+                   detail_link,
+                   wait_for_load_page=2,
+                   wait_for_load_images=0.5):
+
         options = webdriver.ChromeOptions()
         options.add_argument("--headless")  # Run in headless mode (optional)
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
-        parts = detail_link.split("/detail/")
-        url = f"{parts[0]}/detail/galeria/foto/{parts[1]}"
+        url = self.get_images_url(detail_link)
         # Open the webpage
         driver.get(url)
         time.sleep(wait_for_load_page)  # Wait for page to load
@@ -273,7 +289,11 @@ class Nehnutelnosti_sk_processor:
 
         return images
 
-    def process_offers_single_page(self, page_url, current_page, sleep=5):
+    def process_offers_single_page(self,
+                                   page_url,
+                                   current_page,
+                                   sleep=5):
+
         page = self.get_page(page_url)
         detail_links = self.get_details_links(BeautifulSoup(page.text,'html.parser'))
         process_n = 1
@@ -329,6 +349,7 @@ class Nehnutelnosti_sk_processor:
         url = self.base_url
         response = self.get_page(url)
         soup = BeautifulSoup(response.text, 'html.parser')
+        print(soup)
 
         # Find the currently active page (aria-current="true")
         pagination_buttons = soup.select(element_id)
@@ -349,12 +370,13 @@ class Nehnutelnosti_sk_processor:
 
 
 
-processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
-                                       auth_token)
+#processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
+                              #         auth_token)
 #processor.pagination_check()
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
 # print(processor.process_detail(links[0]))
 # print(len(links))
 # print(links[149])
-processor.process_offers('offers_nehnutelnosti_sk.json',1,1)
+#processor.process_offers('offers_nehnutelnosti_sk.json',1,1)
+
