@@ -22,9 +22,14 @@ auth_token_nehnutelnosti = os.getenv('auth_token_nehnutelnosti')
 
 class Nehnutelnosti_sk_processor:
 
-    def __init__(self,base_url,auth_token):
+    def __init__(self,
+                 base_url,
+                 auth_token,
+                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                 ):
         self.auth_token = auth_token
         self.base_url = base_url
+        self.user_agent = user_agent
         self.processed_offers = []
         self.failed_offers = []
         self.failed_pages = []
@@ -32,7 +37,7 @@ class Nehnutelnosti_sk_processor:
     def get_page(self,url):
         headers = {
             "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            self.user_agent,
         "Authorization": self.auth_token
         }
 
@@ -284,7 +289,11 @@ class Nehnutelnosti_sk_processor:
 
         return images
 
-    def process_offers_single_page(self, page_url, current_page, sleep=5):
+    def process_offers_single_page(self,
+                                   page_url,
+                                   current_page,
+                                   sleep=5):
+
         page = self.get_page(page_url)
         detail_links = self.get_details_links(BeautifulSoup(page.text,'html.parser'))
         process_n = 1
@@ -340,6 +349,7 @@ class Nehnutelnosti_sk_processor:
         url = self.base_url
         response = self.get_page(url)
         soup = BeautifulSoup(response.text, 'html.parser')
+        print(soup)
 
         # Find the currently active page (aria-current="true")
         pagination_buttons = soup.select(element_id)
