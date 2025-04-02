@@ -57,7 +57,8 @@ class Nehnutelnosti_sk_processor:
                 else:
                     parsed_url = urlparse(self.base_url)
                     full_url = f"{parsed_url.scheme}://{parsed_url.netloc}{href}"  # Prepend the domain to relative URLs
-                detail_links.append(full_url)
+                if "test" not in full_url.lower():
+                    detail_links.append(full_url)
 
         return list(set(detail_links))
 
@@ -154,7 +155,8 @@ class Nehnutelnosti_sk_processor:
 
         if results['size']:
             try:
-                results['size'] = int(results['size'].split()[0])
+                results['size'] = float(results['size'].split()[0].replace(
+                                                                    ',','.'))
             except:
                 results['size'] = results['size'].split()[0]
 
@@ -173,7 +175,8 @@ class Nehnutelnosti_sk_processor:
                  }
         price_rent = soup.find(rent_element,
                                rent_class
-                          ).text.strip()
+                          ).text.strip(
+                        )
 
         price_energies = None
         try:
@@ -195,7 +198,8 @@ class Nehnutelnosti_sk_processor:
         if price_rent:
             prices["rent"] = (price_rent.replace("\xa0", "")
                               .split("€")[0]
-                              .strip())
+                              .strip().replace(
+                                        ',','.'))
             try:
                 prices["rent"] = int(prices["rent"])
             except:
@@ -205,7 +209,9 @@ class Nehnutelnosti_sk_processor:
             prices["energies"] = (price_energies.replace("\xa0", ""
                                                         ).split("€")[0]
                                                         .strip()
-                                                        .replace("+ ",""))
+                                                        .replace(
+                                                        "+ ","").replace(
+                                                        ',','.'))
             try:
                 prices["energies"] = int(prices["energies"])
             except:
@@ -214,10 +220,10 @@ class Nehnutelnosti_sk_processor:
         if price_ms:
             prices["meter squared"] = (price_ms.replace("\xa0", "")
                                         .split("€")[0]
-                                        .strip())
+                                        .strip().replace(',','.'))
 
             try:
-                prices["meter squared"] = int(prices["meter squared"])
+                prices["meter squared"] = float(prices["meter squared"])
             except:
                 pass
 
@@ -349,7 +355,7 @@ class Nehnutelnosti_sk_processor:
         url = self.base_url
         response = self.get_page(url)
         soup = BeautifulSoup(response.text, 'html.parser')
-        print(soup)
+        #print(soup)
 
         # Find the currently active page (aria-current="true")
         pagination_buttons = soup.select(element_id)
@@ -370,13 +376,14 @@ class Nehnutelnosti_sk_processor:
 
 
 
-#processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
-                              #         auth_token)
+processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
+                                       auth_token_nehnutelnosti)
 #processor.pagination_check()
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
+# print(links)
 # print(processor.process_detail(links[0]))
 # print(len(links))
 # print(links[149])
-#processor.process_offers('offers_nehnutelnosti_sk.json',1,1)
+processor.process_offers('offers_nehnutelnosti_sk.json',1,1)
 
