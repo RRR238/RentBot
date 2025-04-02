@@ -78,13 +78,13 @@ class Nehnutelnosti_sk_processor:
             prices = self.get_price(soup)
             description = self.get_description(soup)
             images= self.get_images(detail_link)
-            print(location)
-            print(get_coordinates(location))
             coordinates = [str(i) for i in get_coordinates(location)]
             approval_year = int(other_properties['Rok kolaudácie:']) if 'Rok kolaudácie:' in other_properties.keys() else None
             last_reconstruction_year = int(other_properties['Rok poslednej rekonštrukcie:']) if 'Rok poslednej rekonštrukcie:' in other_properties.keys() else None
             balconies = int(other_properties['Počet balkónov:']) if 'Počet balkónov:' in other_properties.keys() else None
             ownership = other_properties['Vlastníctvo:'] if 'Vlastníctvo:' in other_properties.keys() else None
+            floor = int(other_properties['Podlažie:']) if 'Podlažie:' in other_properties.keys() else None
+            positioning = other_properties['Umiestnenie:'] if 'Umiestnenie:' in other_properties.keys() else None
             keys_to_remove = [
                                 'Rok kolaudácie:',
                                 'Rok poslednej rekonštrukcie:',
@@ -108,6 +108,8 @@ class Nehnutelnosti_sk_processor:
                     "ownership":ownership,
                     "other_properties":other_properties,
                     "prices":prices,
+                    "floor":floor,
+                    "positioning":positioning,
                     "description":description,
                     "images":images,
                     "coordinates":coordinates
@@ -356,6 +358,8 @@ class Nehnutelnosti_sk_processor:
                     "price_energies":  results['prices']['energies'],
                     "description": results['description'],
                     "other_properties": results['other_properties'],
+                    "floor":results['floor'],
+                    "positioning": results['positioning'],
                     "source": self.source,
                     "source_url": results['source_url'],
                     "coordinates": ";".join(results['coordinates'])
@@ -373,7 +377,10 @@ class Nehnutelnosti_sk_processor:
 
         #return offers
 
-    def process_offers(self,json_file,start_page=1, end_page=None):
+    def process_offers(self,start_page=1,
+                       end_page=None,
+                       json_file=None):
+
         last_page = self.last_page_number_check()
         current_page = start_page
 
@@ -437,5 +444,5 @@ processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
 #print(processor.process_detail('https://www.nehnutelnosti.sk/detail/JuQ7dsNVC-w/arboria--krasny-2-izbovy-byt-s-priestrannou-terasou-na-prenajom-v-projekte-arboria-na-novomestskej-ulici'))
 # print(len(links))
 # print(links[149])
-processor.process_offers('offers_nehnutelnosti_sk.json',1,1)
+processor.process_offers(1,1)
 
