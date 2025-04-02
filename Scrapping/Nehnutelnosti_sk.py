@@ -89,7 +89,9 @@ class Nehnutelnosti_sk_processor:
                                 'Rok kolaudácie:',
                                 'Rok poslednej rekonštrukcie:',
                                 'Počet balkónov:',
-                                'Vlastníctvo:'
+                                'Vlastníctvo:',
+                                'Podlažie:',
+                                'Umiestnenie:'
                             ]
 
             for key in keys_to_remove:
@@ -365,7 +367,8 @@ class Nehnutelnosti_sk_processor:
                     "coordinates": ";".join(results['coordinates'])
                 })
                 print(f"writing images to DB...")
-                self.db_repository.insert_offer_images(new_offer.id,results['images'][:4])
+                self.db_repository.insert_offer_images(new_offer.id,results['images'][:4]
+                                                        if len(results['images']) >= 4 else results['images'])
                 self.processed_offers.append(link)
                 print(f"detail processed successfully")
                 time.sleep(sleep)
@@ -445,4 +448,5 @@ processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
 # print(len(links))
 # print(links[149])
 processor.process_offers(1,1)
+
 
