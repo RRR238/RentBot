@@ -1,1 +1,3 @@
 geopy
+sqlalchemy
+psycopg2-binary
