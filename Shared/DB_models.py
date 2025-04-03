@@ -24,6 +24,8 @@ class Rent_offer_model(Base):
     price_ms = Column(Float, nullable=True)
     price_energies = Column(SmallInteger, nullable=True)
     description = Column(Text, nullable=True)
+    floor = Column(SmallInteger, nullable=True)
+    positioning = Column(Text, nullable=True)
     other_properties = Column(JSONB, nullable=True)  # Use JSONB for PostgreSQL optimization
     source = Column(Text, nullable=True)
     source_url = Column(Text, nullable=True)

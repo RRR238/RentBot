@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 import os
 import json
 from Shared.Geolocation import get_coordinates
+from Rent_offers_repository import Rent_offers_repository
 
 load_dotenv()  # Loads environment variables from .env file
 
@@ -25,6 +26,8 @@ class Nehnutelnosti_sk_processor:
     def __init__(self,
                  base_url,
                  auth_token,
+                 db_repository:Rent_offers_repository,
+                 source = 'Nehnutelnosti.sk',
                  user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
                  ):
         self.auth_token = auth_token
@@ -33,6 +36,8 @@ class Nehnutelnosti_sk_processor:
         self.processed_offers = []
         self.failed_offers = []
         self.failed_pages = []
+        self.db_repository:Rent_offers_repository = db_repository
+        self.source = source
 
     def get_page(self,url):
         headers = {
@@ -73,15 +78,40 @@ class Nehnutelnosti_sk_processor:
             prices = self.get_price(soup)
             description = self.get_description(soup)
             images= self.get_images(detail_link)
-            coordinates = get_coordinates(location)
+            coordinates = [str(i) for i in get_coordinates(location)]
+            approval_year = int(other_properties['Rok kolaudácie:']) if 'Rok kolaudácie:' in other_properties.keys() else None
+            last_reconstruction_year = int(other_properties['Rok poslednej rekonštrukcie:']) if 'Rok poslednej rekonštrukcie:' in other_properties.keys() else None
+            balconies = int(other_properties['Počet balkónov:']) if 'Počet balkónov:' in other_properties.keys() else None
+            ownership = other_properties['Vlastníctvo:'] if 'Vlastníctvo:' in other_properties.keys() else None
+            floor = int(other_properties['Podlažie:']) if 'Podlažie:' in other_properties.keys() else None
+            positioning = other_properties['Umiestnenie:'] if 'Umiestnenie:' in other_properties.keys() else None
+            keys_to_remove = [
+                                'Rok kolaudácie:',
+                                'Rok poslednej rekonštrukcie:',
+                                'Počet balkónov:',
+                                'Vlastníctvo:',
+                                'Podlažie:',
+                                'Umiestnenie:'
+                            ]
+
+            for key in keys_to_remove:
+                if key in other_properties.keys():
+                    del other_properties[key]
+
             # print(f"title: {title} \nlocation: {location} \nkey attributes: {key_attributes} "
             #       f"\nother properties: {other_properties} \nprices: {prices} \ndescription: {description}")
             return {
                     "title":title,
                     "location":location,
                     "key_attributes":key_attributes,
+                    "approval_year":approval_year,
+                    "last_reconstruction_year":last_reconstruction_year,
+                    "balconies":balconies,
+                    "ownership":ownership,
                     "other_properties":other_properties,
                     "prices":prices,
+                    "floor":floor,
+                    "positioning":positioning,
                     "description":description,
                     "images":images,
                     "coordinates":coordinates
@@ -306,28 +336,58 @@ class Nehnutelnosti_sk_processor:
         offers = []
         for link in detail_links:
             print(f"processing{process_n}/{len(set(detail_links))} on page {current_page}")
-            #check if the link is already in DB - if so, skip case
-            if link in self.processed_offers:
+            if self.db_repository.record_exists(link):
+                self.processed_offers.append(link)
                 continue
             try:
                 results = self.process_detail(link)
-                results["source"] = link
+                results["source_url"] = link
                 offers.append(results)
+                print(f"writing rent offer to DB...")
+                new_offer = self.db_repository.insert_rent_offer({
+                    "title": results['title'],
+                    "location": results['location'],
+                    "property_type": [key for key in results['key_attributes'].keys() if results['key_attributes'][key] == True][0],
+                    "property_status": results['key_attributes']['property_status'],
+                    "rooms": results['key_attributes']['rooms'],
+                    "size": results['key_attributes']['size'],
+                    "approval_year": results['approval_year'],
+                    "last_reconstruction_year": results['last_reconstruction_year'],
+                    "balconies": results['balconies'],
+                    "ownership": results['ownership'],
+                    "price_rent": results['prices']['rent'],
+                    "price_ms": results['prices']['meter squared'],
+                    "price_energies":  results['prices']['energies'],
+                    "description": results['description'],
+                    "other_properties": results['other_properties'],
+                    "floor":results['floor'],
+                    "positioning": results['positioning'],
+                    "source": self.source,
+                    "source_url": results['source_url'],
+                    "coordinates": ";".join(results['coordinates'])
+                })
+                print(f"writing images to DB...")
+                self.db_repository.insert_offer_images(new_offer.id,results['images'][:4]
+                                                        if len(results['images']) >= 4 else results['images'])
                 self.processed_offers.append(link)
+                print(f"detail processed successfully")
                 time.sleep(sleep)
             except Exception as e:
                 print(f"failed to process offer: {link} on page: {page_url}, error: {e}")
                 self.failed_offers.append(link)
 
             process_n+=1
-            #save results to DB
-        return offers
 
-    def process_offers(self,json_file,start_page=1, end_page=None):
+        #return offers
+
+    def process_offers(self,start_page=1,
+                       end_page=None,
+                       json_file=None):
+
         last_page = self.last_page_number_check()
         current_page = start_page
 
-        all_offers = {}
+        #all_offers = {}
         while True:
             if end_page:
                 if current_page > end_page:
@@ -337,15 +397,16 @@ class Nehnutelnosti_sk_processor:
 
             url = f"{self.base_url}&page={current_page}"
             try:
-                all_offers[current_page] = self.process_offers_single_page(url,current_page)
+                #all_offers[current_page] = self.process_offers_single_page(url,current_page)
+                self.process_offers_single_page(url, current_page)
             except Exception as e:
                 print(f"failed to process page: {url}, error: {e}")
                 self.failed_pages.append(url)
 
             current_page += 1
 
-        with open(json_file, 'w',encoding="utf-8") as json_file:
-            json.dump(all_offers, json_file, ensure_ascii=False, indent=4)
+        # with open(json_file, 'w',encoding="utf-8") as json_file:
+        #     json.dump(all_offers, json_file, ensure_ascii=False, indent=4)
 
         print(f"failed to process pages: {len(self.failed_pages)} "
               f"\nfailed to process offers: {len(self.failed_offers)}")
@@ -377,13 +438,15 @@ class Nehnutelnosti_sk_processor:
 
 
 processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
-                                       auth_token_nehnutelnosti)
+                                       auth_token_nehnutelnosti,
+                                       Rent_offers_repository(os.getenv('connection_string')))
 #processor.pagination_check()
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
 # print(links)
-# print(processor.process_detail(links[0]))
+#print(processor.process_detail('https://www.nehnutelnosti.sk/detail/JuQ7dsNVC-w/arboria--krasny-2-izbovy-byt-s-priestrannou-terasou-na-prenajom-v-projekte-arboria-na-novomestskej-ulici'))
 # print(len(links))
 # print(links[149])
-processor.process_offers('offers_nehnutelnosti_sk.json',1,1)
+processor.process_offers(1,1)
+
 
