@@ -95,6 +95,7 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
             "apartmen": False,
             "flat": False,
             "studio": False,
+            "double_studio":False,
             "rooms": None,
             "size": None,
             "property_status": None
@@ -112,6 +113,8 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
             if j == 'Druh':
                 if "Garsónka" in info[j]:
                     results["studio"] = True
+                if "Dvojgarsónka" in info[j]:
+                    results["double_studio"] = True
                 elif "byt" in info[j]:
                     results["flat"] = True
                     try:
@@ -183,6 +186,7 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
                                 ).replace(" ", "-"
                                 ).replace("ý","y"
                                 ).replace("á","a"
+                                ).replace("ó","o"
                                 ).lower()
 
         if property_type:
@@ -294,6 +298,7 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
             description = self.get_description(soup)
             images= self.get_images(detail_link)
             coordinates = [str(i) for i in get_coordinates(location)]
+            year_of_construction = int(other_properties['Rok výstavby:']) if 'Rok výstavby:' in other_properties.keys() else None
             approval_year = int(
                 other_properties['Rok kolaudácie:']) if 'Rok kolaudácie:' in other_properties.keys() else None
             last_reconstruction_year = int(other_properties[
@@ -326,6 +331,7 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
                 key_attributes['property_status'] = None
 
             keys_to_remove = [
+                'Rok výstavby:',
                 'Rok kolaudácie:',
                 'Rok poslednej rekonštrukcie:',
                 'Počet balkónov:',
@@ -336,7 +342,8 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
                 "Typ:",
                 "Úžitková plocha:",
                 "Stav nehnuteľnosti:",
-                "Počet izieb / miestností:"
+                "Počet izieb / miestností:",
+                "Energie:"
             ]
 
             for key in keys_to_remove:
@@ -349,6 +356,7 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
                     "title":title,
                     "location":location,
                     "key_attributes":key_attributes,
+                    "year_of_construction":year_of_construction,
                     "approval_year":approval_year,
                     "last_reconstruction_year":last_reconstruction_year,
                     "balconies":balconies,
@@ -396,9 +404,9 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
         return last_page
 
 
-processor = Reality_sk_processor(reality_base_url,
-                                 auth_token_reality,
-                                 Rent_offers_repository(os.getenv('connection_string')))
+# processor = Reality_sk_processor(reality_base_url,
+#                                  auth_token_reality,
+#                                  Rent_offers_repository(os.getenv('connection_string')))
 # #
 # page = processor.get_page(reality_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
@@ -416,4 +424,4 @@ processor = Reality_sk_processor(reality_base_url,
 # print(imgs[0])
 
 #processor.process_offers(1,1)
-print(processor.process_detail('https://www.reality.sk/byty/moderny-2-izbovy-byt-na-prenajom-v-novostavbe-soho-residence-ii-nove-zamky/JustV9aoX8P/'))
+#print(processor.process_detail('https://www.reality.sk/byty/moderny-2-izbovy-byt-na-prenajom-v-novostavbe-soho-residence-ii-nove-zamky/JustV9aoX8P/'))

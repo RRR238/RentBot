@@ -5,7 +5,8 @@ def get_coordinates(place_name):
     geolocator = Nominatim(user_agent="geo_finder")
     location = geolocator.geocode(place_name)
     if not location:
-        location = geolocator.geocode(place_name.replace('ulica',''))
+        location = geolocator.geocode(place_name.lower(
+                                    ).replace('ulica',''))
 
     if location:
         return location.latitude, location.longitude
