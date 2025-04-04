@@ -79,6 +79,7 @@ class Nehnutelnosti_sk_processor:
             description = self.get_description(soup)
             images= self.get_images(detail_link)
             coordinates = [str(i) for i in get_coordinates(location)]
+            year_of_construction = int(other_properties['Rok výstavby:']) if 'Rok výstavby:' in other_properties.keys() else None
             approval_year = int(other_properties['Rok kolaudácie:']) if 'Rok kolaudácie:' in other_properties.keys() else None
             last_reconstruction_year = int(other_properties['Rok poslednej rekonštrukcie:']) if 'Rok poslednej rekonštrukcie:' in other_properties.keys() else None
             balconies = int(other_properties['Počet balkónov:']) if 'Počet balkónov:' in other_properties.keys() else None
@@ -86,14 +87,15 @@ class Nehnutelnosti_sk_processor:
             floor = int(other_properties['Podlažie:']) if 'Podlažie:' in other_properties.keys() else None
             positioning = other_properties['Umiestnenie:'] if 'Umiestnenie:' in other_properties.keys() else None
             keys_to_remove = [
+                                'Rok výstavby:',
                                 'Rok kolaudácie:',
                                 'Rok poslednej rekonštrukcie:',
                                 'Počet balkónov:',
                                 'Vlastníctvo:',
                                 'Podlažie:',
-                                'Umiestnenie:'
+                                'Umiestnenie:',
+                                'Počet izieb / miestností:'
                             ]
-
             for key in keys_to_remove:
                 if key in other_properties.keys():
                     del other_properties[key]
@@ -104,6 +106,7 @@ class Nehnutelnosti_sk_processor:
                     "title":title,
                     "location":location,
                     "key_attributes":key_attributes,
+                    "year_of_construction":year_of_construction,
                     "approval_year":approval_year,
                     "last_reconstruction_year":last_reconstruction_year,
                     "balconies":balconies,
@@ -155,6 +158,7 @@ class Nehnutelnosti_sk_processor:
                    "apartmen":False,
                    "flat":False,
                    "studio":False,
+                   "double_studio": False,
                    "rooms":None,
                    "size":None,
                    "property_status":None
@@ -335,11 +339,13 @@ class Nehnutelnosti_sk_processor:
         process_n = 1
         offers = []
         for link in detail_links:
-            print(f"processing{process_n}/{len(set(detail_links))} on page {current_page}")
-            if self.db_repository.record_exists(link):
-                self.processed_offers.append(link)
-                continue
+            print(f"processing: {process_n}/{len(set(detail_links))} on page {current_page}")
             try:
+                if self.db_repository.record_exists(link):
+                    self.processed_offers.append(link)
+                    process_n += 1
+                    continue
+
                 results = self.process_detail(link)
                 results["source_url"] = link
                 offers.append(results)
@@ -351,6 +357,7 @@ class Nehnutelnosti_sk_processor:
                     "property_status": results['key_attributes']['property_status'],
                     "rooms": results['key_attributes']['rooms'],
                     "size": results['key_attributes']['size'],
+                    "year_of_construction":results['year_of_construction'],
                     "approval_year": results['approval_year'],
                     "last_reconstruction_year": results['last_reconstruction_year'],
                     "balconies": results['balconies'],
@@ -437,9 +444,9 @@ class Nehnutelnosti_sk_processor:
 
 
 
-processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
-                                       auth_token_nehnutelnosti,
-                                       Rent_offers_repository(os.getenv('connection_string')))
+#processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
+#                                        auth_token_nehnutelnosti,
+#                                        Rent_offers_repository(os.getenv('connection_string')))
 #processor.pagination_check()
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
@@ -447,6 +454,6 @@ processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
 #print(processor.process_detail('https://www.nehnutelnosti.sk/detail/JuQ7dsNVC-w/arboria--krasny-2-izbovy-byt-s-priestrannou-terasou-na-prenajom-v-projekte-arboria-na-novomestskej-ulici'))
 # print(len(links))
 # print(links[149])
-processor.process_offers(1,1)
+#processor.process_offers(1,1)
 
 

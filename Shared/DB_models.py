@@ -16,6 +16,7 @@ class Rent_offer_model(Base):
     property_status = Column(Text, nullable=False)
     rooms = Column(SmallInteger, nullable=True)
     size = Column(Float, nullable=True)
+    year_of_construction = Column(SmallInteger, nullable=True)
     approval_year = Column(SmallInteger, nullable=True)
     last_reconstruction_year = Column(SmallInteger, nullable=True)
     balconies = Column(SmallInteger, nullable=True)

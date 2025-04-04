@@ -11,6 +11,7 @@ import time
 from selenium.webdriver.chrome.options import Options
 from Shared.Geolocation import get_coordinates
 import re
+from Rent_offers_repository import Rent_offers_repository
 
 load_dotenv()  # Loads environment variables from .env file
 
@@ -22,9 +23,13 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
     def __init__(self,
                  base_url,
                  auth_token,
+                 db_repository: Rent_offers_repository,
+                 source='Reality.sk',
                  user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"):
         super().__init__(base_url,
                          auth_token,
+                         db_repository,
+                         source,
                          user_agent)
 
     def get_details_links(self, soup, keyword='byty'):
@@ -90,6 +95,7 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
             "apartmen": False,
             "flat": False,
             "studio": False,
+            "double_studio":False,
             "rooms": None,
             "size": None,
             "property_status": None
@@ -107,6 +113,8 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
             if j == 'Druh':
                 if "Garsónka" in info[j]:
                     results["studio"] = True
+                if "Dvojgarsónka" in info[j]:
+                    results["double_studio"] = True
                 elif "byt" in info[j]:
                     results["flat"] = True
                     try:
@@ -178,6 +186,7 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
                                 ).replace(" ", "-"
                                 ).replace("ý","y"
                                 ).replace("á","a"
+                                ).replace("ó","o"
                                 ).lower()
 
         if property_type:
@@ -288,7 +297,18 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
             prices = self.get_price(soup)
             description = self.get_description(soup)
             images= self.get_images(detail_link)
-            coordinates = get_coordinates(location)
+            coordinates = [str(i) for i in get_coordinates(location)]
+            year_of_construction = int(other_properties['Rok výstavby:']) if 'Rok výstavby:' in other_properties.keys() else None
+            approval_year = int(
+                other_properties['Rok kolaudácie:']) if 'Rok kolaudácie:' in other_properties.keys() else None
+            last_reconstruction_year = int(other_properties[
+                                               'Rok poslednej rekonštrukcie:']) if 'Rok poslednej rekonštrukcie:' in other_properties.keys() else None
+            balconies = int(
+                other_properties['Počet balkónov:']) if 'Počet balkónov:' in other_properties.keys() else None
+            ownership = other_properties['Vlastníctvo:'] if 'Vlastníctvo:' in other_properties.keys() else None
+            floor = int(other_properties['Podlažie:']) if 'Podlažie:' in other_properties.keys() else None
+            positioning = other_properties['Umiestnenie:'] if 'Umiestnenie:' in other_properties.keys() else None
+
             # print(f"title: {title} \nlocation: {location} \nkey attributes: {key_attributes} "
             #       f"\nother properties: {other_properties} \nprices: {prices} \ndescription: {description}")
 
@@ -310,12 +330,41 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
             else:
                 key_attributes['property_status'] = None
 
+            keys_to_remove = [
+                'Rok výstavby:',
+                'Rok kolaudácie:',
+                'Rok poslednej rekonštrukcie:',
+                'Počet balkónov:',
+                'Vlastníctvo:',
+                'Podlažie:',
+                'Umiestnenie:',
+                "Druh:",
+                "Typ:",
+                "Úžitková plocha:",
+                "Stav nehnuteľnosti:",
+                "Počet izieb / miestností:",
+                "Energie:"
+            ]
+
+            for key in keys_to_remove:
+                print(key)
+                if key in other_properties.keys():
+                    print(True)
+                    del other_properties[key]
+
             return {
                     "title":title,
                     "location":location,
                     "key_attributes":key_attributes,
+                    "year_of_construction":year_of_construction,
+                    "approval_year":approval_year,
+                    "last_reconstruction_year":last_reconstruction_year,
+                    "balconies":balconies,
+                    "ownership":ownership,
                     "other_properties":other_properties,
                     "prices":prices,
+                    "floor":floor,
+                    "positioning":positioning,
                     "description":description,
                     "images":images,
                     "coordinates":coordinates
@@ -355,8 +404,9 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
         return last_page
 
 
-processor = Reality_sk_processor(reality_base_url,
-                                 auth_token_reality)
+# processor = Reality_sk_processor(reality_base_url,
+#                                  auth_token_reality,
+#                                  Rent_offers_repository(os.getenv('connection_string')))
 # #
 # page = processor.get_page(reality_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
@@ -373,6 +423,5 @@ processor = Reality_sk_processor(reality_base_url,
 # print(imgs)
 # print(imgs[0])
 
-processor.process_offers('offers_reality_sk.json',1,2)
-
-
+#processor.process_offers(1,1)
+#print(processor.process_detail('https://www.reality.sk/byty/moderny-2-izbovy-byt-na-prenajom-v-novostavbe-soho-residence-ii-nove-zamky/JustV9aoX8P/'))
