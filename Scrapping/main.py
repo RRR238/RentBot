@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 from Rent_offers_repository import Rent_offers_repository
+from bs4 import BeautifulSoup
+import time
 
 nehnutelnosti_base_url = os.getenv('nehnutelnosti_base_url')
 auth_token_nehnutelnosti = os.getenv('auth_token_nehnutelnosti')
@@ -21,4 +23,4 @@ processor_reality = Reality_sk_processor(reality_base_url,
 
 if __name__ == "__main__":
     processor_nehnutelnosti.process_offers(1,1)
-    #processor_reality.process_offers(1,1)
+    processor_reality.process_offers(1,1)
