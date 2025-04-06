@@ -447,6 +447,23 @@ processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
 #print(processor.process_detail('https://www.nehnutelnosti.sk/detail/JuQ7dsNVC-w/arboria--krasny-2-izbovy-byt-s-priestrannou-terasou-na-prenajom-v-projekte-arboria-na-novomestskej-ulici'))
 # print(len(links))
 # print(links[149])
-processor.process_offers(1,1)
+#processor.process_offers(1,1)
+
+try:
+    with open('found_offers_nehnutelnosti.json', 'r', encoding="utf-8") as f:
+        all = json.load(f)
+except:
+    all = []
+
+for i in range(1,34):
+    print(f"page: {i}")
+    page = processor.get_page(nehnutelnosti_base_url + f"&page={i}")
+    links = processor.get_details_links(BeautifulSoup(page.text, 'html.parser'))
+    all.extend(links)
+    all = list(set(all))
+
+print(len(all))
+with open('found_offers_nehnutelnosti.json', 'w',encoding="utf-8") as json_file:
+            json.dump(all, json_file, ensure_ascii=False, indent=4)
 
 
