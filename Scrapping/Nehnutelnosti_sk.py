@@ -14,6 +14,8 @@ import os
 import json
 from Shared.Geolocation import get_coordinates
 from Rent_offers_repository import Rent_offers_repository
+from Shared.LLM import LLM
+from Shared.Elasticsearch import Vector_DB
 
 load_dotenv()  # Loads environment variables from .env file
 
@@ -27,6 +29,8 @@ class Nehnutelnosti_sk_processor:
                  base_url,
                  auth_token,
                  db_repository:Rent_offers_repository,
+                 llm:LLM,
+                 vector_db:Vector_DB,
                  source = 'Nehnutelnosti.sk',
                  user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
                  ):
@@ -36,7 +40,10 @@ class Nehnutelnosti_sk_processor:
         self.processed_offers = []
         self.failed_offers = []
         self.failed_pages = []
+        self.estimated_duplicates = []
         self.db_repository:Rent_offers_repository = db_repository
+        self.llm = llm
+        self.vdb = vector_db
         self.source = source
 
     def get_page(self,url):
@@ -347,13 +354,25 @@ class Nehnutelnosti_sk_processor:
                     continue
 
                 results = self.process_detail(link)
+                similar_docs = self.vdb.search_similar_documents(self.llm.get_embedding(
+                                                    results['description']),
+                                                        0.8)
+                if len(similar_docs) > 0:
+                    self.processed_offers.append(link)
+                    self.estimated_duplicates.append({"id_retrieved_doc":similar_docs[0]['_source']['metadata']['id'],
+                                                      "source_url_processed_offer":link,
+                                                      "similarity":similar_docs[0]['score']})
+                    process_n += 1
+                    continue
+
                 results["source_url"] = link
                 offers.append(results)
                 print(f"writing rent offer to DB...")
                 new_offer = self.db_repository.insert_rent_offer({
                     "title": results['title'],
                     "location": results['location'],
-                    "property_type": [key for key in results['key_attributes'].keys() if results['key_attributes'][key] == True][0],
+                    "property_type": [key for key in results['key_attributes'].keys()
+                                            if results['key_attributes'][key] == True][0],
                     "property_status": results['key_attributes']['property_status'],
                     "rooms": results['key_attributes']['rooms'],
                     "size": results['key_attributes']['size'],
@@ -441,12 +460,12 @@ class Nehnutelnosti_sk_processor:
         return last_page
 
 
-
-
-
-#processor = Nehnutelnosti_sk_processor(nehnutelnosti_base_url,
-#                                        auth_token_nehnutelnosti,
-#                                        Rent_offers_repository(os.getenv('connection_string')))
+processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
+                                       auth_token =auth_token_nehnutelnosti,
+                                       db_repository =Rent_offers_repository(os.getenv('connection_string')),
+                                        llm =LLM(),
+                                        vector_db = Vector_DB('rent-bot-index')
+                                        )
 #processor.pagination_check()
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
@@ -456,22 +475,41 @@ class Nehnutelnosti_sk_processor:
 # print(links[149])
 #processor.process_offers(1,1)
 
-try:
-    with open('found_offers_nehnutelnosti.json', 'r', encoding="utf-8") as f:
-        all = json.load(f)
-except:
-    all = []
+# try:
+#     with open('found_offers_nehnutelnosti.json', 'r', encoding="utf-8") as f:
+#         all = json.load(f)
+# except:
+#     all = []
+#
+# for i in range(1,34):
+#     print(f"page: {i}")
+#     page = processor.get_page(nehnutelnosti_base_url + f"&page={i}")
+#     links = processor.get_details_links(BeautifulSoup(page.text, 'html.parser'))
+#     all.extend(links)
+#     all = list(set(all))
+#
+# print(len(all))
+# with open('found_offers_nehnutelnosti.json', 'w',encoding="utf-8") as json_file:
+#             json.dump(all, json_file, ensure_ascii=False, indent=4)
 
-for i in range(1,34):
-    print(f"page: {i}")
-    page = processor.get_page(nehnutelnosti_base_url + f"&page={i}")
-    links = processor.get_details_links(BeautifulSoup(page.text, 'html.parser'))
-    all.extend(links)
-    all = list(set(all))
+# llm = LLM()
+# vdb = Vector_DB('rent-bot-index')
 
-print(len(all))
-with open('found_offers_nehnutelnosti.json', 'w',encoding="utf-8") as json_file:
-            json.dump(all, json_file, ensure_ascii=False, indent=4)
+# data = [{"embedding":llm.get_embedding("ahoj, som v meste"),
+#          "metadata":{"test":"test",
+#                      "timestamp":"now",
+#                      "id":7437544330}}]
+#
+# vdb.insert_data(data)
+#vdb.delete_all_documents()
+
+# s = time.time()
+# print(vdb.search_similar_documents(llm.get_embedding("ahoj, kde si ?")))
+# print(len(vdb.search_similar_documents(llm.get_embedding("ahoj, kde si ?"))))
+# e = time.time()
+# print(e-s)
+#print(len(llm.get_embedding("Ahoj som v meste",'text-embedding-3-large')))
+#vdb.create_index(1536)
 
 
 
