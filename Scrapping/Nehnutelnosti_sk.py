@@ -354,14 +354,21 @@ class Nehnutelnosti_sk_processor:
                     continue
 
                 results = self.process_detail(link)
-                similar_docs = self.vdb.search_similar_documents(self.llm.get_embedding(
-                                                    results['description']),
-                                                        0.8)
+                embedding = self.embedd_rent_offer(self.llm,
+                                                   results['title'],
+                                                   results['description'],
+                                                   results['other_properties'])
+
+                similar_docs = self.vdb.search_similar_documents(embedding,
+                                                        0.98)
                 if len(similar_docs) > 0:
+                    print(f"processed url: {link}")
+                    print(f"most similar offer: {similar_docs[0]['_source']['metadata']['id']}")
+                    print(f"similarity: {similar_docs[0]['_score']}")
                     self.processed_offers.append(link)
                     self.estimated_duplicates.append({"id_retrieved_doc":similar_docs[0]['_source']['metadata']['id'],
                                                       "source_url_processed_offer":link,
-                                                      "similarity":similar_docs[0]['score']})
+                                                      "similarity":similar_docs[0]['_score']})
                     process_n += 1
                     continue
 
@@ -395,6 +402,20 @@ class Nehnutelnosti_sk_processor:
                 print(f"writing images to DB...")
                 self.db_repository.insert_offer_images(new_offer.id,results['images'][:4]
                                                         if len(results['images']) >= 4 else results['images'])
+                keys_to_remove = {"created_at",
+                                  '_sa_instance_state',
+                                  "title",
+                                  "location",
+                                  "description",
+                                  "other_properties",
+                                  "floor",
+                                  "positioning",
+                                    "source",
+                                  'score'}
+                filtered_offer = {k: v for k, v in new_offer.__dict__.items() if k not in keys_to_remove}
+                #print(filtered_offer)
+                self.vdb.insert_data([{"embedding": embedding,
+                                       "metadata": filtered_offer}])
                 self.processed_offers.append(link)
                 print(f"detail processed successfully")
                 time.sleep(sleep)
@@ -459,6 +480,32 @@ class Nehnutelnosti_sk_processor:
 
         return last_page
 
+    @staticmethod
+    def embedd_rent_offer(llm:LLM,
+                          title,
+                          description,
+                          other_attributes=None):
+        if other_attributes:
+            other_attributes_formatted = "\n".join(f"{k.strip().replace(
+                                            '\xa0', '').rstrip(
+                                                ':')}: {v}"
+                                                   for k, v in other_attributes.items())
+            text_to_embedd = (
+                f"NADPIS:\n{title}\n\n"
+                f"ZÁKLADNÉ ÚDAJE:\n{other_attributes_formatted}\n\n"
+                f"OPIS:\n{description}"
+            )
+        else:
+            text_to_embedd = (
+                f"NADPIS:\n{title}\n\n"
+                f"OPIS:\n{description}"
+            )
+
+        embedding = llm.get_embedding(text_to_embedd,'text-embedding-3-large')
+        #print(text_to_embedd)
+
+        return embedding
+
 
 processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
                                        auth_token =auth_token_nehnutelnosti,
@@ -473,7 +520,7 @@ processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
 #print(processor.process_detail('https://www.nehnutelnosti.sk/detail/JuQ7dsNVC-w/arboria--krasny-2-izbovy-byt-s-priestrannou-terasou-na-prenajom-v-projekte-arboria-na-novomestskej-ulici'))
 # print(len(links))
 # print(links[149])
-#processor.process_offers(1,1)
+processor.process_offers(1,1)
 
 # try:
 #     with open('found_offers_nehnutelnosti.json', 'r', encoding="utf-8") as f:
@@ -492,8 +539,8 @@ processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
 # with open('found_offers_nehnutelnosti.json', 'w',encoding="utf-8") as json_file:
 #             json.dump(all, json_file, ensure_ascii=False, indent=4)
 
-# llm = LLM()
-# vdb = Vector_DB('rent-bot-index')
+#llm = LLM()
+#vdb = Vector_DB('rent-bot-index')
 
 # data = [{"embedding":llm.get_embedding("ahoj, som v meste"),
 #          "metadata":{"test":"test",
@@ -502,14 +549,14 @@ processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
 #
 # vdb.insert_data(data)
 #vdb.delete_all_documents()
-
+#print(len(llm.get_embedding('hello how are you','text-embedding-3-large')))
 # s = time.time()
 # print(vdb.search_similar_documents(llm.get_embedding("ahoj, kde si ?")))
 # print(len(vdb.search_similar_documents(llm.get_embedding("ahoj, kde si ?"))))
 # e = time.time()
 # print(e-s)
 #print(len(llm.get_embedding("Ahoj som v meste",'text-embedding-3-large')))
-#vdb.create_index(1536)
+#vdb.create_index(len(llm.get_embedding('hello how are you','text-embedding-3-large')))
 
 
 

@@ -2,7 +2,7 @@ from elasticsearch import Elasticsearch
 import os
 from dotenv import load_dotenv
 from elasticsearch.helpers import bulk
-from LLM import LLM
+#from LLM import LLM
 import time
 
 load_dotenv()
@@ -83,13 +83,14 @@ class Vector_DB:
     def search_similar_documents(self,
                                  query_vector,
                                  similarity_threshold: float = None,
-                                 k: int = 10):
+                                 k: int = 10,
+                                 num_candidates: int = 100):
         query = {
             "knn": {
                 "field": "embedding",
                 "query_vector": query_vector,
                 "k": k,
-                "num_candidates": 100
+                "num_candidates": num_candidates
             }
         }
 
@@ -107,7 +108,7 @@ class Vector_DB:
         return response["hits"]["hits"]
 
 # llm = LLM()
-vdb = Vector_DB('rent-bot-index')
+#vdb = Vector_DB('rent-bot-index')
 
 # data = [{"embedding":llm.get_embedding("ahoj, som v meste"),
 #          "metadata":{"test":"test",
@@ -115,7 +116,7 @@ vdb = Vector_DB('rent-bot-index')
 #                      "id":7437544330}}]
 #
 # vdb.insert_data(data)
-vdb.delete_all_documents()
+#vdb.delete_all_documents()
 
 # s = time.time()
 # print(vdb.search_similar_documents(llm.get_embedding("ahoj, kde si ?")))
