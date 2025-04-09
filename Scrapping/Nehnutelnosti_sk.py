@@ -507,12 +507,12 @@ class Nehnutelnosti_sk_processor:
         return embedding
 
 
-processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
-                                       auth_token =auth_token_nehnutelnosti,
-                                       db_repository =Rent_offers_repository(os.getenv('connection_string')),
-                                        llm =LLM(),
-                                        vector_db = Vector_DB('rent-bot-index')
-                                        )
+# processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
+#                                        auth_token =auth_token_nehnutelnosti,
+#                                        db_repository =Rent_offers_repository(os.getenv('connection_string')),
+#                                         llm =LLM(),
+#                                         vector_db = Vector_DB('rent-bot-index')
+#                                         )
 #processor.pagination_check()
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
@@ -520,7 +520,7 @@ processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
 #print(processor.process_detail('https://www.nehnutelnosti.sk/detail/JuQ7dsNVC-w/arboria--krasny-2-izbovy-byt-s-priestrannou-terasou-na-prenajom-v-projekte-arboria-na-novomestskej-ulici'))
 # print(len(links))
 # print(links[149])
-processor.process_offers(1,1)
+#processor.process_offers(1,1)
 
 # try:
 #     with open('found_offers_nehnutelnosti.json', 'r', encoding="utf-8") as f:
