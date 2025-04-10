@@ -37,9 +37,9 @@ class Nehnutelnosti_sk_processor:
         self.auth_token = auth_token
         self.base_url = base_url
         self.user_agent = user_agent
-        self.processed_offers = []
-        self.failed_offers = []
-        self.failed_pages = []
+        self.processed_offers = 0
+        self.failed_offers = 0
+        self.failed_pages = 0
         self.estimated_duplicates = []
         self.db_repository:Rent_offers_repository = db_repository
         self.llm = llm
@@ -349,7 +349,7 @@ class Nehnutelnosti_sk_processor:
             print(f"processing: {process_n}/{len(set(detail_links))} on page {current_page}")
             try:
                 if self.db_repository.record_exists(link):
-                    self.processed_offers.append(link)
+                    self.processed_offers += 1
                     process_n += 1
                     continue
 
@@ -365,7 +365,7 @@ class Nehnutelnosti_sk_processor:
                     print(f"processed url: {link}")
                     print(f"most similar offer: {similar_docs[0]['_source']['metadata']['id']}")
                     print(f"similarity: {similar_docs[0]['_score']}")
-                    self.processed_offers.append(link)
+                    self.processed_offers += 1
                     self.estimated_duplicates.append({"id_retrieved_doc":similar_docs[0]['_source']['metadata']['id'],
                                                       "source_url_processed_offer":link,
                                                       "similarity":similar_docs[0]['_score']})
@@ -400,8 +400,8 @@ class Nehnutelnosti_sk_processor:
                     "coordinates": ";".join(results['coordinates'])
                 })
                 print(f"writing images to DB...")
-                self.db_repository.insert_offer_images(new_offer.id,results['images'][:4]
-                                                        if len(results['images']) >= 4 else results['images'])
+                # self.db_repository.insert_offer_images(new_offer.id,results['images'][:4]
+                #                                         if len(results['images']) >= 4 else results['images'])
                 keys_to_remove = {"created_at",
                                   '_sa_instance_state',
                                   "title",
@@ -416,12 +416,12 @@ class Nehnutelnosti_sk_processor:
                 #print(filtered_offer)
                 self.vdb.insert_data([{"embedding": embedding,
                                        "metadata": filtered_offer}])
-                self.processed_offers.append(link)
+                self.processed_offers += 1
                 print(f"detail processed successfully")
                 time.sleep(sleep)
             except Exception as e:
                 print(f"failed to process offer: {link} on page: {page_url}, error: {e}")
-                self.failed_offers.append(link)
+                self.failed_offers += 1
 
             process_n+=1
 
@@ -448,15 +448,16 @@ class Nehnutelnosti_sk_processor:
                 self.process_offers_single_page(url, current_page)
             except Exception as e:
                 print(f"failed to process page: {url}, error: {e}")
-                self.failed_pages.append(url)
+                self.failed_pages += 1
 
             current_page += 1
 
         # with open(json_file, 'w',encoding="utf-8") as json_file:
         #     json.dump(all_offers, json_file, ensure_ascii=False, indent=4)
 
-        print(f"failed to process pages: {len(self.failed_pages)} "
-              f"\nfailed to process offers: {len(self.failed_offers)}")
+        print(f"failed to process pages: {self.failed_pages} "
+              f"\nfailed to process offers: {self.failed_offers} "
+              f"\nsuccessfully processed offers: {self.processed_offers}")
 
     def last_page_number_check(self,
                                element_id = "nav[aria-label='pagination navigation'] a"):
@@ -507,12 +508,12 @@ class Nehnutelnosti_sk_processor:
         return embedding
 
 
-# processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
-#                                        auth_token =auth_token_nehnutelnosti,
-#                                        db_repository =Rent_offers_repository(os.getenv('connection_string')),
-#                                         llm =LLM(),
-#                                         vector_db = Vector_DB('rent-bot-index')
-#                                         )
+processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
+                                       auth_token =auth_token_nehnutelnosti,
+                                       db_repository =Rent_offers_repository(os.getenv('connection_string')),
+                                        llm =LLM(),
+                                        vector_db = Vector_DB('rent-bot-index')
+                                        )
 #processor.pagination_check()
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
@@ -520,7 +521,7 @@ class Nehnutelnosti_sk_processor:
 #print(processor.process_detail('https://www.nehnutelnosti.sk/detail/JuQ7dsNVC-w/arboria--krasny-2-izbovy-byt-s-priestrannou-terasou-na-prenajom-v-projekte-arboria-na-novomestskej-ulici'))
 # print(len(links))
 # print(links[149])
-#processor.process_offers(1,1)
+processor.process_offers(1,3)
 
 # try:
 #     with open('found_offers_nehnutelnosti.json', 'r', encoding="utf-8") as f:

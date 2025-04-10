@@ -25,9 +25,9 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
     def __init__(self,
                  base_url,
                  auth_token,
-                 llm:LLM,
-                 vector_db:Vector_DB,
                  db_repository: Rent_offers_repository,
+                 llm: LLM,
+                 vector_db: Vector_DB,
                  source='Reality.sk',
                  user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"):
         super().__init__(base_url,
@@ -302,7 +302,7 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
             other_properties = self.get_other_properties(soup)
             prices = self.get_price(soup)
             description = self.get_description(soup)
-            images= self.get_images(detail_link)
+            #images= self.get_images(detail_link)
             coordinates = [str(i) for i in get_coordinates(location)]
             year_of_construction = int(other_properties['Rok výstavby:']) if 'Rok výstavby:' in other_properties.keys() else None
             approval_year = int(
@@ -352,6 +352,10 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
                 "Energie:"
             ]
 
+            for key in keys_to_remove:
+                if key in other_properties.keys():
+                    del other_properties[key]
+
             return {
                     "title":title,
                     "location":location,
@@ -366,7 +370,7 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
                     "floor":floor,
                     "positioning":positioning,
                     "description":description,
-                    "images":images,
+                    #"images":images,
                     "coordinates":coordinates
                     }
         else:
@@ -426,5 +430,5 @@ processor = Reality_sk_processor(reality_base_url,
 # print(imgs)
 # print(imgs[0])
 
-processor.process_offers(1,1)
+processor.process_offers(1,3)
 #print(processor.process_detail('https://www.reality.sk/byty/moderny-2-izbovy-byt-na-prenajom-v-novostavbe-soho-residence-ii-nove-zamky/JustV9aoX8P/'))
