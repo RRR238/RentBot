@@ -339,14 +339,14 @@ class Nehnutelnosti_sk_processor:
     def process_offers_single_page(self,
                                    page_url,
                                    current_page,
-                                   sleep=5):
+                                   sleep=3):
 
         page = self.get_page(page_url)
         detail_links = self.get_details_links(BeautifulSoup(page.text,'html.parser'))
         process_n = 1
         offers = []
         for link in detail_links:
-            print(f"processing: {process_n}/{len(set(detail_links))} on page {current_page}")
+            print(f"processing: {process_n}/{len(set(detail_links))} on page: {current_page} from: {self.source}")
             try:
                 if self.db_repository.record_exists(link):
                     self.processed_offers += 1
@@ -508,12 +508,12 @@ class Nehnutelnosti_sk_processor:
         return embedding
 
 
-processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
-                                       auth_token =auth_token_nehnutelnosti,
-                                       db_repository =Rent_offers_repository(os.getenv('connection_string')),
-                                        llm =LLM(),
-                                        vector_db = Vector_DB('rent-bot-index')
-                                        )
+# processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
+#                                        auth_token =auth_token_nehnutelnosti,
+#                                        db_repository =Rent_offers_repository(os.getenv('connection_string')),
+#                                         llm =LLM(),
+#                                         vector_db = Vector_DB('rent-bot-index')
+#                                         )
 #processor.pagination_check()
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
@@ -521,7 +521,7 @@ processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
 #print(processor.process_detail('https://www.nehnutelnosti.sk/detail/JuQ7dsNVC-w/arboria--krasny-2-izbovy-byt-s-priestrannou-terasou-na-prenajom-v-projekte-arboria-na-novomestskej-ulici'))
 # print(len(links))
 # print(links[149])
-processor.process_offers(1,3)
+#processor.process_offers(1,3)
 
 # try:
 #     with open('found_offers_nehnutelnosti.json', 'r', encoding="utf-8") as f:

@@ -107,6 +107,31 @@ class Vector_DB:
 
         return response["hits"]["hits"]
 
+    def get_element(self,postgres_id=None, source_url=None):
+
+        if postgres_id:
+            query = {
+                "query": {
+                    "term": {
+                        "metadata.id.keyword": str(postgres_id)
+                    }
+                }
+            }
+        else:
+            query = {
+                "query": {
+                    "term": {
+                        "metadata.source_url.keyword": source_url
+                    }
+                }
+            }
+
+        response = self.__client.search(index=self.index_name,
+                                        body=query)
+
+        return response['hits']['hits'][0]['_source']
+
+
 # llm = LLM()
 #vdb = Vector_DB('rent-bot-index')
 

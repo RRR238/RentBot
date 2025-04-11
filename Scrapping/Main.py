@@ -4,8 +4,6 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 from Rent_offers_repository import Rent_offers_repository
-from bs4 import BeautifulSoup
-import time
 from Shared.LLM import LLM
 from Shared.Elasticsearch import Vector_DB
 
@@ -30,8 +28,8 @@ processor_reality = Reality_sk_processor(reality_base_url,
                                      )
 
 if __name__ == "__main__":
-    processor_nehnutelnosti.process_offers(1,1)
-    processor_reality.process_offers(1,1)
+    processor_nehnutelnosti.process_offers(1,33)
+    processor_reality.process_offers(1,100)
 
     # llm = LLM()
     # vdb = Vector_DB('rent-bot-index')
