@@ -1,5 +1,5 @@
 from sqlalchemy.orm import sessionmaker, scoped_session
-from sqlalchemy import create_engine, exists
+from sqlalchemy import create_engine, exists, and_
 from contextlib import contextmanager
 from sqlalchemy.exc import SQLAlchemyError
 from Shared.DB_models import Rent_offer_model, Offer_image_model
@@ -44,6 +44,22 @@ class Rent_offers_repository:
                                 ).where(
                                 Rent_offer_model.source_url == source_url)
                                 ).scalar()
+
+    def duplicate_exists(self,
+                        price: float,
+                        size: float,
+                        coordinates: str) -> bool:
+
+        with self.get_session() as session:
+            return session.query(
+                exists().where(
+                    and_(
+                        Rent_offer_model.price_rent == price,
+                        Rent_offer_model.size == size,
+                        Rent_offer_model.coordinates == coordinates
+                    )
+                )
+            ).scalar()
 
     def insert_offer_images(self, rent_offer_id: int, image_urls: list[str]):
         """Inserts multiple image URLs related to a specific rent offer."""

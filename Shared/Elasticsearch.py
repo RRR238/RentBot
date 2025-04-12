@@ -58,17 +58,34 @@ class Vector_DB:
         # Print the result of the bulk insert
         print(f"Inserted {response[0]} documents into Elasticsearch.")
 
-    def delete_by_metadata_id(self, metadata_id):
-        query = {
-            "query": {
-                "term": {
-                    "metadata.id": metadata_id  # assumes metadata is a nested object
+    def delete_element(self,
+                        postgres_id=None,
+                        source_url=None):
+
+        if not postgres_id and not source_url:
+            raise ValueError("You must provide at least metadata_ids or source_urls.")
+
+        if postgres_id:
+            query = {
+                "query": {
+                    "term": {
+                        "metadata.id.keyword": postgres_id
+                    }
                 }
             }
-        }
+        else:
+            query = {
+                "query": {
+                    "term": {
+                        "metadata.source_url.keyword": source_url
+                    }
+                }
+            }
 
-        response = self.__client.delete_by_query(index=self.index_name, body=query)
-        print(f"Deleted {response['deleted']} documents with metadata.id = {metadata_id}")
+        response = self.__client.delete_by_query(index=self.index_name,
+                                                 body=query,
+                                                 conflicts="proceed")
+        print(f"Deleted {response['deleted']} documents matching criteria.")
 
     def delete_all_documents(self):
         query = {
@@ -113,7 +130,7 @@ class Vector_DB:
             query = {
                 "query": {
                     "term": {
-                        "metadata.id.keyword": str(postgres_id)
+                        "metadata.id.keyword": postgres_id
                     }
                 }
             }
@@ -131,6 +148,35 @@ class Vector_DB:
 
         return response['hits']['hits'][0]['_source']
 
+    def filtered_vector_search(self,vector_query: list,k):
+        # Step 1: Build the metadata filtering query
+        vector_query_part = {
+                "size": k,  # This specifies how many documents you want to return (top k)
+                "query": {
+                    "bool": {
+                        "filter": [
+                            {"term": {"metadata.property_type.keyword": 'flat'}},
+                            {"term": {"metadata.rooms": 2}},
+                            {"range":{"metadata.price_rent":{"lte":1000}}}
+                            # Add other metadata filters here, for example, 'rooms' and 'price'
+                        ],
+                        "should": [
+                            {
+                                "knn": {
+                                    "field": "embedding",  # The field where vectors are stored
+                                    "query_vector": vector_query,  # The query vector to search for
+                                    "k": k,  # Number of nearest neighbors to return
+                                    "num_candidates": 100  # The number of candidates to consider before ranking
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+
+        # Perform the search with the combined query
+        response = self.__client.search(index=self.index_name, body=vector_query_part)
+        return response['hits']['hits']
 
 # llm = LLM()
 #vdb = Vector_DB('rent-bot-index')

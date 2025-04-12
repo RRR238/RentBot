@@ -354,24 +354,19 @@ class Nehnutelnosti_sk_processor:
                     continue
 
                 results = self.process_detail(link)
+
+                if self.db_repository.duplicate_exists(results['prices']['rent'],
+                                                       results['key_attributes']['size'],
+                                                       ";".join(results['coordinates'])):
+
+                    print(f"Duplicate found for offer: {link}")
+                    process_n += 1
+                    continue
+
                 embedding = self.embedd_rent_offer(self.llm,
                                                    results['title'],
                                                    results['description'],
                                                    results['other_properties'])
-
-                similar_docs = self.vdb.search_similar_documents(embedding,
-                                                        0.98)
-                if len(similar_docs) > 0:
-                    print(f"processed url: {link}")
-                    print(f"most similar offer: {similar_docs[0]['_source']['metadata']['id']}")
-                    print(f"similarity: {similar_docs[0]['_score']}")
-                    self.processed_offers += 1
-                    self.estimated_duplicates.append({"id_retrieved_doc":similar_docs[0]['_source']['metadata']['id'],
-                                                      "source_url_processed_offer":link,
-                                                      "similarity":similar_docs[0]['_score']})
-                    process_n += 1
-                    continue
-
                 results["source_url"] = link
                 offers.append(results)
                 print(f"writing rent offer to DB...")
@@ -523,41 +518,6 @@ class Nehnutelnosti_sk_processor:
 # print(links[149])
 #processor.process_offers(1,3)
 
-# try:
-#     with open('found_offers_nehnutelnosti.json', 'r', encoding="utf-8") as f:
-#         all = json.load(f)
-# except:
-#     all = []
-#
-# for i in range(1,34):
-#     print(f"page: {i}")
-#     page = processor.get_page(nehnutelnosti_base_url + f"&page={i}")
-#     links = processor.get_details_links(BeautifulSoup(page.text, 'html.parser'))
-#     all.extend(links)
-#     all = list(set(all))
-#
-# print(len(all))
-# with open('found_offers_nehnutelnosti.json', 'w',encoding="utf-8") as json_file:
-#             json.dump(all, json_file, ensure_ascii=False, indent=4)
-
-#llm = LLM()
-#vdb = Vector_DB('rent-bot-index')
-
-# data = [{"embedding":llm.get_embedding("ahoj, som v meste"),
-#          "metadata":{"test":"test",
-#                      "timestamp":"now",
-#                      "id":7437544330}}]
-#
-# vdb.insert_data(data)
-#vdb.delete_all_documents()
-#print(len(llm.get_embedding('hello how are you','text-embedding-3-large')))
-# s = time.time()
-# print(vdb.search_similar_documents(llm.get_embedding("ahoj, kde si ?")))
-# print(len(vdb.search_similar_documents(llm.get_embedding("ahoj, kde si ?"))))
-# e = time.time()
-# print(e-s)
-#print(len(llm.get_embedding("Ahoj som v meste",'text-embedding-3-large')))
-#vdb.create_index(len(llm.get_embedding('hello how are you','text-embedding-3-large')))
 
 
 
