@@ -40,7 +40,7 @@ class Nehnutelnosti_sk_processor:
         self.processed_offers = 0
         self.failed_offers = 0
         self.failed_pages = 0
-        self.estimated_duplicates = []
+        self.errors = []
         self.db_repository:Rent_offers_repository = db_repository
         self.llm = llm
         self.vdb = vector_db
@@ -344,7 +344,7 @@ class Nehnutelnosti_sk_processor:
         page = self.get_page(page_url)
         detail_links = self.get_details_links(BeautifulSoup(page.text,'html.parser'))
         process_n = 1
-        offers = []
+        #offers = []
         for link in detail_links:
             print(f"processing: {process_n}/{len(set(detail_links))} on page: {current_page} from: {self.source}")
             try:
@@ -368,13 +368,20 @@ class Nehnutelnosti_sk_processor:
                                                    results['description'],
                                                    results['other_properties'])
                 results["source_url"] = link
-                offers.append(results)
+                #offers.append(results)
+                if "mezonet" in results['title'].lower() or "mezonetový" in results['title'].lower():
+                    property_type = 'mezonet'
+                elif "penthouse" in results['title'].lower():
+                    property_type = 'penthouse'
+                else:
+                    property_type= [key for key in results['key_attributes'].keys()
+                                      if results['key_attributes'][key] == True][0]
+
                 print(f"writing rent offer to DB...")
                 new_offer = self.db_repository.insert_rent_offer({
                     "title": results['title'],
                     "location": results['location'],
-                    "property_type": [key for key in results['key_attributes'].keys()
-                                            if results['key_attributes'][key] == True][0],
+                    "property_type": property_type,
                     "property_status": results['key_attributes']['property_status'],
                     "rooms": results['key_attributes']['rooms'],
                     "size": results['key_attributes']['size'],
@@ -417,6 +424,7 @@ class Nehnutelnosti_sk_processor:
             except Exception as e:
                 print(f"failed to process offer: {link} on page: {page_url}, error: {e}")
                 self.failed_offers += 1
+                self.errors.append({"link":link,"error":str(e)})
 
             process_n+=1
 
@@ -447,8 +455,8 @@ class Nehnutelnosti_sk_processor:
 
             current_page += 1
 
-        # with open(json_file, 'w',encoding="utf-8") as json_file:
-        #     json.dump(all_offers, json_file, ensure_ascii=False, indent=4)
+        with open(f'errors_{self.source.replace(".sk","")}.json', 'w',encoding="utf-8") as json_file:
+            json.dump(self.errors, json_file, ensure_ascii=False, indent=4)
 
         print(f"failed to process pages: {self.failed_pages} "
               f"\nfailed to process offers: {self.failed_offers} "
@@ -502,6 +510,36 @@ class Nehnutelnosti_sk_processor:
 
         return embedding
 
+    def delete_invalid_offers(self):
+        case_nr = 1
+        all_urls = self.db_repository.get_all_source_urls()
+        invalid_urls = []
+        for url in all_urls:
+            print(f"processing {case_nr}/{len(all_urls)}")
+            try:
+                response = requests.get(url, allow_redirects=False,
+                                        timeout=2)
+                # If it's 200 OK and no redirect, it's likely valid
+                if response.status_code == 200:
+                    pass
+                # If it's a redirect (301, 302...), it's likely expired
+                elif response.status_code in [301, 302, 303, 307, 308]:
+                    print(f"Redirected to: {response.headers.get('Location')}")
+                    invalid_urls.append(url)
+                else:
+                    print(f"Status code: {response.status_code}")
+                    return False
+            except requests.RequestException as e:
+                print(f"Error checking URL: {e}")
+                return False
+            case_nr += 1
+
+        self.db_repository.delete_by_source_urls(invalid_urls)
+        for inv_url in invalid_urls:
+            self.vdb.delete_element(source_url=inv_url)
+
+        print(f"deleted {len(invalid_urls)} offers")
+
 
 # processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
 #                                        auth_token =auth_token_nehnutelnosti,
@@ -517,7 +555,4 @@ class Nehnutelnosti_sk_processor:
 # print(len(links))
 # print(links[149])
 #processor.process_offers(1,3)
-
-
-
 
