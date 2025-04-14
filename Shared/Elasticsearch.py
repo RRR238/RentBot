@@ -148,25 +148,26 @@ class Vector_DB:
 
         return response['hits']['hits'][0]['_source']
 
-    def filtered_vector_search(self,vector_query: list,k):
+    def filtered_vector_search(self,vector_query: list,k, filter:list):
         # Step 1: Build the metadata filtering query
         vector_query_part = {
                 "size": k,  # This specifies how many documents you want to return (top k)
                 "query": {
                     "bool": {
-                        "filter": [
-                            {"term": {"metadata.property_type.keyword": 'flat'}},
-                            {"term": {"metadata.rooms": 2}},
-                            {"range":{"metadata.price_rent":{"lte":1000}}}
-                            # Add other metadata filters here, for example, 'rooms' and 'price'
-                        ],
+                        "filter": filter,
+                        #     [
+                        #     {"term": {"metadata.property_type.keyword": 'flat'}},
+                        #     {"term": {"metadata.rooms": 2}},
+                        #     {"range":{"metadata.price_rent":{"lte":1000}}}
+                        #     # Add other metadata filters here, for example, 'rooms' and 'price'
+                        # ],
                         "should": [
                             {
                                 "knn": {
                                     "field": "embedding",  # The field where vectors are stored
                                     "query_vector": vector_query,  # The query vector to search for
                                     "k": k,  # Number of nearest neighbors to return
-                                    "num_candidates": 100  # The number of candidates to consider before ranking
+                                    "num_candidates": 1000  # The number of candidates to consider before ranking
                                 }
                             }
                         ]
