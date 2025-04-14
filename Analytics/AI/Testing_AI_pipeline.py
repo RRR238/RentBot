@@ -38,3 +38,8 @@ while True:
             print(i['_source']['metadata']['source_url'], i['_score'])
     except Exception as e:
         print(e)
+# with open("Novostavby.json", "r", encoding="utf-8") as file:
+#     data = json.load(file)
+#
+# for i in data:
+#     vdb.update_metadata_by_url(i,{"property_status":"novostavba"})
