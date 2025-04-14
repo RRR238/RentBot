@@ -15,3 +15,27 @@ get_key_attributes_prompt = """Z nasledujúceho promptu vydedukuj hodnoty pre ti
                                 Prompt: {user_prompt}
                     
                                 Tvoj výstup: """
+
+get_location_info_prompt = """Z nasledujúceho používateľského vstupu:
+
+                            1. Urči **hlavné miesto alebo orientačný bod**, ktoré používateľ spomína (napr. "centrum Bratislavy", "Eurovea", "Dunaj").
+                               - Ak sa nedá určiť, uveď: `anchor_location = None`
+                               - Inak: `anchor_location = <tvoja odpoveď>`
+                            
+                            2. Urči, či používateľ hovorí o:
+                               - presnej oblasti - v takom prípade uveď `location_scope = within`
+                               - alebo o jej okolí, predmestí, blízkosti (používa slová ako napr. pri, blízko a podobne...) - v takom prípade uveď `location_scope = outskirts`
+                            
+                            3. Ak ide o "outskirts", urči vzdialenostnú kategóriu, ktorú pravdepodobne zamýšľa:
+                               - 1 = do 15 minút pešo (~1.5 km)
+                               - 2 = do 10 minút MHD (~3 km)
+                               - 3 = do 10 minút autom (~5-7 km)
+                               - 4 = do 30 minút autom (~15 km)
+                               - Ak nehovorí o outskirts, uveď `distance_category = None`
+                            
+                            Používateľský vstup: "{user_prompt}"
+                            
+                            Tvoj výstup v tomto formáte:
+                            anchor_location = ...
+                            location_scope = ...
+                            distance_category = ... """
