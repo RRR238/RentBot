@@ -86,3 +86,18 @@ class Rent_offers_repository:
                 Rent_offer_model.source_url.in_(source_urls)
             ).delete(synchronize_session=False)
             session.commit()
+
+    def get_offer_by_id_or_url(self, identifier):
+        with self.get_session() as session:
+            if isinstance(identifier, int):
+                # Assume it's an ID
+                return session.query(Rent_offer_model
+                                     ).filter(
+                                        Rent_offer_model.id == identifier
+                                        ).first()
+            else:
+                # Assume it's a URL
+                return session.query(Rent_offer_model
+                                     ).filter(
+                                    Rent_offer_model.source_url == identifier
+                                    ).first()
