@@ -210,7 +210,7 @@ class Vector_DB:
 
 
 # llm = LLM()
-vdb = Vector_DB('rent-bot-index')
+#vdb = Vector_DB('rent-bot-index')
 
 # data = [{"embedding":llm.get_embedding("ahoj, som v meste"),
 #          "metadata":{"test":"test",
