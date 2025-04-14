@@ -101,7 +101,7 @@ class Vector_DB:
                                  query_vector,
                                  similarity_threshold: float = None,
                                  k: int = 10,
-                                 num_candidates: int = 100):
+                                 num_candidates: int = 500):
         query = {
             "knn": {
                 "field": "embedding",
@@ -146,9 +146,13 @@ class Vector_DB:
         response = self.__client.search(index=self.index_name,
                                         body=query)
 
-        return response['hits']['hits'][0]['_source']
+        return response['hits']['hits'][0]
 
-    def filtered_vector_search(self,vector_query: list,k, filter:list):
+    def filtered_vector_search(self,
+                               vector_query: list,
+                               k:int,
+                               filter:list,
+                               num_candidates:int = 500):
         # Step 1: Build the metadata filtering query
         vector_query_part = {
                 "size": k,  # This specifies how many documents you want to return (top k)
@@ -167,7 +171,7 @@ class Vector_DB:
                                     "field": "embedding",  # The field where vectors are stored
                                     "query_vector": vector_query,  # The query vector to search for
                                     "k": k,  # Number of nearest neighbors to return
-                                    "num_candidates": 1000  # The number of candidates to consider before ranking
+                                    "num_candidates": num_candidates  # The number of candidates to consider before ranking
                                 }
                             }
                         ]
@@ -176,11 +180,37 @@ class Vector_DB:
             }
 
         # Perform the search with the combined query
-        response = self.__client.search(index=self.index_name, body=vector_query_part)
+        response = self.__client.search(index=self.index_name,
+                                        body=vector_query_part)
         return response['hits']['hits']
 
+    def update_metadata_by_url(self,
+                               source_url: str,
+                               updated_metadata: dict):
+
+        resource = self.get_element(source_url=source_url)
+        resource_id = resource["_id"]
+        resource_doc = resource["_source"]
+
+        # Step 2: Merge updated metadata
+        current_metadata = resource_doc.get("metadata", {})
+        current_metadata.update(updated_metadata)
+
+        # Step 3: Update the document in Elasticsearch
+        update_body = {
+            "doc": {
+                "metadata": current_metadata
+            }
+        }
+
+        self.__client.update(index=self.index_name,
+                             id=resource_id, body=update_body)
+        print(f"✅ Document with ID {resource_id} updated successfully.")
+        return True
+
+
 # llm = LLM()
-#vdb = Vector_DB('rent-bot-index')
+vdb = Vector_DB('rent-bot-index')
 
 # data = [{"embedding":llm.get_embedding("ahoj, som v meste"),
 #          "metadata":{"test":"test",
