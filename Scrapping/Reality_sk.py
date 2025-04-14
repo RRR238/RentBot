@@ -129,8 +129,10 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
                         results["rooms"] = info[j][0]
                 elif "Apartmán" in info[j]:
                     results["apartmen"] = True
-                elif "dom" in info[j]:
+                elif "dom" in info[j].lower():
                     results["house"] = True
+                elif "Mezonet" in info[j]:
+                    results["mezonet"] = True
                 else:
                     results[j] = True
             elif j == 'Úžitková plocha':
