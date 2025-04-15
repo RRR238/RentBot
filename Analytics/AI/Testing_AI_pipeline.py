@@ -10,21 +10,21 @@ from Shared.Geolocation import get_coordinates
 from utils import convert_text_to_dict, processing_dict, prepare_filters
 
 vdb = Vector_DB('rent-bot-index')
-llm = LLM()
-collection = []
-
-while True:
-    query = input('enter query: ')
-    if query == 'q':
-        with open('get_key_attributes_prompt_testing.json', 'w',encoding="utf-8") as json_file:
-            json.dump(collection, json_file, ensure_ascii=False, indent=4)
-        break
-
-    #response = llm.generate_answer(get_key_attributes_prompt.format(user_prompt=query))
-    response = llm.generate_answer(get_location_info_prompt.format(user_prompt=query))
-    # collection.append({"query":query,
-    #                   "response":response})
-    print(response)
+# llm = LLM()
+# collection = []
+#
+# while True:
+#     query = input('enter query: ')
+#     if query == 'q':
+#         with open('get_key_attributes_prompt_testing.json', 'w',encoding="utf-8") as json_file:
+#             json.dump(collection, json_file, ensure_ascii=False, indent=4)
+#         break
+#
+#     #response = llm.generate_answer(get_key_attributes_prompt.format(user_prompt=query))
+#     response = llm.generate_answer(get_location_info_prompt.format(user_prompt=query))
+#     # collection.append({"query":query,
+#     #                   "response":response})
+#     print(response)
     # try:
     #     key_attributes_dict = convert_text_to_dict(response)
     #     processed_dict = processing_dict(key_attributes_dict)
@@ -38,9 +38,3 @@ while True:
     #         print(i['_source']['metadata']['source_url'], i['_score'])
     # except Exception as e:
     #     print(e)
-
-# with open("Novostavby.json", "r", encoding="utf-8") as file:
-#     data = json.load(file)
-#
-# for i in data:
-#     vdb.update_metadata_by_url(i,{"property_status":"novostavba"})
