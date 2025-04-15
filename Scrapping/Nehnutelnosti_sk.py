@@ -369,7 +369,7 @@ class Nehnutelnosti_sk_processor:
                                                    results['other_properties'])
                 results["source_url"] = link
                 #offers.append(results)
-                if "mezonet" in results['title'].lower() or "mezonetový" in results['title'].lower():
+                if "mezonet" in results['title'].lower():
                     property_type = 'mezonet'
                 elif "penthouse" in results['title'].lower():
                     property_type = 'penthouse'
@@ -381,22 +381,22 @@ class Nehnutelnosti_sk_processor:
                 new_offer = self.db_repository.insert_rent_offer({
                     "title": results['title'],
                     "location": results['location'],
-                    "property_type": property_type,
-                    "property_status": results['key_attributes']['property_status'],
+                    "property_type": property_type.lower() if property_type else None,
+                    "property_status": results['key_attributes']['property_status'].lower() if results['key_attributes']['property_status'] else None,
                     "rooms": results['key_attributes']['rooms'],
                     "size": results['key_attributes']['size'],
                     "year_of_construction":results['year_of_construction'],
                     "approval_year": results['approval_year'],
                     "last_reconstruction_year": results['last_reconstruction_year'],
                     "balconies": results['balconies'],
-                    "ownership": results['ownership'],
+                    "ownership": results['ownership'].lower() if results['ownership'] else None,
                     "price_rent": results['prices']['rent'],
                     "price_ms": results['prices']['meter squared'],
                     "price_energies":  results['prices']['energies'],
                     "description": results['description'],
                     "other_properties": results['other_properties'],
                     "floor":results['floor'],
-                    "positioning": results['positioning'],
+                    "positioning": results['positioning'].lower() if results['positioning'] else None,
                     "source": self.source,
                     "source_url": results['source_url'],
                     "coordinates": ";".join(results['coordinates'])
