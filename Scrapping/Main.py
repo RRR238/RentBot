@@ -28,16 +28,6 @@ processor_reality = Reality_sk_processor(reality_base_url,
                                      )
 
 if __name__ == "__main__":
+    processor_nehnutelnosti.delete_invalid_offers()
     processor_nehnutelnosti.process_offers(1,33)
-    processor_reality.process_offers(1,100)
-
-    # llm = LLM()
-    # vdb = Vector_DB('rent-bot-index')
-    # while True:
-    #     os.system('cls' if os.name == 'nt' else 'clear')
-    #     query = input()
-    #     embedding = llm.get_embedding(query,
-    #                                   'text-embedding-3-large')
-    #     results = vdb.search_similar_documents(query_vector=embedding,k=4)
-    #     for i in results:
-    #         print(i['_source']['metadata']['source_url'])
+    processor_reality.process_offers(100,200)

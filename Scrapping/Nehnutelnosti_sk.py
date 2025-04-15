@@ -528,10 +528,8 @@ class Nehnutelnosti_sk_processor:
                     invalid_urls.append(url)
                 else:
                     print(f"Status code: {response.status_code}")
-                    return False
             except requests.RequestException as e:
                 print(f"Error checking URL: {e}")
-                return False
             case_nr += 1
 
         self.db_repository.delete_by_source_urls(invalid_urls)
