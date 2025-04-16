@@ -512,31 +512,29 @@ class Nehnutelnosti_sk_processor:
 
     def delete_invalid_offers(self):
         case_nr = 1
+        invalid = 0
         all_urls = self.db_repository.get_all_source_urls()
-        invalid_urls = []
         for url in all_urls:
-            print(f"processing {case_nr}/{len(all_urls)}")
+            print(f"processing {case_nr}/{len(all_urls)}, invalid URLs found: {invalid}")
             try:
                 response = requests.get(url, allow_redirects=False,
-                                        timeout=2)
+                                        timeout=5)
                 # If it's 200 OK and no redirect, it's likely valid
                 if response.status_code == 200:
                     pass
                 # If it's a redirect (301, 302...), it's likely expired
                 elif response.status_code in [301, 302, 303, 307, 308]:
                     print(f"Redirected to: {response.headers.get('Location')}")
-                    invalid_urls.append(url)
+                    self.db_repository.delete_by_source_urls([url])
+                    self.vdb.delete_element(source_url=url)
+                    invalid += 1
                 else:
                     print(f"Status code: {response.status_code}")
             except requests.RequestException as e:
                 print(f"Error checking URL: {e}")
             case_nr += 1
 
-        self.db_repository.delete_by_source_urls(invalid_urls)
-        for inv_url in invalid_urls:
-            self.vdb.delete_element(source_url=inv_url)
-
-        print(f"deleted {len(invalid_urls)} offers")
+        print(f"deleted {invalid} offers")
 
 
 # processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
