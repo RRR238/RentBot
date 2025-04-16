@@ -9,15 +9,24 @@ class LLM:
         self.__client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
     def generate_answer(self,
-                 prompt,
-                 model = 'gpt-3.5-turbo'
-                ):
+                        prompt,
+                        model='gpt-3.5-turbo',
+                        temperature=0.0,  # <-- default temperature here
+                        chat_history=None  # Allow chat_history to be passed or initialized
+                        ):
+        # If no chat history is passed, create a default empty list
+        if chat_history is None:
+            chat_history = []
 
+        # Add the user prompt to the chat history
+        user_message = {"role": "user", "content": prompt}
+        chat_history.append(user_message)
+
+        # Call OpenAI API with the accumulated chat history
         response = self.__client.chat.completions.create(
             model=model,
-            messages=[
-                {"role": "user", "content": prompt}
-            ]
+            temperature=temperature,  # <-- passed into the API call
+            messages=chat_history  # <-- the chat history (including the new user prompt)
         )
 
         return response.choices[0].message.content

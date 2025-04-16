@@ -16,26 +16,32 @@ get_key_attributes_prompt = """Z nasledujúceho promptu vydedukuj hodnoty pre ti
                     
                                 Tvoj výstup: """
 
-get_location_info_prompt = """Z nasledujúceho používateľského vstupu:
+get_location_info_prompt = """Z nasledujúceho používateľského vstupu extrahuj informáciu o polohe podľa týchto pravidiel:
 
-                            1. Urči **hlavné miesto alebo orientačný bod**, ktoré používateľ spomína (napr. "centrum Bratislavy", "Eurovea", "Dunaj").
-                               - Ak sa nedá určiť, uveď: `anchor_location = None`
-                               - Inak: `anchor_location = <tvoja odpoveď>`
-                            
-                            2. Urči, či používateľ hovorí o:
-                               - presnej oblasti - v takom prípade uveď `location_scope = within`
-                               - alebo o jej okolí, predmestí, blízkosti (používa slová ako napr. pri, blízko a podobne...) - v takom prípade uveď `location_scope = outskirts`
-                            
-                            3. Ak ide o "outskirts", urči vzdialenostnú kategóriu, ktorú pravdepodobne zamýšľa:
-                               - 1 = do 15 minút pešo (~1.5 km)
-                               - 2 = do 10 minút MHD (~3 km)
-                               - 3 = do 10 minút autom (~5-7 km)
-                               - 4 = do 30 minút autom (~15 km)
-                               - Ak nehovorí o outskirts, uveď `distance_category = None`
-                            
-                            Používateľský vstup: "{user_prompt}"
-                            
-                            Tvoj výstup v tomto formáte:
-                            anchor_location = ...
-                            location_scope = ...
-                            distance_category = ... """
+1. Urči **hlavné miesto**, ktoré používateľ spomína (napr. "centrum Bratislavy", "Eurovea", "Dunaj", "Štrkovecké jazero",...).
+   - Ak používateľ spomenie **viacero miest**, vyber to, ktoré **najviac vystupuje ako cieľ alebo zámer hľadania** (napr. ak povie "v Petržalke pri jazere", hlavný bod je "petržalské jazero").
+   - POZOR: Ak používateľ povie **„do X min do centra MHD“**, chápe sa to ako „do X minút do **centra mesta** pomocou MHD“ → vtedy nastav `ústredná lokalita = centrum Bratislavy`.
+   - Vždy uprednostni konkrétnu **destináciu** (napr. centrum mesta, obchodné centrum, štvrť) pred obecným mestom ("Bratislava").
+   - Ak sa nedá určiť žiadny vhodný bod, uveď: `ústredná lokalita = None`.
+   - Inak: `ústredná lokalita = <tvoja odpoveď>`
+
+Používateľský vstup: "{user_prompt}"
+
+Tvoj výstup:
+ústredná lokalita = ...
+"""
+
+get_location_info_2_prompt = """Z nasledujúceho používateľského vstupu urci sekundarnu lokalitu, ak je to mozne, podla nasledujucich pravidiel:
+
+1. Urči **hlavny bod**, ktoré používateľ spomína (napr. "Eurovea", "Dunaj", "Štrkovecké jazero",...).
+   - Ak používateľ spomenie **viacero miest**, vyber to, ktoré **najviac vystupuje ako cieľ alebo zámer hľadania** (napr. ak povie "v Mocenku pri jazere", sekundarna lokalita je "mocenske jazero").
+   - Sekundarna lokalita je bod v ramci primarnej lokality, uvedenej nizsie.
+   - Ak sa nedá určiť žiadny vhodný bod, uveď: `ústredná lokalita = None`.
+   - Inak: `ústredná lokalita = <tvoja odpoveď>`
+
+Používateľský vstup: "{user_prompt}"
+Primarna lokalita: "{primary_location}"
+
+Tvoj výstup:
+sekundarna lokalita = ...
+"""
