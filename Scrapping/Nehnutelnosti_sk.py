@@ -547,7 +547,7 @@ class Nehnutelnosti_sk_processor:
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
 # print(links)
-#print(processor.process_detail('https://www.nehnutelnosti.sk/detail/JuQ7dsNVC-w/arboria--krasny-2-izbovy-byt-s-priestrannou-terasou-na-prenajom-v-projekte-arboria-na-novomestskej-ulici'))
+#print(processor.process_detail("https://www.nehnutelnosti.sk/detail/JuTtHrVo6i9/prenajom-2-izbovy-byt-v-lokalite-dlhe-diely"))
 # print(len(links))
 # print(links[149])
 #processor.process_offers(1,3)
