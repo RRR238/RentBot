@@ -13,6 +13,10 @@ nehnutelnosti_icons = {
     "mezonet":"M18 4h-6v4h8V6a2 2 0 0 0-2-2m-6 10v-4h8v4zm0 2v4h6a2 2 0 0 0 2-2v-2zM6 4h4v7H4V6a2 2 0 0 1 2-2m-2 9v5a2 2 0 0 0 2 2h4v-7zM6 2a4 4 0 0 0-4 4v12a4 4 0 0 0 4 4h12a4 4 0 0 0 4-4V6a4 4 0 0 0-4-4z"
     }
 
-nehnutelnosti_xpaths = ['//*[@id="main-detail-content"]/div[1]/div/div[1]/div/div[2]/div/div[2]/div/text()[2]',
+nehnutelnosti_xpaths_1 = ['//*[@id="main-detail-content"]/div[1]/div/div[1]/div/div[2]/div/div[2]/div/text()[2]',
           '//*[@id="main-detail-content"]/div[1]/div/div[1]/div/div[2]/div/div[2]/div/text()[5]',
           '//*[@id="main-detail-content"]/div[1]/div/div[1]/div/div[2]/div/div[2]/div/text()[8]']
+
+nehnutelnosti_xpaths_2 = ['//*[@id="main-detail-content"]/div[1]/div/div[1]/div/div[3]/div/div[2]/div/text()[2]',
+          '//*[@id="main-detail-content"]/div[1]/div/div[1]/div/div[3]/div/div[2]/div/text()[5]',
+          '//*[@id="main-detail-content"]/div[1]/div/div[1]/div/div[3]/div/div[2]/div/text()[8]']

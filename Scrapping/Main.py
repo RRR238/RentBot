@@ -28,6 +28,6 @@ processor_reality = Reality_sk_processor(reality_base_url,
                                      )
 
 if __name__ == "__main__":
-    processor_nehnutelnosti.delete_invalid_offers()
+    #processor_nehnutelnosti.delete_invalid_offers()
     processor_nehnutelnosti.process_offers(1,33)
     processor_reality.process_offers(100,200)

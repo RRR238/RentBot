@@ -410,12 +410,12 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
         return last_page
 
 
-# processor = Reality_sk_processor(reality_base_url,
-#                                  auth_token_reality,
-#                                 LLM(),
-#                                 Vector_DB('rent-bot-index'),
-#                                  Rent_offers_repository(os.getenv('connection_string'))
-#                                  )
+# processor_reality = Reality_sk_processor(reality_base_url,
+#                                     auth_token_reality,
+#                                     Rent_offers_repository(os.getenv('connection_string')),
+#                                      LLM(),
+#                                      Vector_DB('rent-bot-index')
+#                                      )
 # #
 # page = processor.get_page(reality_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
@@ -433,4 +433,4 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
 # print(imgs[0])
 
 #processor.process_offers(1,3)
-#print(processor.process_detail('https://www.reality.sk/byty/moderny-2-izbovy-byt-na-prenajom-v-novostavbe-soho-residence-ii-nove-zamky/JustV9aoX8P/'))
+#print(processor_reality.process_detail('https://www.reality.sk/byty/krasny-1-izbovy-byt-so-zahradkou/JuAZnwBcFgl/'))

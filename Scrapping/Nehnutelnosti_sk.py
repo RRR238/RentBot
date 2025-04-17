@@ -151,7 +151,8 @@ class Nehnutelnosti_sk_processor:
     def get_key_attributes(self, soup):
         icons = DOM_identifiers.nehnutelnosti_icons
 
-        xpaths = DOM_identifiers.nehnutelnosti_xpaths
+        xpaths_1 = DOM_identifiers.nehnutelnosti_xpaths_1
+        xpaths_2 = DOM_identifiers.nehnutelnosti_xpaths_2
 
         dom = etree.HTML(str(soup))
 
@@ -173,7 +174,10 @@ class Nehnutelnosti_sk_processor:
         for i in range(len(paragraphs)):
             svg = paragraphs[i].find("svg")
             path_data = svg.find("path")['d']
-            attribute = dom.xpath(xpaths[i])[0].lower()
+            try:
+                attribute = dom.xpath(xpaths_1[i])[0].lower()
+            except:
+                attribute = dom.xpath(xpaths_2[i])[0].lower()
             for j in icons.keys():
                 if icons[j] == path_data:
                     if "dom" in attribute:
@@ -547,7 +551,7 @@ class Nehnutelnosti_sk_processor:
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
 # print(links)
-#print(processor.process_detail("https://www.nehnutelnosti.sk/detail/JuTtHrVo6i9/prenajom-2-izbovy-byt-v-lokalite-dlhe-diely"))
+#print(processor.process_detail("https://www.nehnutelnosti.sk/detail/JutcdMa_D6c/na-prenajom-priestranny-3i-byt-bratislava"))
 # print(len(links))
 # print(links[149])
 #processor.process_offers(1,3)
