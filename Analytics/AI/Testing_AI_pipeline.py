@@ -41,24 +41,24 @@ while True:
         #     json.dump(collection, json_file, ensure_ascii=False, indent=4)
         # break
 
-    #response = llm.generate_answer(get_key_attributes_prompt.format(user_prompt=query))
-    primary_location = llm.generate_answer(get_location_info_prompt.format(user_prompt=query))
-    secundary_location = llm.generate_answer(get_location_info_2_prompt.format(user_prompt=query, primary_location=primary_location))
-    # collection.append({"query":query,
-    #                   "response":response})
-    #print(response)
-    print(primary_location)
-    print(secundary_location)
-    # try:
-    #     key_attributes_dict = convert_text_to_dict(response)
-    #     processed_dict = processing_dict(key_attributes_dict)
-    #     print(key_attributes_dict)
-    #     print(processed_dict)
-    #     filters = prepare_filters(processed_dict)
-    #     print(filters)
-    #     embedding = llm.get_embedding(query, model='text-embedding-3-large')
-    #     results = vdb.filtered_vector_search(embedding, 15, filter=filters)
-    #     for i in results:
-    #         print(i['_source']['metadata']['source_url'], i['_score'])
-    # except Exception as e:
-    #     print(e)
+    response = llm.generate_answer(get_key_attributes_prompt.format(user_prompt=query))
+    #primary_location = llm.generate_answer(get_location_info_prompt.format(user_prompt=query))
+    # sec_llocation = llm.generate_answer(get_location_info_2_prompt.format(user_prompt = query, lokalita=primary_location))
+    # # collection.append({"query":query,
+    # #                   "response":response})
+    #print(primary_location)
+    # print(sec_llocation)
+    print(response)
+    try:
+        key_attributes_dict = convert_text_to_dict(response)
+        processed_dict = processing_dict(key_attributes_dict)
+        print(key_attributes_dict)
+        print(processed_dict)
+        filters = prepare_filters(processed_dict)
+        print(filters)
+        embedding = llm.get_embedding(query, model='text-embedding-3-large')
+        results = vdb.filtered_vector_search(embedding, 15, filter=filters)
+        for i in results:
+            print(i['_source']['metadata']['source_url'], i['_score'])
+    except Exception as e:
+        print(e)

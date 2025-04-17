@@ -3,11 +3,13 @@ def convert_text_to_dict(llm_output):
     final_dict = {}
     no_spaces = llm_output.strip().replace('/n','').replace(' \n','').replace(' ','')
     final_dict['price_rent'] = no_spaces[no_spaces.find('cena')+len('cena'):no_spaces.find('početizieb')].replace(',','').replace('\n','').replace(':','')
-    final_dict['rooms'] = no_spaces[no_spaces.find('početizieb') + len('početizieb'):no_spaces.find('rozloha')].replace(',','').replace('\n', '').replace(':', '')
+    final_dict['rooms'] = no_spaces[no_spaces.find('početizieb') + len('početizieb'):no_spaces.find('početiziebMIN')].replace(',','').replace('\n', '').replace(':', '')
+    final_dict['rooms_min'] = no_spaces[no_spaces.find('početiziebMIN') + len('početiziebMIN'):no_spaces.find('početiziebMAX')].replace(',', '').replace('\n', '').replace(':', '')
+    final_dict['rooms_max'] = no_spaces[no_spaces.find('početiziebMAX') + len('početiziebMAX'):no_spaces.find('rozloha')].replace(',', '').replace('\n', '').replace(':', '')
     final_dict['size'] = no_spaces[no_spaces.find('rozloha') + len('rozloha'):no_spaces.find('typnehnuteľnosti')].replace(',', '').replace('\n', '').replace(':', '')
     final_dict['property_type'] = no_spaces[no_spaces.find('typnehnuteľnosti') + len('typnehnuteľnosti'):no_spaces.find('novostavba')].replace(',','').replace('\n', '').replace(':', '').replace('.','')
     final_dict['property_status'] = no_spaces[no_spaces.find('novostavba') + len('novostavba'):].replace(',','').replace('\n', '').replace(':', '').replace('.', '')
-
+    print(final_dict['rooms_max'])
     return final_dict
 
 
@@ -42,7 +44,11 @@ def prepare_filters(processed_dict):
         if k=='size' and v is not None:
             filter.append({"range": {"metadata.size": {"gte": v}}})
         if k=='rooms' and v is not None:
+            filter.append({"term": {"metadata.rooms": v}})
+        if k=='rooms_min' and v is not None:
             filter.append({"range": {"metadata.rooms": {"gte": v}}})
+        if k=='rooms_max' and v is not None:
+            filter.append({"range": {"metadata.rooms": {"lte": v}}})
         if k=='property_type' and v is not None:
             filter.append({"term": {"metadata.property_type.keyword": v}})
         if k=='property_status' and v is not None:
