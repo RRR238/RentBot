@@ -369,7 +369,7 @@ class Nehnutelnosti_sk_processor:
                                                    results['other_properties'])
                 results["source_url"] = link
                 #offers.append(results)
-                if "mezonet" in results['title'].lower() or "mezonetový" in results['title'].lower():
+                if "mezonet" in results['title'].lower():
                     property_type = 'mezonet'
                 elif "penthouse" in results['title'].lower():
                     property_type = 'penthouse'
@@ -381,22 +381,22 @@ class Nehnutelnosti_sk_processor:
                 new_offer = self.db_repository.insert_rent_offer({
                     "title": results['title'],
                     "location": results['location'],
-                    "property_type": property_type,
-                    "property_status": results['key_attributes']['property_status'],
+                    "property_type": property_type.lower() if property_type else None,
+                    "property_status": results['key_attributes']['property_status'].lower() if results['key_attributes']['property_status'] else None,
                     "rooms": results['key_attributes']['rooms'],
                     "size": results['key_attributes']['size'],
                     "year_of_construction":results['year_of_construction'],
                     "approval_year": results['approval_year'],
                     "last_reconstruction_year": results['last_reconstruction_year'],
                     "balconies": results['balconies'],
-                    "ownership": results['ownership'],
+                    "ownership": results['ownership'].lower() if results['ownership'] else None,
                     "price_rent": results['prices']['rent'],
                     "price_ms": results['prices']['meter squared'],
                     "price_energies":  results['prices']['energies'],
                     "description": results['description'],
                     "other_properties": results['other_properties'],
                     "floor":results['floor'],
-                    "positioning": results['positioning'],
+                    "positioning": results['positioning'].lower() if results['positioning'] else None,
                     "source": self.source,
                     "source_url": results['source_url'],
                     "coordinates": ";".join(results['coordinates'])
@@ -512,33 +512,29 @@ class Nehnutelnosti_sk_processor:
 
     def delete_invalid_offers(self):
         case_nr = 1
+        invalid = 0
         all_urls = self.db_repository.get_all_source_urls()
-        invalid_urls = []
         for url in all_urls:
-            print(f"processing {case_nr}/{len(all_urls)}")
+            print(f"processing {case_nr}/{len(all_urls)}, invalid URLs found: {invalid}")
             try:
                 response = requests.get(url, allow_redirects=False,
-                                        timeout=2)
+                                        timeout=5)
                 # If it's 200 OK and no redirect, it's likely valid
                 if response.status_code == 200:
                     pass
                 # If it's a redirect (301, 302...), it's likely expired
                 elif response.status_code in [301, 302, 303, 307, 308]:
                     print(f"Redirected to: {response.headers.get('Location')}")
-                    invalid_urls.append(url)
+                    self.db_repository.delete_by_source_urls([url])
+                    self.vdb.delete_element(source_url=url)
+                    invalid += 1
                 else:
                     print(f"Status code: {response.status_code}")
-                    return False
             except requests.RequestException as e:
                 print(f"Error checking URL: {e}")
-                return False
             case_nr += 1
 
-        self.db_repository.delete_by_source_urls(invalid_urls)
-        for inv_url in invalid_urls:
-            self.vdb.delete_element(source_url=inv_url)
-
-        print(f"deleted {len(invalid_urls)} offers")
+        print(f"deleted {invalid} offers")
 
 
 # processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
@@ -551,7 +547,7 @@ class Nehnutelnosti_sk_processor:
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
 # print(links)
-#print(processor.process_detail('https://www.nehnutelnosti.sk/detail/JuQ7dsNVC-w/arboria--krasny-2-izbovy-byt-s-priestrannou-terasou-na-prenajom-v-projekte-arboria-na-novomestskej-ulici'))
+#print(processor.process_detail("https://www.nehnutelnosti.sk/detail/JuTtHrVo6i9/prenajom-2-izbovy-byt-v-lokalite-dlhe-diely"))
 # print(len(links))
 # print(links[149])
 #processor.process_offers(1,3)
