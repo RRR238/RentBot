@@ -85,7 +85,10 @@ class Nehnutelnosti_sk_processor:
             prices = self.get_price(soup)
             description = self.get_description(soup)
             images= self.get_images(detail_link)
-            coordinates = [str(i) for i in get_coordinates(location)]
+            try:
+                coordinates = [str(i) for i in get_coordinates(location)]
+            except:
+                coordinates = None
             year_of_construction = int(other_properties['Rok výstavby:']) if 'Rok výstavby:' in other_properties.keys() else None
             approval_year = int(other_properties['Rok kolaudácie:']) if 'Rok kolaudácie:' in other_properties.keys() else None
             last_reconstruction_year = int(other_properties['Rok poslednej rekonštrukcie:']) if 'Rok poslednej rekonštrukcie:' in other_properties.keys() else None
@@ -182,16 +185,22 @@ class Nehnutelnosti_sk_processor:
                 if icons[j] == path_data:
                     if "dom" in attribute:
                         results["house"] = True
-                    elif "byt" in attribute:
+                    elif "byt" in attribute and "iný byt" not in attribute:
                         results["flat"] = True
                         try:
                             results["rooms"] = int(j[0])
                         except:
-                            results["rooms"] = j[0]
+                            results["rooms"] = None
+                    elif "iný byt" in attribute:
+                        results["flat"] = True
                     elif "apartmán" in attribute:
                         results["apartmen"] = True
                     elif "garsónka" in attribute:
                         results["studio"] = True
+                    elif "mezonet" in attribute:
+                        results["mezonet"] = True
+                    elif "loft" in attribute:
+                        results["loft"] = True
                     else:
                         if results[j]==False:
                             results[j] = True
@@ -241,36 +250,35 @@ class Nehnutelnosti_sk_processor:
                                    ).text.strip() else None
 
         if price_rent:
-            prices["rent"] = (price_rent.replace("\xa0", "")
-                              .split("€")[0]
-                              .strip().replace(
-                                        ',','.'))
             try:
+                prices["rent"] = (price_rent.replace("\xa0", "")
+                                                    .split("€")[0]
+                                                    .strip().replace(
+                                                        ',', '.'))
                 prices["rent"] = int(prices["rent"])
             except:
-                pass
+                prices["rent"] = None
 
         if price_energies:
-            prices["energies"] = (price_energies.replace("\xa0", ""
-                                                        ).split("€")[0]
-                                                        .strip()
-                                                        .replace(
-                                                        "+ ","").replace(
-                                                        ',','.'))
             try:
+                prices["energies"] = (price_energies.replace("\xa0", ""
+                                                             ).split("€")[0]
+                                                            .strip()
+                                                            .replace(
+                                                                "+ ", "").replace(
+                                                                ',', '.'))
                 prices["energies"] = int(prices["energies"])
             except:
-                pass
+                prices["energies"] = None
 
         if price_ms:
-            prices["meter squared"] = (price_ms.replace("\xa0", "")
-                                        .split("€")[0]
-                                        .strip().replace(',','.'))
-
             try:
+                prices["meter squared"] = (price_ms.replace("\xa0", "")
+                                           .split("€")[0]
+                                           .strip().replace(',', '.'))
                 prices["meter squared"] = float(prices["meter squared"])
             except:
-                pass
+                prices["meter squared"] = None
 
         return prices
 
@@ -551,8 +559,7 @@ class Nehnutelnosti_sk_processor:
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
 # print(links)
-#print(processor.process_detail("https://www.nehnutelnosti.sk/detail/JutcdMa_D6c/na-prenajom-priestranny-3i-byt-bratislava"))
+#print(processor.process_detail("https://www.nehnutelnosti.sk/detail/Ju37ubRTmfv/axis-real--5-izb-byt-v-rdl-ba-iv-zahorska-bystrical-cs-tankistov"))
 # print(len(links))
 # print(links[149])
 #processor.process_offers(1,3)
-

@@ -68,25 +68,25 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
 
     def get_price(self, soup):
 
-        price_rent = soup.find('div',"d-flex flex-wrap no-gutters justify-content-between align-items-center"
-                                    ).find('h3', class_='contact-title big col-12 col-md-6 mb-0').text.strip(
-                                    ).split("€")[0]
         try:
+            price_rent = soup.find('div', "d-flex flex-wrap no-gutters justify-content-between align-items-center"
+                                   ).find('h3', class_='contact-title big col-12 col-md-6 mb-0').text.strip(
+                                    ).split("€")[0]
             price_rent = int(re.sub(r'\s+', '', price_rent))
         except:
-            pass
+            price_rent = None
 
-        price_ms = soup.find('div',"d-flex flex-wrap no-gutters justify-content-between align-items-center"
-                                ).find('h3', class_='contact-title big col-12 col-md-6 mb-0'
-                                ).find_all('small'
-                                )[0].text.strip(
-                                ).split("€")[0].replace(
-                                ',','.'
-                                )
         try:
+            price_ms = soup.find('div', "d-flex flex-wrap no-gutters justify-content-between align-items-center"
+                                 ).find('h3', class_='contact-title big col-12 col-md-6 mb-0'
+                                        ).find_all('small'
+                                                   )[0].text.strip(
+                                                    ).split("€")[0].replace(
+                                                        ',', '.'
+                                                    )
             price_ms = int(re.sub(r'\s+', '', price_ms))
         except:
-            pass
+            price_ms = None
 
         return {
                 "rent":price_rent,
@@ -144,7 +144,7 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
                                                 )
                                             )
                 except:
-                    results["size"] = info[j].replace("m²","")
+                    results["size"] = None
             else:
                 pass
 
@@ -305,7 +305,10 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
             prices = self.get_price(soup)
             description = self.get_description(soup)
             #images= self.get_images(detail_link)
-            coordinates = [str(i) for i in get_coordinates(location)]
+            try:
+                coordinates = [str(i) for i in get_coordinates(location)]
+            except:
+                coordinates = None
             year_of_construction = int(other_properties['Rok výstavby:']) if 'Rok výstavby:' in other_properties.keys() else None
             approval_year = int(
                 other_properties['Rok kolaudácie:']) if 'Rok kolaudácie:' in other_properties.keys() else None
@@ -433,4 +436,4 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
 # print(imgs[0])
 
 #processor.process_offers(1,3)
-#print(processor_reality.process_detail('https://www.reality.sk/byty/krasny-1-izbovy-byt-so-zahradkou/JuAZnwBcFgl/'))
+#print(processor_reality.process_detail('https://www.reality.sk/byty/realfinn-exkluzivne-prenajom-zariadeny-2-izbovy-apartman-v-starej-lesnej-video/JuhtXaxTBoX/'))
