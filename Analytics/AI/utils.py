@@ -9,7 +9,6 @@ def convert_text_to_dict(llm_output):
     final_dict['size'] = no_spaces[no_spaces.find('rozloha') + len('rozloha'):no_spaces.find('typnehnuteľnosti')].replace(',', '').replace('\n', '').replace(':', '')
     final_dict['property_type'] = no_spaces[no_spaces.find('typnehnuteľnosti') + len('typnehnuteľnosti'):no_spaces.find('novostavba')].replace(',','').replace('\n', '').replace(':', '').replace('.','')
     final_dict['property_status'] = no_spaces[no_spaces.find('novostavba') + len('novostavba'):].replace(',','').replace('\n', '').replace(':', '').replace('.', '')
-    print(final_dict['rooms_max'])
     return final_dict
 
 
@@ -57,12 +56,29 @@ def prepare_filters(processed_dict):
     return filter
 
 
+import requests
 
-# with open('get_key_attributes_prompt_testing.json', 'r',encoding="utf-8") as json_file:
-#             key_attributes = json.load(json_file)
-#
-#
-# for i in key_attributes:
-#     d = convert_text_to_dict(i['response'])
-#     processing_dict(d)
-#     print(prepare_filters(d))
+def get_bounding_box(location_name):
+    url = "https://nominatim.openstreetmap.org/search"
+    params = {
+        'q': location_name,
+        'format': 'json',
+        'limit': 1,
+        'polygon_geojson': 0,
+        'addressdetails': 1
+    }
+
+    headers = {
+        'User-Agent': 'YourApp/1.0 (richardmacus0@gmail.com)'  # Always use a UA
+    }
+
+    response = requests.get(url, params=params, headers=headers)
+    data = response.json()
+
+    if data:
+        bounding_box = data[0]['boundingbox']  # [south, north, west, east]
+        print("Bounding Box:", bounding_box)
+        return bounding_box
+    else:
+        print("No results found.")
+        return None

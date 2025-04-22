@@ -48,3 +48,30 @@ Používateľský vstup: "{user_prompt}"
 Tvoj výstup:
 lokalizačný rozsah = ...
 """
+
+location_extraction_prompt = """
+Z nasledujúceho textu extrahuj všetky relevantné **lokality alebo orientačné body**, ktoré by mohli súvisieť s geografickou polohou. Môže ísť o:
+
+- mestá alebo mestské časti (napr. "Ružinov", "Petržalka", "Senec"),
+- ulice, štvrte, sídliská (napr. "Mlynské Nivy", "Dlhé diely"),
+- jazerá, parky, hory, lesy (napr. "Štrkovec", "Sad Janka Kráľa"),
+- obchodné centrá, pamiatky, dopravné uzly (napr. "Eurovea", "Hlavná stanica"),
+- prípadne známe budovy alebo komplexy.
+
+Výstup uveď ako **čistý python zoznam reťazcov**, bez komentárov a vysvetlení.
+Davaj pozor aby udaje o polohe boli v gramaticky spravnom tvare !! (napr Zilina, centrum, Bratislava, centrum a podobne) 
+
+Text: "{user_prompt}"
+
+Výstup:
+"""
+
+location_scope_prompt = """Z nasledujúceho textu:
+{user_prompt}
+
+Bola vydedukovaná ako ústredná oblasť: {anchor_location}
+
+Myslí sa v texte miesto VRÁMCI ústrednej oblasti, alebo MIMO (pri, blízko, kúsok) nej? Odpovedz iba slovom VRÁMCI alebo MIMO (napr. Domček na polosamote pri Žiline bude oznaceny ako MIMO)
+
+Tvoj výstup:
+"""
