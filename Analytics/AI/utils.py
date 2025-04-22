@@ -82,3 +82,25 @@ def get_bounding_box(location_name):
     else:
         print("No results found.")
         return None
+
+def few_shots_chat_history(shots, prompt_template):
+    shots_for_memory = []
+    accumulated_history = ""
+
+    for shot in shots:
+        # Inject prior history into the prompt
+        formatted_prompt = prompt_template.format(
+            user_prompt=shot['User'],
+            chat_history=accumulated_history.strip()
+        )
+
+        # Store in final few-shot memory structure
+        shots_for_memory.append({
+            "User": formatted_prompt,
+            "AI": shot["AI"]
+        })
+
+        # Append to accumulated history for next turn
+        accumulated_history += f"Používateľ: {shot['User']}\nAI: {shot['AI']}\n\n"
+
+    return shots_for_memory

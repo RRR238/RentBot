@@ -1,4 +1,22 @@
-get_key_attributes_prompt = """Z nasledujúceho promptu vydedukuj hodnoty pre tieto premenné:
+summarize_chat_history_prompt = """{chat_history}
+
+Na základe predchádzajúcej konverzácie a nasledujúcej novej informácie, aktualizuj a zhrň aktuálne preferencie používateľa ohľadom nehnuteľnosti do krátkeho odstavca.  
+Zameraj sa IBA NA FAKTY a požiadavky používateľa.  
+Nepodávaj peknú štýlizovanú odpoveď, iba heslovité zhrnutie kľúčových údajov a preferencií! **Nezačínaj odpoveď slovami ako "Používateľ preferuje" alebo podobnými frázami.** **Nepoužívaj nijaké vysvetľujúce frázy o používateľovi!**   
+**Ak používateľ zmení požiadavky a uvedie nový dopyt (napr. "alebo radšej domček na polosamote"), nezmiešavaj tieto dva dopyty.** Namiesto toho vráť samostatné zhrnutie pre každý dopyt.  
+
+Použi prirodzený jazyk a zachovaj logické doplnenia predchádzajúcich požiadaviek (napr. "zvýš cenu na 4000" = nová cena je 4000).  
+POZOR – vždy iba uprav pôvodné informácie, ak sa týkajú originálneho dopytu (napr. zvýšenie ceny).  
+POZOR – ak používateľ zmieni nový typ požiadavky (napr. „alebo radšej dvojizbový byt“), vráť **nový dopyt** v samostatnom zhrnutí, ktoré bude odlišné od predchádzajúceho. **Nepridávaj nežiaduce alebo nadbytočné informácie.**
+POZOR - ak pouzivatel vyradi nejaku poziadavku alebo parameter, iba ho vynechaj v odpovedi. NEPODAVAJ INFORMACIU O TOM, ZE POUZIVATEL TO UZ NECHCE.
+
+Nová informácia:  
+{user_prompt}
+
+Tvoje zhrnutie kľúčových údajov a preferencii:
+"""
+
+get_key_attributes_prompt = """Na základe nasledujúceho promptu používateľa vydedukuj hodnoty pre tieto premenné:
 
 cena: <tvoja dedukcia> (uveď iba číslo. Ak je uvedený ROZSAH a nie konkrétne číslo, použi najvyššiu hodnotu z rozsahu. Ak nie je možné určiť presné číslo, priraď hodnotu None.),
 
@@ -10,7 +28,7 @@ počet izieb MAX: <tvoja dedukcia> (ak používateľ uvedie rozsah počtu izieb 
 
 rozloha: <tvoja dedukcia> (uveď iba číslo, ak je to možné. Ak je uvedený rozsah a nie konkrétne číslo, použi najnižšiu hodnotu z rozsahu. Ak nie je možné určiť presné číslo, priraď hodnotu None.),
 
-typ nehnuteľnosti: <tvoja dedukcia> (vyber iba jednu z nasledujúcich možností: "dom", "loft", "mezonet", "byt", "garzónka". Ak nie je možné určiť, priraď hodnotu None.),
+typ nehnuteľnosti: <tvoja dedukcia> (vyber iba jednu z nasledujúcich možností: "dom", "loft", "mezonet", "penthouse", "byt", "garzónka". Ak nie je možné určiť, priraď hodnotu None.),
 
 novostavba: <tvoja dedukcia> (priraď hodnotu True, ak je z promptu zrejmé, že ide o novostavbu. Inak priraď hodnotu None.)
 
@@ -19,6 +37,14 @@ Ak niektoré hodnoty nie je možné určiť, priraď k danej premennej hodnotu N
 Prompt: {user_prompt}
 
 Tvoj výstup:
+"""
+
+follow_up_question_prompt = """
+Na základe predchádzajúcej konverzácie sa pokús doplniť chýbajúce informácie ohľadom preferencií používateľa na prenájom nehnuteľnosti.
+
+Polož mu vhodnú jednu doplňujúcu otázku, ktorá pomôže spresniť jeho predstavu (napr. cena, lokalita, rozloha,...).
+
+Otázka:
 """
 
 get_location_info_prompt = """Z nasledujúceho používateľského vstupu urči **hlavné miesto alebo orientačný bod**, ktoré používateľ spomína (napr. "centrum Bratislavy", "Eurovea", "Dunaj", "Štrkovec", "Petržalka").
