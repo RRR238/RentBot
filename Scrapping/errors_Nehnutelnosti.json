@@ -1,162 +1,74 @@
 [
     {
-        "link": "https://www.nehnutelnosti.sk/detail/Juhc8-DovhO/dam-do-prenajmu-byt-v-trencine-pre-dve-osoby",
-        "error": "(psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: \"Cena dohodou\"\nLINE 3: WHERE rent_offers.price_rent = 'Cena dohodou' AND rent_offer...\n                                       ^\n\n[SQL: SELECT EXISTS (SELECT * \nFROM rent_offers \nWHERE rent_offers.price_rent = %(price_rent_1)s AND rent_offers.size IS NULL AND rent_offers.coordinates = %(coordinates_1)s) AS anon_1]\n[parameters: {'price_rent_1': 'Cena dohodou', 'coordinates_1': '48.8922719;18.0387465'}]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)"
+        "link": "https://www.nehnutelnosti.sk/detail/JuDP5eqrN15/prenajom-2-izbovy-dizajnovy-byt-oproti-hant-arene-ulicatrnavska-cesta-",
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.nehnutelnosti.sk/detail/JurCTedrQ1a/2-izbovy-byt-trencin-na-prenajoml-sihot",
-        "error": "'NoneType' object is not iterable"
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/Jun2yHjn0nA/na-prenajom-2-izbovy-zariadeny-byt-v-centre-mesta-sala-s-parkovacim-miestom",
-        "error": "'NoneType' object is not iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/Jukt-kkg8ve/prenajom-styloveho-2-izboveho-bytu-v-starom-meste-na-ulici-lermontovova",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JuBpM9jQh6I/sky-park-limitovana-ponuka-2kk-bytov-na-prenajom---limited-offer-of-1-bedroom-apartments-for-rent",
-        "error": "(psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: \"Info v RK\"\nLINE 3: WHERE rent_offers.price_rent = 'Info v RK' AND rent_offers.s...\n                                       ^\n\n[SQL: SELECT EXISTS (SELECT * \nFROM rent_offers \nWHERE rent_offers.price_rent = %(price_rent_1)s AND rent_offers.size = %(size_1)s AND rent_offers.coordinates = %(coordinates_1)s) AS anon_1]\n[parameters: {'price_rent_1': 'Info v RK', 'size_1': 55.0, 'coordinates_1': '48.1436522;17.1254518'}]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)"
+        "link": "https://www.nehnutelnosti.sk/detail/Ju3aUMKP8XU/prenajom-bytu",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/Jup6f592-RX/prenajom-2-izboveho-bytu---centrum",
-        "error": "(psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: \"Cena dohodou\"\nLINE 3: WHERE rent_offers.price_rent = 'Cena dohodou' AND rent_offer...\n                                       ^\n\n[SQL: SELECT EXISTS (SELECT * \nFROM rent_offers \nWHERE rent_offers.price_rent = %(price_rent_1)s AND rent_offers.size IS NULL AND rent_offers.coordinates = %(coordinates_1)s) AS anon_1]\n[parameters: {'price_rent_1': 'Cena dohodou', 'coordinates_1': '48.31006888632997;18.077417346043536'}]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JurttfL1QLC/2-izbovy-byt-v-novostavbel-ul-cedrova--kosice",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JuNeCQJu03e/occam--sky-park-2i-prakticky-byt-na-oblubenej-adrese",
-        "error": "(psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: \"Cena dohodou\"\nLINE 3: WHERE rent_offers.price_rent = 'Cena dohodou' AND rent_offer...\n                                       ^\n\n[SQL: SELECT EXISTS (SELECT * \nFROM rent_offers \nWHERE rent_offers.price_rent = %(price_rent_1)s AND rent_offers.size = %(size_1)s AND rent_offers.coordinates = %(coordinates_1)s) AS anon_1]\n[parameters: {'price_rent_1': 'Cena dohodou', 'size_1': 52.0, 'coordinates_1': '48.14496135;17.12639927509996'}]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JuGi4s8DQ4t/lehnice-3-izbovy-mezonetovy-radovy-dombyt",
-        "error": "'5rooms_ap'"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JudpTfTN4qy/nove-byty-na-prenajom-v-tlmacoch",
-        "error": "(psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: \"Cena dohodou\"\nLINE 3: WHERE rent_offers.price_rent = 'Cena dohodou' AND rent_offer...\n                                       ^\n\n[SQL: SELECT EXISTS (SELECT * \nFROM rent_offers \nWHERE rent_offers.price_rent = %(price_rent_1)s AND rent_offers.size = %(size_1)s AND rent_offers.coordinates = %(coordinates_1)s) AS anon_1]\n[parameters: {'price_rent_1': 'Cena dohodou', 'size_1': 50.0, 'coordinates_1': '48.29619179389844;18.51531132403864'}]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JubDeIzEsvd/hladam-do-dlhodobeho-podnajmu-3izb-byt-dom-v-nr",
-        "error": "(psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: \"Cena dohodou\"\nLINE 3: WHERE rent_offers.price_rent = 'Cena dohodou' AND rent_offer...\n                                       ^\n\n[SQL: SELECT EXISTS (SELECT * \nFROM rent_offers \nWHERE rent_offers.price_rent = %(price_rent_1)s AND rent_offers.size = %(size_1)s AND rent_offers.coordinates = %(coordinates_1)s) AS anon_1]\n[parameters: {'price_rent_1': 'Cena dohodou', 'size_1': 90.0, 'coordinates_1': '48.31295;18.0894593'}]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JuxMDk6gJp5/prenajom-zariadeny-2-izbovy-byt-skalica--560-eur",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Rb_8Y__y6j9/na-prenajom-2-izbovy-byt-s-balkonom-a-garazovym-statim-v-projekte-mikol-trnava",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Jumm1YsaYwn/obchodna-ul---priestranny-5-izbovy-byt-163-m2",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JuoQSZ1AmbX/prenajom-1-izbovy-byt---kolaudovany-2024",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Jue1YQq8V58/4i-byt-v-tatranskej-strbe",
-        "error": "(psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: \"Cena dohodou\"\nLINE 3: WHERE rent_offers.price_rent = 'Cena dohodou' AND rent_offer...\n                                       ^\n\n[SQL: SELECT EXISTS (SELECT * \nFROM rent_offers \nWHERE rent_offers.price_rent = %(price_rent_1)s AND rent_offers.size = %(size_1)s AND rent_offers.coordinates = %(coordinates_1)s) AS anon_1]\n[parameters: {'price_rent_1': 'Cena dohodou', 'size_1': 85.0, 'coordinates_1': '49.0535636;20.0787196'}]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JuTPfU_TsjK/rodinny-dom-s-peknym-dvorom",
-        "error": "(psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: \"Cena dohodou\"\nLINE 3: WHERE rent_offers.price_rent = 'Cena dohodou' AND rent_offer...\n                                       ^\n\n[SQL: SELECT EXISTS (SELECT * \nFROM rent_offers \nWHERE rent_offers.price_rent = %(price_rent_1)s AND rent_offers.size = %(size_1)s AND rent_offers.coordinates = %(coordinates_1)s) AS anon_1]\n[parameters: {'price_rent_1': 'Cena dohodou', 'size_1': 83.0, 'coordinates_1': '48.6469222;21.680547'}]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JuDFUB9B0tl/exkluzivne-podkrovne-byvanie",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju3AIb2bIrP/prenajom-5i-bytu-v-raci",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju8mGB_sK1u/velky-2---izbovy-apartman-vysoke-tatry",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JueJ79zv44w/specialny-moderny-15-izbovy-bytl-vydrical",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Jupcsmi9Ckw/predaj-2---izboveho-bytu-nova-koliba",
-        "error": "(psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: \"Cena dohodou\"\nLINE 3: WHERE rent_offers.price_rent = 'Cena dohodou' AND rent_offer...\n                                       ^\n\n[SQL: SELECT EXISTS (SELECT * \nFROM rent_offers \nWHERE rent_offers.price_rent = %(price_rent_1)s AND rent_offers.size = %(size_1)s AND rent_offers.coordinates = %(coordinates_1)s) AS anon_1]\n[parameters: {'price_rent_1': 'Cena dohodou', 'size_1': 74.0, 'coordinates_1': '48.168958380119946;17.119780582550362'}]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JuxfJVka7VN/3-izb-mezanin-2-kupelnel-2-lodzie",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju-PH-_nEQ6/1i-zrekonstruovany-byt-v-dobrej-lokalite",
-        "error": "'NoneType' object is not iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/JutBuFhTyyF/2-izbovy-byt-na-prenajom",
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.nehnutelnosti.sk/detail/JuC2QBQ4CeO/cena-vratane-vsetkych-energii",
-        "error": "'NoneType' object is not iterable"
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju245T5RH-8/axis-real--komfortne-byvanie-v-novostavbe-bory-novy-dvor-s-parkovanim",
-        "error": "'NoneType' object is not iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/Ju1RSMd8lO_/2-izb-byt-panorama--novostavba-s-parkovanim",
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.nehnutelnosti.sk/detail/Ju8MLIOykX1/ponukam-na-prenajom-3-izbovy-byt-v-novostavbe",
-        "error": "'NoneType' object is not iterable"
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju37ubRTmfv/axis-real--5-izb-byt-v-rdl-ba-iv-zahorska-bystrical-cs-tankistov",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.nehnutelnosti.sk/detail/JuxMDk6gJp5/prenajom-zariadeny-2-izbovy-byt-skalica--560-eur",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JuhK0hXNtee8/the-home-prenajom---jedinecny-5i-byt-v-bratislavskom-podhradi",
-        "error": "(psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: \"Cena dohodou\"\nLINE 3: WHERE rent_offers.price_rent = 'Cena dohodou' AND rent_offer...\n                                       ^\n\n[SQL: SELECT EXISTS (SELECT * \nFROM rent_offers \nWHERE rent_offers.price_rent = %(price_rent_1)s AND rent_offers.size = %(size_1)s AND rent_offers.coordinates = %(coordinates_1)s) AS anon_1]\n[parameters: {'price_rent_1': 'Cena dohodou', 'size_1': 210.0, 'coordinates_1': '48.14331334708484;17.10371839612268'}]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)"
+        "link": "https://www.nehnutelnosti.sk/detail/Ju8mGB_sK1u/velky-2---izbovy-apartman-vysoke-tatry",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JugoMC8Mbnl/prenajmite-si-3-i-byt-v-tichej-casti-dubravkyl-proviziu-neplatite",
-        "error": "'NoneType' object is not iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/Ju-PH-_nEQ6/1i-zrekonstruovany-byt-v-dobrej-lokalite",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JugoMC8Mbnl/prenajmite-si-3-i-byt-v-tichej-casti-dubravkyl-proviziu-neplatite",
-        "error": "'NoneType' object is not iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/JuxfJVka7VN/3-izb-mezanin-2-kupelnel-2-lodzie",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JuvNbAnBGoh/dom-realitl-priestranna-nehnutelnost-687m2-na-hlavnej-ulici-v-hamuliakove",
-        "error": "(psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: \"Cena dohodou\"\nLINE 3: WHERE rent_offers.price_rent = 'Cena dohodou' AND rent_offer...\n                                       ^\n\n[SQL: SELECT EXISTS (SELECT * \nFROM rent_offers \nWHERE rent_offers.price_rent = %(price_rent_1)s AND rent_offers.size = %(size_1)s AND rent_offers.coordinates = %(coordinates_1)s) AS anon_1]\n[parameters: {'price_rent_1': 'Cena dohodou', 'size_1': 687.0, 'coordinates_1': '48.03683468950547;17.25636497050361'}]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)"
+        "link": "https://www.nehnutelnosti.sk/detail/JulPlSluI7P/3-izbovy-byt-na-prenajom-ihned-k-dispozicii",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JumY4XsNUC4/5-izbovy-byt-na-ulici-29-augusta",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.nehnutelnosti.sk/detail/JuPlh1fy7zG/3-izbovy-byt-s-balkonoml-foncorda",
+        "error": "Response ended prematurely"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/Jut_0d9yP_8/velkometrazny-byt-132-m-pod-slavinoml-5-miestnostil-galandova-ulical-moznost-parkingu",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.nehnutelnosti.sk/detail/Ju3M6jiWe3n/garsonka-v-dubravke-s-balkonom-volne",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju6KvXsqp9B/4-izbovy-byt-v-luxusnom-projekte-hlboka-7-s-parkingom",
-        "error": "(psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: \"Cena dohodou\"\nLINE 3: WHERE rent_offers.price_rent = 'Cena dohodou' AND rent_offer...\n                                       ^\n\n[SQL: SELECT EXISTS (SELECT * \nFROM rent_offers \nWHERE rent_offers.price_rent = %(price_rent_1)s AND rent_offers.size = %(size_1)s AND rent_offers.coordinates = %(coordinates_1)s) AS anon_1]\n[parameters: {'price_rent_1': 'Cena dohodou', 'size_1': 153.0, 'coordinates_1': '48.15528655;17.103294905'}]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)"
+        "link": "https://www.nehnutelnosti.sk/detail/JuHjux5xlZe/directrealna-prenajom-priestranny-2-izbovy-byt-s-loggiou-a-parkovacim-miestom-na-ulici-k-lomu-v-bratislave",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju-ZJ63UEPA/ba-il-stare-mestol-5-izbovy-exkluzivny-byt-na-tolsteho-ulici",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.nehnutelnosti.sk/detail/JuOeQe39KpN/na-prenajom-prerobena-zariadena-garsonkal-33-m2l-senica",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JuLgFX5BZaa/5-izbovy-byt-160-m-v-luxusnom-projekte-hlboka-7-s-parkingom",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Jurz98wY_hc/herrys---na-prenajom-priestranny-5-izbovy-byt-s-zahradou-105-m2-vhodny-aj-na-sidlo-firmy",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JuGa0aDvDjS/herrys---na-prenajom-dizajnovy-3-izbovy-byt-v-projekte-eurovea-2",
-        "error": "(psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: \"Cena dohodou\"\nLINE 3: WHERE rent_offers.price_rent = 'Cena dohodou' AND rent_offer...\n                                       ^\n\n[SQL: SELECT EXISTS (SELECT * \nFROM rent_offers \nWHERE rent_offers.price_rent = %(price_rent_1)s AND rent_offers.size = %(size_1)s AND rent_offers.coordinates = %(coordinates_1)s) AS anon_1]\n[parameters: {'price_rent_1': 'Cena dohodou', 'size_1': 87.0, 'coordinates_1': '48.140279050000004;17.129130449999998'}]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju4woDhvWnT/herrys---na-prenajom-4-izbovy-mezonet-s-velkou-terasoul-s-moznostou-mat-psika",
-        "error": "'5rooms_ap'"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JuHYUU8RQcu/top--moderny-klim-zariadeny-5-izb-rd-na-byvanie-200-m2l-parkingl-akn2-7",
-        "error": "'NoneType' object is not iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/JuHIHqStTwA/na-prenajom-tiny-house-hlohovec",
+        "error": "can only join an iterable"
     }
 ]

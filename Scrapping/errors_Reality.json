@@ -1,694 +1,530 @@
 [
     {
-        "link": "https://www.reality.sk/byty/prenajom-3-izbovy-byt-komplet-zariadeny/JuskiSm47m1/",
-        "error": "'NoneType' object is not iterable"
+        "link": "https://www.reality.sk/byty/prenajom-styloveho-2-izboveho-bytu-v-starom-meste-na-ulici-lermontovova/Jukt-kkg8ve/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/priestranny-2-izbovy-byt-dubravka-ulica-m-sch-trnavskeho/Jua-FhgobeO/",
-        "error": "'NoneType' object is not iterable"
+        "link": "https://www.reality.sk/byty/3-izbovy-byt-na-prenajom-ihned-k-dispozicii/JulPlSluI7P/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/na-prenajom-4-izbovy-byt-v-rodinnom-dome-v-niznej-sebastovej/JuzqSzeuZfw/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/garsonka-v-dubravke-s-balkonom-volne/Ju3M6jiWe3n/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/na-prenajom-krasny-velky-presvetleny-byt-komplet-zariadeny-budatinska-petrzalka/JuWFdJqorwg/",
-        "error": "'NoneType' object has no attribute 'text'"
+        "link": "https://www.reality.sk/byty/directreal-na-prenajom-priestranny-2-izbovy-byt-s-loggiou-a-parkovacim-miestom-na-ulici-k-lomu-v-bratislave/JuHjux5xlZe/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/na-prenajom-prerobena-zariadena-garsonka-33-m2-senica/JuOeQe39KpN/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/na-prenajom-2-izbovy-byt-balkon-zahradka-polianky-zavar/JuvAr2ZVC0E/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/na-prenajom-2-izbovy-podkrovny-byt-v-rod-dome-jablonica/JuFswRX1kT5/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajom-nadstandardneho-bytu-cedrova-ulica-panorama-kosice/JuAPyK2K0zn/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajmite-si-3-i-byt-v-tichej-casti-dubravky-proviziu-neplatite/JugoMC8Mbnl/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/doposial-neobyvany-slnecny-3-izb-byt-s-balkonom-a-vyhladom-na-dunaj-nabrezie-arm-gen-l-svobodu/JuiGaPhsZQt/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/2-izbovy-byt-trencin-na-prenajom-sihot/JurCTedrQ1a/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajom-2-izboveho-bytu-na-hore-dargovskych-hrdinov-furca/Ju-uPhXdh7O5/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/metropolitan-svetly-ciastocne-zariadeny-2i-byt-bory/Juv0X0YeMJB/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/metropolitan-svetly-3i-byt-v-novostavbe-matadorka/JufRRwaINXk/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/metropolitan-moderny-a-slnecny-3-izbovy-byt-bory-home/JuapdJGZG5j/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajom-moderneho-2-izboveho-bytu-s-parkovacim-miestom-v-novostavbe-thurzove-sady-bytca/JuK71C58Uwy/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/elegantny-a-dizajnovo-ojedinely-2-5i-byt-prenajom/Jutu4aerSKA/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/uplne-novy-1i-bytik-prenajom-ovocne-sady/JubzmYdNydJ/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/uplne-novy-2-izbovy-byt-stare-mesto/Ju55fsW-GsT/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/1-izb-byt-krasna-horka-32-m2/JuAZoTg6mMd/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/uplne-novy-klimatizovany-1-a-1-2-izbovy-byt-s-balkonom-s-garazou-pivnicou-ba-ii-ruzinov-rezidencia-pristavna/JuAt8cX1uLb/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajom-1-5-izbovy-byt-s-parkovacim-statim-a-balkonom-projekt-bory/Ju8HF9D47ap/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/na-prenajom-3-izbovy-byt-s-terasou-novostavba-parkovacie-statie-trencin-olbrachtova-ul/JuJBIZrydIC/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/nadstandartny-zariadeny-2-izb-byt-plus-parkovacie-miesto/JuL4uqC_96Q/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/2-izbovy-byt-na-prenajom-v-brezne-na-ulici-ladislava-novomeskeho/JuZ8ylA7pde/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajom-jednej-izby-v-trojizbovom-byte/Jus992dKyeH/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajom-2-5izoby-byt-s-parkovanim-dunajska-streda/Ju7cSTPm7za/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajom-2izbovy-byt-dunajska-streda-novostavba-s-parkovacim-statim-v-uzavretom-dvore/Jul0JO9LVWJy/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/na-prenajom-5-izbovy-byt-v-zahorskej-vsi/Ju8xhFcJcMW/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajom-3izbovy-byt-ciastocne-zariadeny-gabcikovo/JuJ3H24CXp-/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/na-prenajom-byt-trstena-prenajom-3-izbovy-byt-s-balkonom/JuEgR0S3JFF/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/na-prenajom-2-izbovy-byt-s-balkonom-a-garazovym-statim-v-projekte-miko-trnava/Rb_8Y__y6j9/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prijemny-slnecny-2i-byt-60m2-s-lodziou-a-vyhladom-na-dunaj/JuDDZYNYB-b/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/rezervovane-prijemny-2i-byt-55m2-s-balkonom-a-parkovanim-tarjanne/Jut1_u5v4Qd/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/moderny-3-izbovy-byt-na-prenajom-v-novostavbe-nesto/Ju2GaTrhGXzI/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/predmetom-prenajmu-je-2-izbovy-byt-v-komplexe-klingerka-sukenicka-ul-ba/Ju2JL1lYtV9/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/2-izbovy-byt-na-prenajom-jegorovova-cesta/Ju3gSz6tf9p/",
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/na-prenajom3iz-byt-zlate-moravce/Ju8YQs8emXl/",
-        "error": "'NoneType' object is not iterable"
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/starsi-rodinny-dom-na-prenajom-sala-110-m2-a-300-m2-pozemok/Ju-NfGAwDoe/",
-        "error": "'NoneType' object has no attribute 'text'"
+        "link": "https://www.reality.sk/byty/na-prenajom-krasny-zariadeny-2-izb-byt-petofiho-komarno/JuAUo4JFA2d/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/garsonka-do-prenajmu-za-300-mesacne/JuZhmDmtWC2/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/na-prenajom-velky-1-izbovy-byt-s-balkonom-na-jazernej-komarno/JumaZ5XlzgW/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/prenajom-byt-1-1-na-sidlisku-tarca-v-spisskej-novej-vsi/Ju4_teTkegO/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/na-prenajom-mestiansky-byt-v-centre-mesta-komarno/Ju9xfqu9JGl/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/priestranny-3-izbovy-byt-s-terasou-na-prenajom-blizko-centra-skalice/Ju0-psMD8zd/",
-        "error": "'NoneType' object has no attribute 'text'"
+        "link": "https://www.reality.sk/byty/zariadeny-4-izbovy-byt-v-novostavbe/JuyXy4CBxdE/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/prenajom-1-izbovy-byt-v-meste-levoca/JuIhXI5ptlg/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-apartman-klimatizacia-terasa-125-m2-kompletna-rekonstrukcia-trencianske-teplice-ul-generala-m-r-stefanika/JuN_CkDLbdk/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-2-izboveho-bytu-bosakova-ba/Jufwe0wCpqb/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-3-izbovy-mezonet-apartman-v-dolnom-smokovci/JuqaQjr3rYS/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/1-izbovy-byt-nezariadeny-na-prenajom-bauring-komarno/Ju8rYGRSugu/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/1-izbovy-byt-na-prenajom-bene-komarno/JuKn1ZD_7er/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/1-izbovy-byt-na-prenajom-bauring-komarno/Ju6qTqEn7ON/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/plus-reality-i-zariadeny-1-5-izbovy-byt-s-loggiou-v-mestskej-casti-bratislava-lamac-na-schelingovej-ulici-na-prenajom/Ju_dsEAd_hf/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/plus-reality-i-prijemny-2-izbovy-byt-v-mestskej-casti-bratislava-ruzinov-a-stare-mesto-na-zahradnickej-ulici-na-prenajom/Ju9tyQJebUb/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/plus-reality-i-kompletne-zariadeny-2-5-izbovy-byt-v-projekte-ovocne-sady-v-mestskej-casti-bratislava-ruzinov-na-prenajom/JuxSTgnjaCh/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/plus-reality-i-moderny-1-izbovy-byt-v-mestskej-casti-bratislava-petrzalka-na-prenajom/Ju_namh7XW9/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/plus-reality-i-velky-4-izbovy-byt-s-dvomi-loggiami-v-mestskej-casti-bratislava-nove-mesto-na-rybnicnej-ulici-na-prenajom/Juh6PSuYRLj/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/plus-reality-i-moderny-dvojizbovy-byt-s-balkonom-v-komplexe-bory-iii-v-mestskej-casti-bratislava-devinska-nova-ves-na-prenajom/JuyDHBccHWN/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/plus-reality-i-pekny-3-izbovy-byt-s-balkonom-v-projekte-sky-park-v-mestskej-casti-bratislava-stare-mesto-na-tovarenskej-ulici-na-prenajom/Ju1MQCcWFfi/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/plus-reality-i-priestranna-garsoniera-v-bytovom-dome-edlhof-v-mestskej-casti-bratislava-stare-mesto-na-prenajom/JucyL5xBl2M/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/plus-reality-i-luxusny-4-izbovy-byt-v-mestskej-casti-bratislava-nove-mesto-na-bardosovej-ulici-na-prenajom/JuJLLQmnDmb/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/plus-reality-i-zariadeny-3-izbovy-byt-v-mestskej-casti-bratislava-ruzinov-na-lanovej-ulici-na-prenajom/Ju9EnfJcXt4/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/luxusny-a-moderny-3-izbovy-byt-s-terasou-na-dunaj-river-park/JuCTsIiL5FD6/",
-        "error": "'NoneType' object has no attribute 'text'"
+        "link": "https://www.reality.sk/byty/1-izbovy-byt-kosice-juh-jantarova-ul-zariadeny/JurlnEB9dKe/",
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/rozsirili-sme-ubytovanie-pre-studentov-nove-volne-miesta-po-f019-214-anm3/JuRr_IsN9Nj/",
         "error": "'NoneType' object has no attribute '__dict__'"
     },
     {
-        "link": "https://www.reality.sk/byty/prestizny-moderny-penthouse-s-jedinecnou-terasou-a-nadhernym-vyhladom-na-mesto/Ju0ulfRG9d2/",
-        "error": "'NoneType' object has no attribute 'text'"
+        "link": "https://www.reality.sk/byty/l-p-utulna-garsonka-pri-jazere-drazdiak/Juzm7mC-Cbl/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/prenajom-3-izboveho-bytu-vo-vrabloch-maly-psik-povoleny/Ju8OGuyysHE/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/priestranny-2-izbovy-byt-dubravka-ulica-m-sch-trnavskeho/Jua-FhgobeO/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/kompletne-zariadeny-2-izbovy-byt-v-nitre-na-prenajom/JuUW-vd51Wz/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/l-p-luxusny-2-izbovy-byt-na-prenajom/JuB08f1yo3T/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/ponukame-do-dlhodobeho-prenajmu-2-izbovy-byt-zariadeny-byt-v-centre-mesta-poprad/JullIdfv71r/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/prenajom-3-izbovy-byt-komplet-zariadeny/JuskiSm47m1/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/na-prenajom-3izb-byt-v-dome-s-parkovanim-terasa-kosice/JuyddnNIuHcu/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/prijemny-2-izbovy-byt-s-loggiou-klingerka-ruzinov-sukennicka-ul/Ju7Cf0PuAwL/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/na-prenajom-prerobena-zariadena-garsonka-33-m2-senica/JuOeQe39KpN/",
-        "error": "'NoneType' object is not iterable"
+        "link": "https://www.reality.sk/byty/2-izbovy-byt-v-novostavbe-ul-cedrova-kosice/JusxFhyM5I8/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/na-prenajom-2-izbovy-podkrovny-byt-v-rod-dome-jablonica/JuFswRX1kT5/",
-        "error": "'NoneType' object is not iterable"
+        "link": "https://www.reality.sk/byty/plus-reality-i-zariadeny-1-5-izbovy-byt-s-loggiou-v-mestskej-casti-bratislava-lamac-na-schelingovej-ulici-na-prenajom/Ju_dsEAd_hf/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/na-prenajom-2-izbovy-byt-balkon-zahradka-polianky-zavar/JuvAr2ZVC0E/",
-        "error": "'NoneType' object is not iterable"
+        "link": "https://www.reality.sk/byty/plus-reality-i-priestranna-garsoniera-v-bytovom-dome-edlhof-v-mestskej-casti-bratislava-stare-mesto-na-prenajom/JucyL5xBl2M/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/na-prenajom-utulny-3-izbovy-byt-v-trnave-g-dusika/JuG6unbuaMZ/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/plus-reality-i-velky-4-izbovy-byt-s-dvomi-loggiami-v-mestskej-casti-bratislava-nove-mesto-na-rybnicnej-ulici-na-prenajom/Juh6PSuYRLj/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/trnava-reality-prenajom-elegantneho-2-izboveho-bytu-s-velkou-loggiou-v-novostavbe-prudy-52-1-m2-pivnica-garazove-statie/JuHkln313Pk/",
-        "error": "'NoneType' object has no attribute 'text'"
+        "link": "https://www.reality.sk/byty/1-izbovy-byt-nezariadeny-na-prenajom-bauring-komarno/Ju8rYGRSugu/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/prenajom-mezonetoveho-bytu-v-centre-namestova/JuN9qWoShvNo/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/1-izbovy-byt-na-prenajom-bene-komarno/JuKn1ZD_7er/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/na-prenajom-2o-byt-na-farskeho-ul-v-bratislave/JufaxQNJTNk/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/1-izbovy-byt-na-prenajom-bauring-komarno/Ju6qTqEn7ON/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/hladame-byt-na-prenajom-v-michalovciach/Jui6yrraGis/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-4-izboveho-bytu-michalovce/JulEuXCmsRr/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/hladame-3-izbovy-byt-na-prenajom-v-michalovciach/Juy-AXZVoDi/",
-        "error": "'NoneType' object has no attribute 'text'"
+        "link": "https://www.reality.sk/byty/1-izbovy-byt-pri-auparku-2x-lo-42-m2-jantarova/Jue-BLHfvKR/",
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/hladame-byty-na-prenajom-snina-n01-maba/JuvPZA0Waf1/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/rezervovane-prenajom-2-izboveho-bytu-vo-vranou-nad-toplou/JuE10L6xZ_Q/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-1-izbovy-byt-vhodny-na-podnikanie-n028-211-dasea/JutDGsx9yyX/",
         "error": "'NoneType' object has no attribute '__dict__'"
     },
     {
         "link": "https://www.reality.sk/byty/hladame-byt-na-prenajom-v-meste-humenne-n008-mim/JuyIVK2dR6v/",
-        "error": "'NoneType' object has no attribute 'text'"
+        "error": "'NoneType' object has no attribute '__dict__'"
     },
     {
         "link": "https://www.reality.sk/byty/hladame-byty-na-prenajom-pre-konkretnych-klientov-n001-zdha/JuYVeDHtBvC/",
         "error": "'NoneType' object has no attribute '__dict__'"
     },
     {
-        "link": "https://www.reality.sk/byty/prenajom-lukrativny-2-izbovy-byt-s-2-loggiami-novostavba-povazska-bystrica-bytovy-dom-centrum/Ju871bcZ_6p/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-pekny-2i-byt-so-zariadenim-v-centre-mesta/JuJkN03_CVZ/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-bytu-poprad-ulica-mladeze/JuFeTwm-xZU/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-3-izbovy-byt-po-rekonstrukcii-sidl-juh-nove-zamky/JuTPr7BCl9-/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-2-izbovy-byt-s-balkonom-v-novych-zamkoch/Ju1D0dOhUzD/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/adomis-prenajom-1izbovy-byt-25m2-v-centre-mesta-oproti-oc-aupark-senny-trh-top-lokalita-kosice/JuSxSICCH0KU/",
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/rado-na-prenajom-4-izbovy-byt-garaz-park-statie-noviny-tn/JuF1MHdPL7h/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/jedinecny-dizajnovy-3i-byt-87m2-2x-parking-eurovea-riverside/JuYByvr4dyu/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prijemny-slnecny-2i-byt-60m2-s-lodziou-a-vyhladom-na-dunaj/JuDDZYNYB-b/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prijemny-2i-byt-55m2-s-balkonom-a-parkovanim-tarjanne/Jut1_u5v4Qd/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/ponukame-vam-na-prenajom-krasny-3-izbovy-byt-vo-vrabloch/JuiWb-UxHgC/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/ponukame-do-podnajmu-1-izbovy-byt-v-novych-zamkoch/JuwRL8kDSGI/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-priestor-v-kosiciach-v-lukrativnej-lokalite-kosice-centrum-hlavna-ul/JuHaEyEWS1W/",
-        "error": "'NoneType' object has no attribute 'text'"
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/ponukame-na-dlhodoby-prenajom-garsonku-v-prievidzi/Juconf60up0/",
-        "error": "'NoneType' object is not iterable"
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/4-izbovy-byt-na-prenajom-rybnicna/JuvcGSVCpqE/",
-        "error": "'NoneType' object is not iterable"
+        "link": "https://www.reality.sk/byty/na-prenajom-apartman-klimatizacia-terasa-125-m2-kompletna-rekonstrukcia-trencianske-teplice-ul-generala-m-r-stefanika/JuN_CkDLbdk/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/hladame-1-izbovy-byt-na-prenajom-vo-vrakuni/Jul9xxcH1A3/",
-        "error": "'NoneType' object has no attribute 'text'"
+        "link": "https://www.reality.sk/byty/velky-2-izbovy-byt-na-prenajom-v-michale-na-ostrove/Ju7qunZ2X69/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/3i-kompletne-zrekonstruovany-byt-volny-ihned/JuCCdkhec0D/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/novy-vkusne-zariadeny-2-izbovy-byt-s-terasou-zahradkou-a-pivnicou-v-trnave/Ju-rheM5C-6/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/ponukame-na-kratkodoby-prenajom-1-izbovy-byt-v-novostavbe-kyjevske-namestie/JulPxwPnL9X/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/realfinn-exkluzivne-prenajom-zariadeny-2-izbovy-apartman-v-starej-lesnej-video/JuhtXaxTBoX/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/luxusny-2-izbovy-byt-s-loggiou-v-panorama-city-v-starom-meste-na-landererovej-ul/JuNuAfISR0t/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-2-izbovy-byt-s-terasou-domaniza-povazska-bystrica/JuEsX58Vrr_/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/luxusny-4i-byt-v-centre-mesta-s-wellnessom-bazenom-posilnovnou-a-solariom-na-palackeho-ulici-na-prenajom/JuFRpqu_qkh/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/3-pracujuci-hladaju-prenajom-v-bratislave/Ju896f0X0fjn/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/mlady-poriadkumilovny-par-hlada-prenajom-v-ba/JuALoOOEyag/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-zariadeny-3i-byt-snp-holic/JuPFNzGB_Bx/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/moderny-3-izbovy-byt-na-prenajom-v-novostavbe-nesto/Ju2GaTrhGXzI/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-3-izbovy-byt-v-ilave-mednanska-ulica/Ju9kUHY9n8D/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/nido-ii-prenajom/RbB02Jym4-o/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/hladame-1-4-izbove-byty-domy-na-prenajom-pre-rodiny-z-ukrajiny/Juwtm_APteC/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/luxusny-4-izbovy-byt-s-terasou-a-zahradou-v-starom-meste/JuyuV1hPzXK/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prijemny-2-izbovy-byt-s-loggiou-klingerka-ruzinov-sukennicka-ul/Ju7Cf0PuAwL/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/mam-klientku-na-prenajom-1-izboveho-bytu-garsonky-v-petrzalke-cena-650-eur-s-energiami/JuZZAx0MgZG/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-2-izbova-bytova-jednotka-v-rodinnom-dome-so-zahradkou-a-parkovanim/JuvY1RYtnHY/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/mam-klientku-na-prenajom-1-izboveho-bytu-garsonky-v-petrzalke-cena-650-eur-s-energiami/JujuwhcTKQd/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/hladam-na-prenajom-2-izbovy-byt-bratislava-stare-mesto/JuYaypri5XG/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/mam-klienta-pre-vas-1-izbovy-byt-na-prenajom-lokalita-dunajska-luzna/JuOsGAGbsRt/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/hladam-pre-klienta-na-prenajom-3-izbovy-byt-v-lokalite-bratislava-zahorska-bystrica/JubjZeI4fPZ/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-3-izbovy-byt-v-centre-mesta-90-m2/JuvobXO95rN/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/najom-3-izbovy-byt-s-parkovanim-hurbanova-bardejov/JumnBs-Aa6B/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/mate-3-izbovy-byt-na-prenajom-mam-pre-vas-spolahliveho-najomcu/JueLV-OnNOL/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/hladam-pre-klienta-na-prenajom-3-izbovy-byt-bratislava-lamac/JuxYirW-iR3k/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/hladam-pre-klienta-na-prenajom-2-izbovy-byt-bratislava-zahorska-bystrica/Ju9hG62kMDT/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/mam-klienta-pre-vas-1-izbovy-byt-na-prenajom-lokalita-rovinka/JueaDwc8SIe/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/mam-klienta-pre-vas-4-izbovy-byt-na-prenajom-stare-mesto/Ju4B8Ou3M3k/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/4-izbovy-byt-bratislava-i-mestska-cast-stare-mesto/JuNPKL0JxhH/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/mam-klienta-pre-vas-1-izbovy-byt-na-prenajom-lokalita-petrzalka/JuaOdg60yq_/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/mam-klienta-pre-vas-1-izbovy-byt-na-prenajom-lokalita-petrzalka/JuDIRKdtkiP/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-na-slovenskej-ul-presov/JuIgWxJ7yxd/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/mam-klienta-pre-vas-1-izbovy-byt-na-prenajom-lokalita-miloslavov/Juq6y9vZNLG/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/hladam-pre-klienta-na-prenajom-3-izbovy-byt-bratislava-dubravka/Ju98bfNhpUH/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-2-izbovy-byt-v-trnave-novostavba-miko/Ju3dhHImySi/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/ponukame-na-prenajom-zariadeny-3i-apartman-v-rodinnom-dome-v-malebnej-obci-dubova-pri-modre/JukU72_X7gx/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-2-izbovy-byt-laca-novomeskeho-presov/JuZyNoWPu_m/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/jkvreal-ponuka-na-prenajom-moderne-zrekonstruovany-2-izbovy-byt-s-lodziou-na-dvojkriznej-ulici-bratislava-vrakuna/JuOLNv_KeGp/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-3-izbovy-byt-presov-ulica-hlavna/Ju_1Ttu-slV/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-4-izbovy-byt-v-rodinnom-dome-v-niznej-sebastovej/JuXLsW5OvoV/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/na-prenajom-2-izbovy-byt-s-balkonom-v-novostavbe-len-15-km-od-bratislavy/JuU3C5tW9h0/",
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/jkv-real-ponuka-na-prenajom-3-izbovy-byt-v-novostavbe-bratislava-nove-mesto/JuSTw_hPWTp/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-slnecny-2-izbovy-byt-lamac-na-ul-mateja-encingera/JuLvPI8vMQEG/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/jkv-real-ponuka-na-prenajom-prijemny-kompletne-zariadeny-2-izbovy-byt-v-novostavbe-na-rustaveliho-ulici-bratislava-raca/JuZ73oUIdp1R/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/na-prenajom-slnecny-1-izbovy-byt-v-bratislave-cast-stare-mesto/JuU6-W8WnZZ/",
-        "error": "'NoneType' object is not iterable"
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/na-prenajom-slnecny-2-izbovy-byt-lamac-na-ul-mateja-encingera/JuLvPI8vMQEG/",
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/prenajom-1-izb-bytu-pre-narocnych-v-dun-strede/JuRiU4dxGyS/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/1-5-izbovy-byt-bellova-ul-stare-mesto/Ju9G7AhlTIH/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/rezervovane-3-izbovy-byt-s-krasnym-vyhladom-dubravska-ulica-necpaly/JuIRUswYp1Y/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/2-izbovy-luxusny-kompletne-zariadeny-byt-euphoria/JurN48-kAHw/",
-        "error": "'NoneType' object is not iterable"
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/prenajom-2-izb-byt-zariadeny/Ju7hTXDm26T/",
+        "link": "https://www.reality.sk/byty/5-izbovy-byt-160-m2-v-luxusnom-projekte-hlboka-7-s-parkingom/JuLgFX5BZaa/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/realitna-kancelaria-sa-reality-ponuka-na-prenajom-pre-pracovne-skupiny-obytne-priestory-v-dome-vo-velkom-dure-nedaleko-mochoviec/JupdPmV-zcD/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/na-prenajom-krasny-3-izbovy-staromestsky-byt-111-m2-senkiewiczova/JureVJIyde_/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/na-prenajom-3-izbovy-byt-pezinok-kucisdorfska-dolina/Juc_8X6ALgK7/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/hladam-pre-overeneho-klienta-prenajom-1i-bytu/JuNOh1Swogs/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/hladame-pre-overeneho-klienta-prenajom-1i-bytu/JuV-T7QLVz4/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/sedlicky-na-prenajom-trojizbovy-apartman-opatovce-nad-nitrou-120-m2-2-p-2-p-zariadeny/JuGw_7rWSc8/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/moderny-3-izbovy-byt-na-prenajom-v-novostavbe-villa-cermel/JuipLBfSeiw/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/novy-4-izbovy-byt-s-troma-spalnami-priamo-v-historickom-centre/JuIBXUrCa3W/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajom-garazove-statie-s-nabijacou-stanicou-sky-park-iv-veza/Ju817og_s8z/",
         "error": "'NoneType' object has no attribute '__dict__'"
     },
     {
-        "link": "https://www.reality.sk/byty/prenajom-1izb-bytu/JuUUhevWiCu/",
+        "link": "https://www.reality.sk/byty/ubytovanie-pre-seniorov-zvolen/JuZG_owowmg/",
         "error": "'NoneType' object has no attribute '__dict__'"
     },
     {
-        "link": "https://www.reality.sk/byty/prenajom-1-5izb-bytu-kosice-sidlisko-kvp/JufpKrjacs1/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/moderny-dvojizbovy-byt-s-parkovanim-v-novostavbe/JuF89b2Tklv/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/na-prenajom-krasny-zariadeny-2-izbovy-byt-v-blizkosti-centra-kosic/Ju7WIfoX18o/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/directreal-moderne-zariadeny-2-izbovy-byt-na-prenajom/JuaFKTLAU0t/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/prenajom-2-izboveho-bytu-palarikova-ulica/JuCVQ5ghN3P/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/directreal-na-prenajom-kompletne-rekonstruovany-2-izb-byt-53-07-m2-s-vlastnym-kurenim-balkonom-a-pivnicou-v-bytovom-dome-v-hurbanove-exkluzivne-iba-u-nas/Ju0tBIdGMad/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/prenajom-2izb-bytu-na-czambelovej-ulici-v-kosiciach/JuQPaLeV2be/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/all-inclusive-na-prenajom-2-izbovy-byt-v-dunajskej-strede/Juwy-RVl-h4y/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/prenajom-luxusneho-3izb-bytu-s-predzahradkou-v-novostavbe/JupClKnXX8z/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/n-e-s-t-o-3i-novo-skolaudovany-byt-s-parkovacim-statim-bav-petrzalka/Ju4E9pYEeOK/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/prenajom-1-izboveho-bytu-v-kosiciach/JuuL8OQaV6G/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/ponukame-vam-na-prenajom-3-izbovy-byt-zilina-cast-solinky-jesenova-ul/JupXiFdQKs1/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/prenajom-3-izboveho-bytu-v-rodinnom-dome/Ju2LEQ-xqB9/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/reality-komplex-s-r-o-vam-ponuka-na-prenajom-pekny-2-izbovy-byt-v-dunajskej-strede/JuPEB6HNLBq/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/apartman-demaenova-jasna/JunvsP3a8hf/",
-        "error": "'NoneType' object has no attribute 'text'"
+        "link": "https://www.reality.sk/byty/uzasny-byt-loft-klima-balkon-parkovanie-v-garazi-jarovce/JuvyzJnceki/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/prenajom-2-izboveho-bytu-na-turgenevovej-ulici/JurJPQRUQXb/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/prenajom-bytu-poprad-ulica-mladeze/JuFeTwm-xZU/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/moderny-2izbovy-byt-v-novostavbe/Juw4xWr4keAr/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/4-izbovy-byt-na-prenajom-rybnicna/JuvcGSVCpqE/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/apartmany-demaenova/JuzW5XpNDH7/",
-        "error": "'NoneType' object has no attribute 'text'"
+        "link": "https://www.reality.sk/byty/3-pracujuci-hladaju-prenajom-v-bratislave/Ju896f0X0fjn/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/prenajom-1-izb-bytu-terasa-kosice/Juc24b9I7ws/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/na-prenajom-3-izbovy-byt-v-ilave-mednanska-ulica/Ju9kUHY9n8D/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/na-prenajom-krasny-zariadeny-3-izbovy-byt-s-loggiou/Juj6UMFDL4h/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/mlady-poriadkumilovny-par-hlada-prenajom-v-ba/JuALoOOEyag/",
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/prenajom-2-izboveho-bytu-v-novostavbe/Jut5jOCCOrz/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-zariadeny-3-izbovy-byt/JutmEnSZKgd/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-krasny-zariadeny-3-izbovy-byt/Ju7GsDV2idU/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-2-izb-bytu-snp-ba-i-stare-mesto-61-m2/JuQl1Op2g_B/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/newcastle-rezervovane-1-izboveho-bytu-s-parkovanim-pivnicou-a-wifi-s-tv-44m2/JuX2zU-5O0a/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/2-izbovy-byt-na-prenajom-v-hainburg-an-der-donau/JuTk3utoavI/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-2-5-izbovy-byt-v-sali/JuXd83lVRxm/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/2-izbovy-byt-v-novostavbe-ul-cedrova-kosice/JurttfL1QLC/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-3-izbovy-byt-s-balkonom-v-centre-mesta-dunajska-streda-rybny-trh-sidlisko-vychod/JuHeZK9sFRO/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/garsonka-v-dubravke-s-balkonom-volne/Ju3M6jiWe3n/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-priamo-v-centre-martina-2-izbovy-byt-71-m2/JuK1Ou62x1-/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/bosen-zariadeny-2-izbovy-klimatizovany-byt-s-balkonom-v-novostavbe-kesselbauer-namestie-1-maja-54-m2/Juy0EULrY_f/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/bosen-priestranny-2-izbovy-byt-s-terasou-a-garazovym-statim-v-starom-meste/JuXklf2OMUj/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/mam-klienta-pre-vas-1-izbovy-byt-na-prenajom-lokalita-dunajska-luzna/JuOsGAGbsRt/",
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/bosen-na-prenajom-byt-v-centre-dunajskej-stredy-v-budove-rotunda/Ju3qrIMvcMl/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/2-izbovy-moderny-klimatizovany-byt-na-mesacnej/Jus3t9qP95G/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-3-izbovy-ciastocne-zariadeny-byt-s-balkonom-na-juhu-v-poprade/JuiOZHXpSrr/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/2-izbovy-byt-do-prenajmu-v-novych-zamkoch/JuJ0pIZE6o0/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-exkluzivnych-bytov/JuYlrYM22Tql/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-ciastocne-zariadeny-3-izbovy-byt-v-komarne/JukizDDMCiz/",
-        "error": "'NoneType' object is not iterable"
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/luxusne-nadstandardne-byty-v-meste-mosonmagyarovar-na-prenajom/JuhbzF9nZ_o/",
-        "error": "'NoneType' object is not iterable"
+        "error": "can only join an iterable"
     },
     {
-        "link": "https://www.reality.sk/byty/prenajom-moderny-2izbovy-byt-na-hurbanovej-ulici/Ju3sVe_05np/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-2-izbovy-byt-62-m2-banovce-nad-bebravou/Ju75BlKz4tb/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-2-izbovy-byt-banovce-nad-bebravou/JuD1RlbeEwr/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "link": "https://www.reality.sk/byty/na-prenajom-ciastocne-zariadeny-3-izbovy-byt-v-komarne/JukizDDMCiz/",
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/3-izb-byt-s-predzahradkou-terasa-klimatizacia-parking/JuzM2Xrn8KG/",
-        "error": "'NoneType' object is not iterable"
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/afyreal-prenajom-slnecny-2i-byt-na-18-posch-vyhlad-na-panoramu-mesta-klingerka/JulW6Wu5_HY/",
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/na-prenajom-obytna-unimobunka-s-pozemkom-v-mocenku/JunutEXjj9Z/",
         "error": "'NoneType' object has no attribute '__dict__'"
     },
     {
-        "link": "https://www.reality.sk/byty/afyreal-prenajom-slnecny-2i-byt-na-18-posch-vyhlad-na-panoramu-mesta-klingerka/JulW6Wu5_HY/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/exkluzivny-prenajom-krasneho-1-izboveho-bytu-po-kompletnej-rekonstrukcii/JuqoF5uxu3h/",
-        "error": "'NoneType' object is not iterable"
+        "link": "https://www.reality.sk/byty/kompletne-zariadeny-novy-2i-byt-v-susedstve-nemocnice-bory-loggia-parkovacie-miesto-jana-jonasa/JuhwHMhaxk0/",
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/1-5-izb-uplne-novy-detailne-a-dizajnovo-zariadeny-pristavna-residence/JuAZBMzT01G/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/ponukate-byt-do-prenajmu-mame-pre-vas-jedinecnu-sluzbu-najom-plus/JuoG_wD3kPp/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/kompletne-zariadeny-novy-2i-byt-v-susedstve-nemocnice-bory-loggia-parkovacie-miesto-jana-jonasa/JuhwHMhaxk0/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/pekny-2-izbovy-byt-s-velkou-loggiou-bratislava-dubravka/Ju4tJJaHbla/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/moderny-pet-friendly-3-izbovy-mezonet-s-dvomi-balkonmi-a-parkovanim-petrzalka/JuMILssz3zm/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-zariadeny-3-izbovy-byt-s-loggiou-kosice-nad-jazerom/JucwmXtoAh6/",
-        "error": "'NoneType' object has no attribute 'text'"
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/1-izbovy-byt-na-prenajom-fran-partizanov-vrutky/Ju3Yc9r9zbh/",
-        "error": "'NoneType' object is not iterable"
-    },
-    {
-        "link": "https://www.reality.sk/byty/pripravujeme-prenajom-3-izboveho-bytu-v-petrzalke-na-jasovskej-ulici/JuyeOynih23/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-priestranny-3-izbovy-byt-po-kompletnej-rekonstrukcii-na-kurskej-ulici/JuLd4rcmUGv/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/na-prenajom-4-izbovy-byt-v-centre-mesta-prievidza-idealny-pre-viacerych-zamestnancov-firmy/JuTmusQqpzp/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-zrekonstruovaneho-kompletne-zariadeneho-43m2-bytu/JuTdI-V3IdC/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-zrekonstruovaneho-kompletne-zariadeneho-46m2-bytu/Ju_Hj3MvUlZ/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-1i-byt-komplet-zariadeny/Ju3v49s-HAa/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-1-izboveho-bytu-v-ziari-nad-hronom-cast-etapa/JuamkrV9dN1/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/2-izbovy-byt-novostavba-samorin-prenajom/JuAMARyg2rw/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-2-izbovy-byt-s-balkonom-hlavna-presov/JuxlB7wH7uW/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/2-izbovy-byt-na-prenajom-ziar-nad-hronom/JuOzeVFRrFk/",
-        "error": "'NoneType' object has no attribute 'text'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-priestranny-prerobeny-1-izbovy-byt-jantarova-12-energie-v-cene-zariadeny-klimatizacia-2x-loggia-2x-vytah/Juv2S-deuL_/",
-        "error": "'NoneType' object has no attribute '__dict__'"
-    },
-    {
-        "link": "https://www.reality.sk/byty/prenajom-1-izboveho-bytu-s-balkonom-martin-kosuty-1/JuFyAWOEsOI/",
-        "error": "'NoneType' object has no attribute '__dict__'"
+        "error": "can only join an iterable"
     },
     {
         "link": "https://www.reality.sk/byty/na-prenajom-svetly-a-priestranny-4-izbovy-byt-zvolen-zapad-n4b129zl/Ju7Fnr49anM/",
-        "error": "'NoneType' object is not iterable"
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajmem-3-izbovy-byt-s-2-balkonmi-v-centre-novych-zamkov/Junatvk33oX/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajom-dizajnoveho-3i-bytu-c-1-novostavba-trnavska-cesta-ba-ii/Ju9XgUP2f-5/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajom-dizajnoveho-3i-bytu-c-2-novostavba-trnavska-cesta-ba-ii/JuEcXJHxM_v/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajom-3i-bytu-karlova-ves-silvanska-ul/Ju_9jhT4cac/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/1-5-izb-uplne-novy-detailne-a-dizajnovo-zariadeny-pristavna-residence/JufTY07W97Z/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/1-5-izb-uplne-novy-detailne-a-dizajnovo-zariadeny-pristavna-residence/JuQRlgzwEhr/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajom-velkometrazneho-3-izboveho-bytu-v-novostavbe-kubinske-vyhlady/Ju4wdF74Xko/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/na-prenajom-2-izbovy-zariadeny-byt-v-centre-mesta-sala-s-parkovacim-miestom/Jun2yHjn0nA/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajom-izby-v-nitre-na-braneckeho-ul-za-300-pre-jedneho-za-340-pre-dvoch/JupRgor9R5B/",
+        "error": "'NoneType' object has no attribute '__dict__'"
+    },
+    {
+        "link": "https://www.reality.sk/byty/garzonka/JuSXnBICytW/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/na-prenajom-1-izbovy-byt-s-balkonom-v-meste-surany/JuosShkpskH/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/na-prenajom-3-izboby-byt-s-balkonom/JuWWnV2Boik/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/nove-bytove-jednotky-na-prenajom-v-centre-mesta-povazska-bystrica/JuR-3Jo23T7/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/top-klim-3-izb-zar-apartman-104-30-m2-3-p-parking-akn2-7/JuT38uhMNGM/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/na-prenajom-2-izbovy-byt-s-balkonom-v-centre-v-novych-zamkoch/Ju6JM5ggoLX/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/trnava-bytova-jednotka-120m2-v-rodinnom-dome-salezianska-na-prenajom-rezervovane/JuP3htBAIMW/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajom-apartmanu-c-1-v-novostavbe-bytoveho-domu-v-centre-obce-rimavske-janovce/Ju44T4k1woL/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/2-izbovy-byt-elsa-v-staromestianskom-dome-lisabeth-residence/JuRywUAdT8S/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/luxusne-apartmany-na-prenajom-v-piano-residence/JukCWcxT2ej/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajom-zariadeneho-2-izboveho-bytu-v-objekte-iii-veze-bratislava/JuIvlI_WhZT/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/nadstandartny-2i-byt-s-parkovanim-pri-boroch/JuJoABY7SF2/",
+        "error": "can only join an iterable"
+    },
+    {
+        "link": "https://www.reality.sk/byty/poskytujeme-trvaly-pobyt-v-bratislave/JuACYIVGIhJ/",
+        "error": "'NoneType' object has no attribute '__dict__'"
+    },
+    {
+        "link": "https://www.reality.sk/byty/prenajom-2-izbovy-dizajnovy-byt-oproti-hant-arene-ulica-trnavska-cesta/JuDP5eqrN15/",
+        "error": "can only join an iterable"
     }
 ]
