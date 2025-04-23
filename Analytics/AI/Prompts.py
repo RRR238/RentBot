@@ -1,19 +1,53 @@
-summarize_chat_history_prompt = """{chat_history}
+check_conversation_prompt = """
+Tvojou úlohou je určiť, či sa nový vstup používateľa stále týka tej istej nehnuteľnosti ako predchádzajúca konverzácia, alebo ide o nový a samostatný dopyt.
 
-Na základe predchádzajúcej konverzácie a nasledujúcej novej informácie, aktualizuj a zhrň aktuálne preferencie používateľa ohľadom nehnuteľnosti do krátkeho odstavca.  
-Zameraj sa IBA NA FAKTY a požiadavky používateľa.  
-Nepodávaj peknú štýlizovanú odpoveď, iba heslovité zhrnutie kľúčových údajov a preferencií! **Nezačínaj odpoveď slovami ako "Používateľ preferuje" alebo podobnými frázami.** **Nepoužívaj nijaké vysvetľujúce frázy o používateľovi!**   
-**Ak používateľ zmení požiadavky a uvedie nový dopyt (napr. "alebo radšej domček na polosamote"), nezmiešavaj tieto dva dopyty.** Namiesto toho vráť samostatné zhrnutie pre každý dopyt.  
+ZHRNUTIE PREDCHÁDZAJÚCEJ KONVERZÁCIE:
+{original_summary}
 
-Použi prirodzený jazyk a zachovaj logické doplnenia predchádzajúcich požiadaviek (napr. "zvýš cenu na 4000" = nová cena je 4000).  
-POZOR – vždy iba uprav pôvodné informácie, ak sa týkajú originálneho dopytu (napr. zvýšenie ceny).  
-POZOR – ak používateľ zmieni nový typ požiadavky (napr. „alebo radšej dvojizbový byt“), vráť **nový dopyt** v samostatnom zhrnutí, ktoré bude odlišné od predchádzajúceho. **Nepridávaj nežiaduce alebo nadbytočné informácie.**
-POZOR - ak pouzivatel vyradi nejaku poziadavku alebo parameter, iba ho vynechaj v odpovedi. NEPODAVAJ INFORMACIU O TOM, ZE POUZIVATEL TO UZ NECHCE.
+NOVÝ VSTUP:
+{user_prompt}
+
+Pravidlá:
+- Ak nový vstup mení alebo spresňuje parametre tej istej nehnuteľnosti (napr. cena, počet izieb, rozloha, lokalita v tom istom meste, terasa, parkovanie, vybavenie...), stále ide o rovnaký dopyt → odpovedz: `POKRAČUJ`
+- Ak nový vstup naznačuje úplne inú nehnuteľnosť (HLAVNE iný typ bývania – dom/chalupa vs byt, mezonet vs byt a podobne) kedy sa mení viacero kľúčových parametrov naraz, ide o nový dopyt → odpovedz: `NOVÝ DOPYT`
+- Ak nový vstup len pridáva, alebo maže parametre (napr. cena, rozloha, počet izieb, záhrada, terasa, balkón, parkovanie, vybavenie, upresnenie lokality), považuj to za ten istý dopyt → `POKRAČUJ`
+
+Pomôcky:
+- Zmena z "1-izbový byt" na "2-izbový" = `POKRAČUJ`
+- Zmena z "byt v Bratislave" na "chalupa pri Žiline" = `NOVÝ DOPYT`
+- Zmena z "dom v Trnave" na "byt v Žiline" = `NOVÝ DOPYT`
+- Zmena z "Petržalka, 1i byt, 400€" na "Karlova Ves, 2i novostavba, 900€" = `NOVÝ DOPYT`
+- Vstup "netreba garáž" alebo "s balkónom" alebo "so záhradou" = `POKRAČUJ`
+- Vstup "toto isté ale v Bratislave namiesto Nitry" = `POKRAČUJ`
+- Vstup "alebo radšej dom s garážou v Nitre" = `NOVÝ DOPYT`
+- Vstup "do "600 eur" = `POKRAČUJ`
+
+Dôležité:  
+Nepíš žiadne vysvetlenia, odpovedz **LEN** jedným slovom: `POKRAČUJ` alebo `NOVÝ DOPYT`
+"""
+
+summarize_chat_history_prompt = """
+Na základe predchádzajúcej sumarizácie a nasledujúcej novej informácie aktualizuj a zhrň aktuálne preferencie používateľa ohľadom nehnuteľnosti do krátkeho odstavca.  
+Zameraj sa IBA NA FAKTY a konkrétne požiadavky.  
+Nepodávaj štylizovanú odpoveď – výstup má byť iba heslovité zhrnutie kľúčových parametrov!  
+**Nezačínaj slovami ako "Používateľ preferuje" ani inými podobnými frázami.**  
+**Nevysvetľuj motivácie používateľa.**
+
+**Ak používateľ zmení dopyt (napr. „alebo radšej domček...“), vytvor NOVÝ DOPYT – neprepájaj ho s pôvodným.**  
+**Ak niečo už nie je podmienkou, jednoducho to vynechaj. Nespomínaj to žiadnym spôsobom.**
+
+Zachovaj logickú nadväznosť (napr. „zvýš cenu na 4000“ = nová cena je 4000).  
+POZOR – uprav len existujúce údaje, ak sa týkajú rovnakého dopytu.  
+POZOR – ak používateľ použije „alebo“, nahraď pôvodný údaj novým.  
+POZOR – ak používateľ vyradí požiadavku (napr. „nemusí“, „netreba“, „vynechaj“), len ju vynechaj – **NEUVÁDZAJ, že nie je potrebná.**
+
+Predchádzajúca sumarizácia:
+{original_summary}
 
 Nová informácia:  
 {user_prompt}
 
-Tvoje zhrnutie kľúčových údajov a preferencii:
+Tvoje zhrnutie kľúčových údajov a preferencií:
 """
 
 get_key_attributes_prompt = """Na základe nasledujúceho promptu používateľa vydedukuj hodnoty pre tieto premenné:
@@ -39,65 +73,3 @@ Prompt: {user_prompt}
 Tvoj výstup:
 """
 
-follow_up_question_prompt = """
-Na základe predchádzajúcej konverzácie sa pokús doplniť chýbajúce informácie ohľadom preferencií používateľa na prenájom nehnuteľnosti.
-
-Polož mu vhodnú jednu doplňujúcu otázku, ktorá pomôže spresniť jeho predstavu (napr. cena, lokalita, rozloha,...).
-
-Otázka:
-"""
-
-get_location_info_prompt = """Z nasledujúceho používateľského vstupu urči **hlavné miesto alebo orientačný bod**, ktoré používateľ spomína (napr. "centrum Bratislavy", "Eurovea", "Dunaj", "Štrkovec", "Petržalka").
-
-Pravidlá:
-- Ak používateľ spomenie **viacero miest**, vyber to, ktoré **najviac vystupuje ako cieľ alebo zámer hľadania** (napr. ak povie "v Petržalke pri jazere", hlavný bod je "Petržalka").
-- Ak používateľ povie **„do X min do centra MHD“**, chápe sa to ako „do X minút do **centra mesta** pomocou MHD“ → nastav `ústredná lokalita = centrum Bratislavy`.
-- Vždy uprednostni konkrétnu **destináciu** (napr. štvrť, orientačný bod) pred obecným mestom ("Bratislava").
-- Ak sa nedá určiť žiadny vhodný bod, uveď: `ústredná lokalita = None`.
-
-Používateľský vstup: "{user_prompt}"
-
-Tvoj výstup:
-ústredná lokalita = ...
-"""
-
-get_location_info_2_prompt = """Podľa používateľského vstupu a známej ústrednej lokality urči, či používateľ myslí priestor **v rámci** tejto lokality, alebo **mimo nej / v jej okolí**.
-
-Pravidlá:
-- Ak používateľ píše výrazy ako „v {lokalita}“, „v rámci {lokalita}“, „v lokalite {lokalita}“, „v mestskej časti {lokalita}“ → nastav: `lokalizačný rozsah = VRAMCI`
-- Ak používateľ píše výrazy ako „pri {lokalita}“, „blízko {lokalita}“, „neďaleko {lokalita}“, „v okolí {lokalita}“ → nastav: `lokalizačný rozsah = MIMO`
-- V prípade nejednoznačnosti uveď `lokalizačný rozsah = None`
-
-Používateľský vstup: "{user_prompt}"
-Ústredná lokalita: "{lokalita}"
-
-Tvoj výstup:
-lokalizačný rozsah = ...
-"""
-
-location_extraction_prompt = """
-Z nasledujúceho textu extrahuj všetky relevantné **lokality alebo orientačné body**, ktoré by mohli súvisieť s geografickou polohou. Môže ísť o:
-
-- mestá alebo mestské časti (napr. "Ružinov", "Petržalka", "Senec"),
-- ulice, štvrte, sídliská (napr. "Mlynské Nivy", "Dlhé diely"),
-- jazerá, parky, hory, lesy (napr. "Štrkovec", "Sad Janka Kráľa"),
-- obchodné centrá, pamiatky, dopravné uzly (napr. "Eurovea", "Hlavná stanica"),
-- prípadne známe budovy alebo komplexy.
-
-Výstup uveď ako **čistý python zoznam reťazcov**, bez komentárov a vysvetlení.
-Davaj pozor aby udaje o polohe boli v gramaticky spravnom tvare !! (napr Zilina, centrum, Bratislava, centrum a podobne) 
-
-Text: "{user_prompt}"
-
-Výstup:
-"""
-
-location_scope_prompt = """Z nasledujúceho textu:
-{user_prompt}
-
-Bola vydedukovaná ako ústredná oblasť: {anchor_location}
-
-Myslí sa v texte miesto VRÁMCI ústrednej oblasti, alebo MIMO (pri, blízko, kúsok) nej? Odpovedz iba slovom VRÁMCI alebo MIMO (napr. Domček na polosamote pri Žiline bude oznaceny ako MIMO)
-
-Tvoj výstup:
-"""
