@@ -33,13 +33,13 @@ Nepodávaj štylizovanú odpoveď – výstup má byť iba heslovité zhrnutie k
 **Nezačínaj slovami ako "Používateľ preferuje" ani inými podobnými frázami.**  
 **Nevysvetľuj motivácie používateľa.**
 
-**Ak používateľ zmení dopyt (napr. „alebo radšej domček...“), vytvor NOVÝ DOPYT – neprepájaj ho s pôvodným.**  
+**Ak používateľ zmení dopyt (uvedie napr. „alebo radšej domček...“, prípadne zmení mnoho kľúčových parametrov naraz), vytvor NOVÝ DOPYT – neprepájaj ho s pôvodným.**  
 **Ak niečo už nie je podmienkou, jednoducho to vynechaj. Nespomínaj to žiadnym spôsobom.**
 
 Zachovaj logickú nadväznosť (napr. „zvýš cenu na 4000“ = nová cena je 4000).  
 POZOR – uprav len existujúce údaje, ak sa týkajú rovnakého dopytu.  
-POZOR – ak používateľ použije „alebo“, nahraď pôvodný údaj novým.  
-POZOR – ak používateľ vyradí požiadavku (napr. „nemusí“, „netreba“, „vynechaj“), len ju vynechaj – **NEUVÁDZAJ, že nie je potrebná.**
+POZOR – ak používateľ použije „alebo“, nahraď pôvodný údaj novým (napr. uvedie „alebo stačia len 2 izby“ – nahradíš pôvodný počet izieb novým uvedeným počtom) - V žiadnom prípade nepripájaj nový údaj k starému, iba ho nahraď !  
+POZOR – ak používateľ vyradí požiadavku (použije slová ako napr. „nechcem“, „bez“,  „nemusí“, „netreba“, „vynechaj“), len ju vynechaj – **NEUVÁDZAJ, že nie je potrebná.**
 
 Predchádzajúca sumarizácia:
 {original_summary}
@@ -73,3 +73,39 @@ Prompt: {user_prompt}
 Tvoj výstup:
 """
 
+follow_up_questions_prompt = """Toto je dopyt používateľa ohľadom požadovanej nehnuteľnosti:  
+{original_summary}
+
+Toto sú vydedukované kľúčové údaje:  
+{key_attributes}
+
+Niektorým kľúčovým atribútom bola priradená hodnota *None*, pretože z používateľovho dopytu sa nedali jednoznačne určiť.  
+Navrhni doplňujúce otázky, pomocou ktorých by sa dali tieto údaje získať.
+
+Ak *žiadnemu* z atribútov nebola priradená hodnota *None*, polož otázky, ktoré pomôžu spresniť preferencie používateľa — napríklad, či má záujem o balkón, parkovanie, klimatizáciu a podobne. Buď kreatívny.
+POZOR - polož najviac 2 otázky, ktoré považuješ za najdôležitejšie.
+Výstup v tomto formate:
+· <otázka 1>
+· <otázka 2>
+
+Tvoje otázky:
+"""
+
+agentic_flow_prompt ="""
+Tvojou úlohou je získať a následne zhrnúť preferencie používateľa ohľadom ideálnej nehnuteľnosti, ktorú si chce prenajať. 
+Primárne sa zameraj na získanie hodnôt pre nasledujúce premenné:
+
+- cena (nájom)
+- počet izieb
+- rozloha
+- typ nehnuteľnosti (dom, loft, mezonet, penthouse, byt, garzónka)
+- či ide o novostavbu
+
+Snaž sa klásť otázky tak, aby z odpovedí bolo možné tieto hodnoty jednoznačne určiť. 
+Ak už máš hodnotu danej premennej, alebo používateľ nevie / nechce odpovedať, viac sa na to nepýtaj. 
+Nikdy neopakuj tú istú otázku.
+
+Keď už poznáš všetky vyššie uvedené hodnoty, pokračuj v rozhovore doplňujúcimi otázkami — 
+napríklad ohľadom balkóna, parkovacieho miesta, klimatizácie, výhľadu a iných praktických či komfortných prvkov. 
+Buď prirodzený, prívetivý a rozhovor veď tak, aby sa používateľ cítil príjemne a podporovaný pri vyjadrovaní svojich predstáv.
+"""
