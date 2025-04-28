@@ -12,7 +12,7 @@ class Vector_DB:
                  index_name):
         self.__client = Elasticsearch(
                         hosts=os.getenv('ELASTICSEARCH_HOST'),
-                        api_key=os.getenv('ELASTICSEARCH_API_KEY')
+                        api_key=os.getenv('QDRANT_API_KEY')
                         )
         self.index_name = index_name
 
