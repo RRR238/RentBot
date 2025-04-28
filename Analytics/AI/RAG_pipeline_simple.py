@@ -4,10 +4,6 @@ from utils import convert_text_to_dict, processing_dict, prepare_filters
 from Shared.Elasticsearch import Vector_DB
 from Shared.LLM import LLM
 from Shots import chat_history_summary_few_shots, extract_key_attributes_shots
-import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-warnings.filterwarnings("ignore", category=UserWarning)
-
 
 llm = LLM()
 vdb = Vector_DB('rent-bot-index')

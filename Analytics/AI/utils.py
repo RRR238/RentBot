@@ -1,4 +1,6 @@
 import json
+from langchain.schema import HumanMessage, AIMessage
+
 def convert_text_to_dict(llm_output):
     final_dict = {}
     no_spaces = llm_output.strip().replace('/n','').replace(' \n','').replace(' ','')
@@ -104,3 +106,19 @@ def few_shots_chat_history(shots, prompt_template):
         accumulated_history += f"Používateľ: {shot['User']}\nAI: {shot['AI']}\n\n"
 
     return shots_for_memory
+
+def extract_chat_history_as_dict(memory):
+    chat_history = []
+    for message in memory.chat_memory.messages:
+        role = "user" if isinstance(message, HumanMessage) else "assistant" if isinstance(message, AIMessage) else "system"
+        chat_history.append({"role": role, "content": message.content})
+    return chat_history
+
+def format_chat_history(chat_history):
+    formatted_history = ""
+    for message in chat_history:
+        if message["role"] == "user":
+            formatted_history += f"Používateľ: {message['content']}\n"
+        elif message["role"] == "assistant":
+            formatted_history += f"Asistent: {message['content']}\n"
+    return formatted_history
