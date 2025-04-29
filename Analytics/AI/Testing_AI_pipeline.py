@@ -1,12 +1,7 @@
 from Prompts import get_key_attributes_prompt
-from Shared.Elasticsearch import Vector_DB
-from Scrapping.Rent_offers_repository import Rent_offers_repository
-from Analytics.config import CONN_STRING
-import webbrowser
+from Shared.Vector_database.Elasticsearch import Vector_DB
 import json
-import time
 from Shared.LLM import LLM
-from Shared.Geolocation import get_coordinates
 from utils import convert_text_to_dict, processing_dict, prepare_filters
 
 vdb = Vector_DB('rent-bot-index')
