@@ -2,17 +2,16 @@ from elasticsearch import Elasticsearch
 import os
 from dotenv import load_dotenv
 from elasticsearch.helpers import bulk
-#from LLM import LLM
-import time
+from Vector_DB_interface import Vector_DB_interface
 
 load_dotenv()
 
-class Vector_DB:
+class Vector_DB_Elasticsearch(Vector_DB_interface):
     def __init__(self,
                  index_name):
         self.__client = Elasticsearch(
                         hosts=os.getenv('ELASTICSEARCH_HOST'),
-                        api_key=os.getenv('ELASTICSEARCH_API_KEY')
+                        api_key=os.getenv('QDRANT_API_KEY')
                         )
         self.index_name = index_name
 
@@ -159,12 +158,6 @@ class Vector_DB:
                 "query": {
                     "bool": {
                         "filter": filter,
-                        #     [
-                        #     {"term": {"metadata.property_type.keyword": 'flat'}},
-                        #     {"term": {"metadata.rooms": 2}},
-                        #     {"range":{"metadata.price_rent":{"lte":1000}}}
-                        #     # Add other metadata filters here, for example, 'rooms' and 'price'
-                        # ],
                         "should": [
                             {
                                 "knn": {
@@ -207,20 +200,3 @@ class Vector_DB:
                              id=resource_id, body=update_body)
         print(f"✅ Document with ID {resource_id} updated successfully.")
         return True
-
-
-# llm = LLM()
-#vdb = Vector_DB('rent-bot-index')
-
-# data = [{"embedding":llm.get_embedding("ahoj, som v meste"),
-#          "metadata":{"test":"test",
-#                      "timestamp":"now",
-#                      "id":7437544330}}]
-#
-# vdb.insert_data(data)
-#vdb.delete_all_documents()
-
-# s = time.time()
-# print(vdb.search_similar_documents(llm.get_embedding("ahoj, kde si ?")))
-# e = time.time()
-# print(e-s)
