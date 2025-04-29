@@ -4,12 +4,12 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 from qdrant_client.http.models import PointStruct
 import uuid
-import numpy as np
-from qdrant_client.http.models import Filter, FieldCondition, MatchValue, FilterSelector, SearchParams
+from qdrant_client.http.models import Filter, FieldCondition, MatchValue, FilterSelector, SearchParams, Range, QueryRequest
+from Vector_DB_interface import Vector_DB_interface
 
 load_dotenv()
 
-class Vector_DB:
+class Vector_DB_Qdrant(Vector_DB_interface):
     def __init__(self,
                  index_name,
                  vector_dimension):
@@ -117,26 +117,89 @@ class Vector_DB:
     def filtered_vector_search(self,
                                vector_query: list,
                                k:int,
-                               filter:list):
+                               filter:list[dict]):
 
 
         filters = []
+        for i in filter:
+            if i['type'] == 'term':
+                filters.append(FieldCondition(key=i['key'],
+                                              match= MatchValue(
+                                                  value=i['value']
+                                            )
+                                        )
+                                    )
+            elif i['type'] == 'gte':
+                filters.append(FieldCondition(key=i['key'],
+                                              range=Range(
+                                                  gte=i['value']
+                                                               )
+                                                            )
+                                                        )
+            else:
+                filters.append(FieldCondition(key=i['key'],
+                                              range=Range(
+                                                  lte=i['value']
+                                              )
+                                            )
+                                        )
 
-        response = self.__client.query_points(
-            collection_name=self.index_name,
-            query=vector_query,
-            limit=k,
-            search_params=SearchParams(exact=True)
-        )
+        search_query = [QueryRequest(query=vector_query,
+                                    filter=Filter(must=filters),
+                                     limit=k,
+                                     with_payload= True)]
 
-        # Return the filtered results
+        response = self.__client.query_batch_points(collection_name=self.index_name,
+                                                    requests=search_query
+                                                    )
+
         return response
 
+    def get_element(self,
+                    postgres_id=None,
+                    source_url=None):
 
-vdb = Vector_DB('test',200)
-#vdb.create_index()
-# for i in range(10):
-#     vdb.insert_data([{"embedding":[np.random.randint(1,55) for i in range(200)],"metadata":{'price':i+10,'size':60-i,'rooms':2}}])
-#vdb.delete_all_documents()
+        if postgres_id:
+            filter = [FieldCondition(key='postgres_id',
+                                          match=MatchValue(
+                                              value =postgres_id
+                                          )
+                                          )
+                                        ]
+        elif source_url:
+            filter = [FieldCondition(key='source_url',
+                                     match=MatchValue(
+                                         value =source_url
+                                     )
+                                     )
+                      ]
+        else:
+            raise ValueError('one of parameters must be specified')
 
-print(vdb.search_similar_documents([np.random.randint(5,55) for i in range(200)]))
+        search_query = [QueryRequest(
+                                     filter=Filter(must=filter),
+                                     with_payload=True)]
+
+        response = self.__client.query_batch_points(collection_name=self.index_name,
+                                                    requests=search_query
+                                                    )
+
+        return response
+
+    def update_metadata_by_url(self,
+                               source_url:str,
+                               updated_metadata: dict):
+
+        self.__client.set_payload(
+            collection_name=self.index_name,
+            payload=updated_metadata,
+            points=Filter(
+                must=[
+                    FieldCondition(
+                        key="price",
+                        match=MatchValue(value=source_url),
+                    ),
+                ],
+            ),
+        )
+        return True
