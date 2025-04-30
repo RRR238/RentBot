@@ -19,19 +19,22 @@ Dôležité:
 """
 
 summarize_chat_history_prompt = """
-Na základe predchádzajúcej sumarizácie a nasledujúcej novej informácie aktualizuj a zhrň aktuálne preferencie používateľa ohľadom nehnuteľnosti do krátkeho odstavca.  
+Na základe histórie konverzácie, predchádzajúcej sumarizácie a nasledujúcej novej informácie aktualizuj a zhrň aktuálne preferencie používateľa ohľadom nehnuteľnosti do krátkeho odstavca.  
 Zameraj sa IBA NA FAKTY a konkrétne požiadavky.  
 Nepodávaj štylizovanú odpoveď – výstup má byť iba heslovité zhrnutie kľúčových parametrov!  
 **Nezačínaj slovami ako "Používateľ preferuje" ani inými podobnými frázami.**  
 **Nevysvetľuj motivácie používateľa.**
 
 **Ak používateľ zmení dopyt (uvedie napr. „alebo radšej domček...“, prípadne zmení mnoho kľúčových parametrov naraz), vytvor NOVÝ DOPYT – neprepájaj ho s pôvodným.**  
-**Ak niečo už nie je podmienkou, jednoducho to vynechaj. Nespomínaj to žiadnym spôsobom.**
+**Ak niečo už nie je podmienkou, jednoducho to vynechaj. Nespomínaj to žiadnym spôsobom.** 
 
 Zachovaj logickú nadväznosť (napr. „zvýš cenu na 4000“ = nová cena je 4000).  
 POZOR – uprav len existujúce údaje, ak sa týkajú rovnakého dopytu.  
 POZOR – ak používateľ použije „alebo“, nahraď pôvodný údaj novým (napr. uvedie „alebo stačia len 2 izby“ – nahradíš pôvodný počet izieb novým uvedeným počtom) - V žiadnom prípade nepripájaj nový údaj k starému, iba ho nahraď !  
 POZOR – ak používateľ vyradí požiadavku (použije slová ako napr. „nechcem“, „bez“,  „nemusí“, „netreba“, „vynechaj“), len ju vynechaj – **NEUVÁDZAJ, že nie je potrebná.**
+
+História konverzácie:
+{conversation_history}
 
 Predchádzajúca sumarizácia:
 {original_summary}
@@ -98,9 +101,8 @@ Kladiem ti nasledujúce požiadavky:
 1. Ak už používateľ uviedol hodnotu pre niektorú premennú, už sa na ňu NIKDY nepýtaj znova (napríklad, ak už používateľ uviedol, že chce 3-izbový byt, nepýtaj sa znova na typ nehnuteľnosti a počet izieb!).
 2. V jednej odpovedi polož najviac **2 otázky**.
 3. NEPONÚKAJ riešenia, NEODPORÚČAJ realitky, NEPÍŠ o ďalších krokoch. Tvojou JEDINOU úlohou je klásť otázky a budovať obraz o preferenciách používateľa.
-4. Ak už máš všetky hlavné hodnoty, pýtaj sa na doplnkové detaily ako napr. balkón, výhľad, poschodie, parkovanie, klimatizácia, zariadenie atď.
-5. V rozhovore buď prirodzený, príjemný a rešpektujúci. Pomáhaj používateľovi vyjadriť svoje predstavy bez nátlaku.
-6. Ak sa rozhovor zatúla mimo tému, jemne ho nasmeruj späť k preferenciám pre prenájom nehnuteľnosti.
+4. Ak už máš všetky hlavné hodnoty, pýtaj sa na doplnkové detaily ako napr. poloha, balkón, výhľad, poschodie, parkovanie, klimatizácia, zariadenie atď. Vymyslí si pokojne aj niečo svoje.
+6. Ak sa rozhovor zatúla mimo tému, nasmeruj ho späť k preferenciám pre prenájom nehnuteľnosti.
 
 Tvoj cieľ: získať všetky potrebné informácie, bez opakovania otázok, bez navrhovania riešení – iba otázkami.
 """

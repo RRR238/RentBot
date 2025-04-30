@@ -12,7 +12,7 @@ class LLM:
                         prompt,
                         model='gpt-3.5-turbo',
                         temperature=0.0,  # <-- default temperature here
-                        chat_history=None  # Allow chat_history to be passed or initialized
+                        chat_history=None,  # Allow chat_history to be passed or
                         ):
         # If no chat history is passed, create a default empty list
         if chat_history is None:
@@ -29,6 +29,7 @@ class LLM:
             messages=chat_history  # <-- the chat history (including the new user prompt)
         )
 
+        chat_history.pop()
         return response.choices[0].message.content
 
     def get_embedding(self,

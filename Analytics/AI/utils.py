@@ -1,5 +1,6 @@
 import json
 from langchain.schema import HumanMessage, AIMessage
+import math
 
 def convert_text_to_dict(llm_output):
     final_dict = {}
@@ -122,3 +123,16 @@ def format_chat_history(chat_history):
         elif message["role"] == "assistant":
             formatted_history += f"Asistent: {message['content']}\n"
     return formatted_history
+
+def cosine_similarity(vec1, vec2):
+    if len(vec1) != len(vec2):
+        raise ValueError("Vectors must be the same length.")
+
+    dot_product = sum(a * b for a, b in zip(vec1, vec2))
+    norm_a = math.sqrt(sum(a * a for a in vec1))
+    norm_b = math.sqrt(sum(b * b for b in vec2))
+
+    if norm_a == 0 or norm_b == 0:
+        return 0.0  # Avoid division by zero
+
+    return dot_product / (norm_a * norm_b)
