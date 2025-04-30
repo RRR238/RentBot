@@ -48,7 +48,7 @@ class Rent_offers_repository:
     def duplicate_exists(self,
                         price: float,
                         size: float,
-                        coordinates: str) -> bool:
+                        coordinates: str|None) -> bool:
 
         with self.get_session() as session:
             return session.query(

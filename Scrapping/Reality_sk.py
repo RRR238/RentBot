@@ -13,7 +13,7 @@ from Shared.Geolocation import get_coordinates
 import re
 from Rent_offers_repository import Rent_offers_repository
 from Shared.LLM import LLM
-from Shared.Vector_database.Elasticsearch import Vector_DB
+from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
 
 load_dotenv()  # Loads environment variables from .env file
 
@@ -27,7 +27,7 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
                  auth_token,
                  db_repository: Rent_offers_repository,
                  llm: LLM,
-                 vector_db: Vector_DB,
+                 vector_db: Vector_DB_interface,
                  source='Reality.sk',
                  user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"):
         super().__init__(base_url,
