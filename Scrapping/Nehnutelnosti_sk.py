@@ -545,7 +545,7 @@ class Nehnutelnosti_sk_processor:
                 elif response.status_code in [301, 302, 303, 307, 308]:
                     print(f"Redirected to: {response.headers.get('Location')}")
                     self.db_repository.delete_by_source_urls([url])
-                    self.vdb.delete_element(source_url=url)
+                    #252kjOPJKAZself.vdb.delete_element(source_url=url)
                     invalid += 1
                 else:
                     print(f"Status code: {response.status_code}")
@@ -556,12 +556,12 @@ class Nehnutelnosti_sk_processor:
         print(f"deleted {invalid} offers")
 
 
-processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
-                                       auth_token =auth_token_nehnutelnosti,
-                                       db_repository =Rent_offers_repository(os.getenv('connection_string')),
-                                        llm =LLM(),
-                                        vector_db = Vector_DB_Qdrant('test')
-                                        )
+# processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
+#                                        auth_token =auth_token_nehnutelnosti,
+#                                        db_repository =Rent_offers_repository(os.getenv('connection_string')),
+#                                         llm =LLM(),
+#                                         vector_db = Vector_DB_Qdrant('test')
+#                                         )
 #processor.pagination_check()
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))

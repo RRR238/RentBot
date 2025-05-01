@@ -35,30 +35,30 @@ if __name__ == "__main__":
     processor_nehnutelnosti.delete_invalid_offers()
     # processor_nehnutelnosti.process_offers(1,33)
     # processor_reality.process_offers(1,240)
-    vdb.create_index(3072)
-    urls = repo.get_all_source_urls()
-    total = len(urls)
-    current = 1
-    errors = 0
-    for i in urls:
-        print(f"processing: {current}/{total}")
-        offer = repo.get_offer_by_id_or_url(i)
-        embedding = processor_nehnutelnosti.embedd_rent_offer(LLM(),offer.title, offer.description,offer.other_properties)
-        keys_to_remove = {"created_at",
-                          '_sa_instance_state',
-                          "title",
-                          "location",
-                          "description",
-                          "other_properties",
-                          "floor",
-                          "positioning",
-                          "source",
-                          'score'}
-        filtered_offer = {k: v for k, v in offer.__dict__.items() if k not in keys_to_remove}
-        result = vdb.insert_data([{"embedding": embedding,
-                                        "metadata": filtered_offer}])
-        if not result:
-            print(f"error processing: {i}")
-            errors +=1
-    print(f"errors: {errors}")
+    # vdb.create_index(3072)
+    # urls = repo.get_all_source_urls()
+    # total = len(urls)
+    # current = 1
+    # errors = 0
+    # for i in urls:
+    #     print(f"processing: {current}/{total}")
+    #     offer = repo.get_offer_by_id_or_url(i)
+    #     embedding = processor_nehnutelnosti.embedd_rent_offer(LLM(),offer.title, offer.description,offer.other_properties)
+    #     keys_to_remove = {"created_at",
+    #                       '_sa_instance_state',
+    #                       "title",
+    #                       "location",
+    #                       "description",
+    #                       "other_properties",
+    #                       "floor",
+    #                       "positioning",
+    #                       "source",
+    #                       'score'}
+    #     filtered_offer = {k: v for k, v in offer.__dict__.items() if k not in keys_to_remove}
+    #     result = vdb.insert_data([{"embedding": embedding,
+    #                                     "metadata": filtered_offer}])
+    #     if not result:
+    #         print(f"error processing: {i}")
+    #         errors +=1
+    # print(f"errors: {errors}")
 
