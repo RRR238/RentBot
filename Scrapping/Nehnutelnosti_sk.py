@@ -372,9 +372,7 @@ class Nehnutelnosti_sk_processor:
 
                 coordinates = ";".join(results['coordinates']) if results['coordinates'] else None
                 if self.db_repository.duplicate_exists(results['prices']['rent'],
-                                                       results['key_attributes']['size'] +1,
-                                                       coordinates) and self.db_repository.duplicate_exists(results['prices']['rent'],
-                                                       results['key_attributes']['size'] -1,
+                                                       results['key_attributes']['size'],
                                                        coordinates):
 
                     print(f"Duplicate found for offer: {link}")
