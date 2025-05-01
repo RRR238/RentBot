@@ -5,29 +5,28 @@ from qdrant_client.models import Distance, VectorParams
 from qdrant_client.http.models import PointStruct
 import uuid
 from qdrant_client.http.models import Filter, FieldCondition, MatchValue, FilterSelector, SearchParams, Range, QueryRequest
-from Vector_DB_interface import Vector_DB_interface
+from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
 
 load_dotenv()
 
 class Vector_DB_Qdrant(Vector_DB_interface):
     def __init__(self,
-                 index_name,
-                 vector_dimension):
+                 index_name):
         self.__client = QdrantClient(
                         url=os.getenv('QDRANT_ENDPOINT'),
                         api_key=os.getenv('QDRANT_API_KEY'),
                     )
         self.index_name = index_name
-        self.vector_dimension = vector_dimension
 
-    def create_index(self):
+    def create_index(self,
+                     vector_dimension):
 
         if not self.__client.collection_exists(
             collection_name=self.index_name,
         ):
             self.__client.create_collection(
                 collection_name=self.index_name,
-                vectors_config=VectorParams(size=self.vector_dimension,
+                vectors_config=VectorParams(size=vector_dimension,
                                             distance=Distance.COSINE)
             )
 
@@ -52,11 +51,13 @@ class Vector_DB_Qdrant(Vector_DB_interface):
         )
 
         if response.status == "completed":
-            print(f"Inserted {len(points)} documents into Qdrant.")
+            return True
         else:
-            print(f"Upsert operation failed with status: {response.status}")
+            return False
 
-    def delete_element(self, postgres_id=None, source_url=None):
+    def delete_element(self,
+                       postgres_id=None,
+                       source_url=None):
         if not postgres_id and not source_url:
             raise ValueError("You must provide at least postgres_id or source_url.")
 
