@@ -45,18 +45,15 @@ class Rent_offers_repository:
                                 Rent_offer_model.source_url == source_url)
                                 ).scalar()
 
-    def duplicate_exists(self,
-                        price: float,
-                        size: float,
-                        coordinates: str) -> bool:
-
+    def duplicate_exists(self, price: float, size: float, coordinates: str) -> bool:
         with self.get_session() as session:
             return session.query(
                 exists().where(
                     and_(
                         Rent_offer_model.price_rent == price,
-                        Rent_offer_model.size == size,
-                        Rent_offer_model.coordinates == coordinates
+                        Rent_offer_model.coordinates == coordinates,
+                        Rent_offer_model.size >= size - 1,
+                        Rent_offer_model.size <= size + 1
                     )
                 )
             ).scalar()

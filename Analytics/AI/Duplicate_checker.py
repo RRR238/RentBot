@@ -1,4 +1,4 @@
-from Shared.Elasticsearch import Vector_DB
+from Shared.Vector_database.Elasticsearch import Vector_DB
 from Scrapping.Rent_offers_repository import Rent_offers_repository
 from Analytics.config import CONN_STRING
 from Shared.LLM import LLM

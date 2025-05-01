@@ -13,7 +13,7 @@ from Shared.Geolocation import get_coordinates
 import re
 from Rent_offers_repository import Rent_offers_repository
 from Shared.LLM import LLM
-from Shared.Elasticsearch import Vector_DB
+from Shared.Vector_database.Elasticsearch import Vector_DB
 
 load_dotenv()  # Loads environment variables from .env file
 
