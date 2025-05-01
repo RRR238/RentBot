@@ -2,7 +2,8 @@ from abc import ABC, abstractmethod
 
 class Vector_DB_interface(ABC):
     @abstractmethod
-    def create_index(self):
+    def create_index(self,
+                     vector_dimension:int):
         pass
 
     @abstractmethod

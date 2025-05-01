@@ -15,7 +15,10 @@ import json
 from Shared.Geolocation import get_coordinates
 from Rent_offers_repository import Rent_offers_repository
 from Shared.LLM import LLM
-from Shared.Vector_database.Elasticsearch import Vector_DB
+from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
+from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
+
+
 
 load_dotenv()  # Loads environment variables from .env file
 
@@ -30,7 +33,7 @@ class Nehnutelnosti_sk_processor:
                  auth_token,
                  db_repository:Rent_offers_repository,
                  llm:LLM,
-                 vector_db:Vector_DB,
+                 vector_db:Vector_DB_interface,
                  source = 'Nehnutelnosti.sk',
                  user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
                  ):
@@ -85,7 +88,10 @@ class Nehnutelnosti_sk_processor:
             prices = self.get_price(soup)
             description = self.get_description(soup)
             images= self.get_images(detail_link)
-            coordinates = [str(i) for i in get_coordinates(location)]
+            try:
+                coordinates = [str(i) for i in get_coordinates(location)]
+            except:
+                coordinates = None
             year_of_construction = int(other_properties['Rok výstavby:']) if 'Rok výstavby:' in other_properties.keys() else None
             approval_year = int(other_properties['Rok kolaudácie:']) if 'Rok kolaudácie:' in other_properties.keys() else None
             last_reconstruction_year = int(other_properties['Rok poslednej rekonštrukcie:']) if 'Rok poslednej rekonštrukcie:' in other_properties.keys() else None
@@ -151,7 +157,8 @@ class Nehnutelnosti_sk_processor:
     def get_key_attributes(self, soup):
         icons = DOM_identifiers.nehnutelnosti_icons
 
-        xpaths = DOM_identifiers.nehnutelnosti_xpaths
+        xpaths_1 = DOM_identifiers.nehnutelnosti_xpaths_1
+        xpaths_2 = DOM_identifiers.nehnutelnosti_xpaths_2
 
         dom = etree.HTML(str(soup))
 
@@ -173,21 +180,30 @@ class Nehnutelnosti_sk_processor:
         for i in range(len(paragraphs)):
             svg = paragraphs[i].find("svg")
             path_data = svg.find("path")['d']
-            attribute = dom.xpath(xpaths[i])[0].lower()
+            try:
+                attribute = dom.xpath(xpaths_1[i])[0].lower()
+            except:
+                attribute = dom.xpath(xpaths_2[i])[0].lower()
             for j in icons.keys():
                 if icons[j] == path_data:
                     if "dom" in attribute:
                         results["house"] = True
-                    elif "byt" in attribute:
+                    elif "byt" in attribute and "iný byt" not in attribute:
                         results["flat"] = True
                         try:
                             results["rooms"] = int(j[0])
                         except:
-                            results["rooms"] = j[0]
+                            results["rooms"] = None
+                    elif "iný byt" in attribute:
+                        results["flat"] = True
                     elif "apartmán" in attribute:
                         results["apartmen"] = True
                     elif "garsónka" in attribute:
                         results["studio"] = True
+                    elif "mezonet" in attribute:
+                        results["mezonet"] = True
+                    elif "loft" in attribute:
+                        results["loft"] = True
                     else:
                         if results[j]==False:
                             results[j] = True
@@ -237,36 +253,35 @@ class Nehnutelnosti_sk_processor:
                                    ).text.strip() else None
 
         if price_rent:
-            prices["rent"] = (price_rent.replace("\xa0", "")
-                              .split("€")[0]
-                              .strip().replace(
-                                        ',','.'))
             try:
+                prices["rent"] = (price_rent.replace("\xa0", "")
+                                                    .split("€")[0]
+                                                    .strip().replace(
+                                                        ',', '.'))
                 prices["rent"] = int(prices["rent"])
             except:
-                pass
+                prices["rent"] = None
 
         if price_energies:
-            prices["energies"] = (price_energies.replace("\xa0", ""
-                                                        ).split("€")[0]
-                                                        .strip()
-                                                        .replace(
-                                                        "+ ","").replace(
-                                                        ',','.'))
             try:
+                prices["energies"] = (price_energies.replace("\xa0", ""
+                                                             ).split("€")[0]
+                                                            .strip()
+                                                            .replace(
+                                                                "+ ", "").replace(
+                                                                ',', '.'))
                 prices["energies"] = int(prices["energies"])
             except:
-                pass
+                prices["energies"] = None
 
         if price_ms:
-            prices["meter squared"] = (price_ms.replace("\xa0", "")
-                                        .split("€")[0]
-                                        .strip().replace(',','.'))
-
             try:
+                prices["meter squared"] = (price_ms.replace("\xa0", "")
+                                           .split("€")[0]
+                                           .strip().replace(',', '.'))
                 prices["meter squared"] = float(prices["meter squared"])
             except:
-                pass
+                prices["meter squared"] = None
 
         return prices
 
@@ -355,9 +370,10 @@ class Nehnutelnosti_sk_processor:
 
                 results = self.process_detail(link)
 
+                coordinates = ";".join(results['coordinates']) if results['coordinates'] else None
                 if self.db_repository.duplicate_exists(results['prices']['rent'],
                                                        results['key_attributes']['size'],
-                                                       ";".join(results['coordinates'])):
+                                                       coordinates):
 
                     print(f"Duplicate found for offer: {link}")
                     process_n += 1
@@ -399,7 +415,7 @@ class Nehnutelnosti_sk_processor:
                     "positioning": results['positioning'].lower() if results['positioning'] else None,
                     "source": self.source,
                     "source_url": results['source_url'],
-                    "coordinates": ";".join(results['coordinates'])
+                    "coordinates": coordinates
                 })
                 print(f"writing images to DB...")
                 # self.db_repository.insert_offer_images(new_offer.id,results['images'][:4]
@@ -416,8 +432,11 @@ class Nehnutelnosti_sk_processor:
                                   'score'}
                 filtered_offer = {k: v for k, v in new_offer.__dict__.items() if k not in keys_to_remove}
                 #print(filtered_offer)
-                self.vdb.insert_data([{"embedding": embedding,
+                result = self.vdb.insert_data([{"embedding": embedding,
                                        "metadata": filtered_offer}])
+                if not result:
+                    self.db_repository.delete_by_source_urls([results['source_url']])
+                    raise RuntimeError("Vector DB write failed after DB write.")
                 self.processed_offers += 1
                 print(f"detail processed successfully")
                 time.sleep(sleep)
@@ -537,18 +556,17 @@ class Nehnutelnosti_sk_processor:
         print(f"deleted {invalid} offers")
 
 
-# processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
-#                                        auth_token =auth_token_nehnutelnosti,
-#                                        db_repository =Rent_offers_repository(os.getenv('connection_string')),
-#                                         llm =LLM(),
-#                                         vector_db = Vector_DB('rent-bot-index')
-#                                         )
+processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
+                                       auth_token =auth_token_nehnutelnosti,
+                                       db_repository =Rent_offers_repository(os.getenv('connection_string')),
+                                        llm =LLM(),
+                                        vector_db = Vector_DB_Qdrant('test')
+                                        )
 #processor.pagination_check()
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
 # print(links)
-#print(processor.process_detail("https://www.nehnutelnosti.sk/detail/JuTtHrVo6i9/prenajom-2-izbovy-byt-v-lokalite-dlhe-diely"))
+#print(processor.process_detail("https://www.nehnutelnosti.sk/detail/JuDP5eqrN15/prenajom-2-izbovy-dizajnovy-byt-oproti-hant-arene-ulicatrnavska-cesta-"))
 # print(len(links))
 # print(links[149])
 #processor.process_offers(1,3)
-
