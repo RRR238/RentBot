@@ -5,7 +5,6 @@ from langchain.prompts import PromptTemplate
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from Prompts import get_key_attributes_prompt, agentic_flow_prompt, check_conversation_prompt,summarize_chat_history_prompt
 from utils import cosine_similarity, extract_chat_history_as_dict, format_chat_history, convert_text_to_dict, processing_dict
-from Shared.Elasticsearch import Vector_DB
 from Shared.LLM import LLM
 from Shots import chat_history_summary_few_shots, extract_key_attributes_shots
 import warnings
@@ -23,7 +22,7 @@ llm_langchain = ChatOpenAI(
     #openai_api_key=,  # optional if set as ENV variable
 )
 llm = LLM()
-vdb = Vector_DB('rent-bot-index')
+#vdb = Vector_DB('rent-bot-index')
 
 memory = ConversationBufferMemory(
     memory_key="chat_history",
@@ -66,7 +65,7 @@ while True:
     # chat_history_summary_few_shots.append({"role": "user", "content": query})
     # chat_history_summary_few_shots.append({"role": "assistant", "content": response_summary})
     print(f"🤖: {response}")
-    # print(f"summary: {response_summary}")
+    print(f"summary: {response_summary}")
     response_key_attr = llm.generate_answer(get_key_attributes_prompt.format(user_prompt=response_summary),
                                             chat_history=extract_key_attributes_shots)
     key_attributes_dict = convert_text_to_dict(response_key_attr)
