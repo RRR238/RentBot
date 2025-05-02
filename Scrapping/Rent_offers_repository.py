@@ -47,32 +47,27 @@ class Rent_offers_repository:
 
 
     def duplicate_exists(self,
-                        price: float,
-                        size: float,
-                        coordinates: str|None) -> bool:
+                        price: float|None,
+                        size: float|None,
+                        coordinates: str|None,
+                        url:str|None=None) -> bool:
 
         with self.get_session() as session:
+            conditions = [
+                Rent_offer_model.price_rent == price,
+                Rent_offer_model.coordinates == coordinates
+            ]
+
             if size is not None:
-                return session.query(
-                    exists().where(
-                        and_(
-                            Rent_offer_model.price_rent == price,
-                            Rent_offer_model.coordinates == coordinates,
-                            Rent_offer_model.size >= size - 1,
-                            Rent_offer_model.size <= size + 1
-                        )
-                    )
-                ).scalar()
+                conditions.append(Rent_offer_model.size >= size - 1)
+                conditions.append(Rent_offer_model.size <= size + 1)
             else:
-                return session.query(
-                    exists().where(
-                        and_(
-                            Rent_offer_model.price_rent == price,
-                            Rent_offer_model.coordinates == coordinates,
-                            Rent_offer_model.size == size
-                        )
-                    )
-                ).scalar()
+                conditions.append(Rent_offer_model.size == size)
+
+            if url:
+                conditions.append(Rent_offer_model.source_url != url)
+
+            return session.query(exists().where(and_(*conditions))).scalar()
 
     def insert_offer_images(self, rent_offer_id: int, image_urls: list[str]):
         """Inserts multiple image URLs related to a specific rent offer."""
