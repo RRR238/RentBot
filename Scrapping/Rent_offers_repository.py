@@ -52,16 +52,27 @@ class Rent_offers_repository:
                         coordinates: str|None) -> bool:
 
         with self.get_session() as session:
-            return session.query(
-                exists().where(
-                    and_(
-                        Rent_offer_model.price_rent == price,
-                        Rent_offer_model.coordinates == coordinates,
-                        Rent_offer_model.size >= size - 1,
-                        Rent_offer_model.size <= size + 1
+            if size is not None:
+                return session.query(
+                    exists().where(
+                        and_(
+                            Rent_offer_model.price_rent == price,
+                            Rent_offer_model.coordinates == coordinates,
+                            Rent_offer_model.size >= size - 1,
+                            Rent_offer_model.size <= size + 1
+                        )
                     )
-                )
-            ).scalar()
+                ).scalar()
+            else:
+                return session.query(
+                    exists().where(
+                        and_(
+                            Rent_offer_model.price_rent == price,
+                            Rent_offer_model.coordinates == coordinates,
+                            Rent_offer_model.size == size
+                        )
+                    )
+                ).scalar()
 
     def insert_offer_images(self, rent_offer_id: int, image_urls: list[str]):
         """Inserts multiple image URLs related to a specific rent offer."""
