@@ -4,7 +4,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from Prompts import get_key_attributes_prompt, agentic_flow_prompt, check_conversation_prompt,summarize_chat_history_prompt
-from utils import cosine_similarity, extract_chat_history_as_dict, format_chat_history, convert_text_to_dict, processing_dict
+from utils import chat_history_summary_post_processing, extract_chat_history_as_dict, format_chat_history, convert_text_to_dict, processing_dict
 from Shared.LLM import LLM
 from Shots import chat_history_summary_few_shots, extract_key_attributes_shots
 import warnings
@@ -47,6 +47,14 @@ agentic_chain = LLMChain(
 )
 
 org_summary = ""
+skip_phrases = [
+        "Máte nejaké ďalšie požiadavky alebo preferencie ohľadom nehnuteľnosti",
+        "Máte ešte nejaké ďalšie požiadavky alebo preferencie",
+        "Máte ešte nejaké ďalšie požiadavky alebo detaily",
+        "Máte nejaké ďalšie požiadavky alebo detaily",
+        "Dokážete uviesť nejaké ďalšie požiadavky",
+        "Dokážete uviesť ďalšie požiadavky"
+    ]
 while True:
     query = input()
     chhd = extract_chat_history_as_dict(memory)
@@ -56,17 +64,25 @@ while True:
     #                                                                                      chat_history=formatted_chat_history))
     # print(response_query_classification)
     response = agentic_chain.predict(input = query)
+    if any(phrase in response for phrase in skip_phrases):
+        print("skipping to next question")
+        query="pýtaj sa ďalej"
+        response = agentic_chain.predict(input=query)
+        print(f"🤖: {response}")
+        continue
+
     response_summary = llm.generate_answer(summarize_chat_history_prompt.format(conversation_history=formatted_chat_history,
                                                                                 original_summary=org_summary,
                                                                                 user_prompt=query),)
                                                                                 #chat_history=chat_history_summary_few_shots)
 
-    org_summary = response_summary
+    processed_summary = chat_history_summary_post_processing(response_summary)
+    org_summary = processed_summary
     # chat_history_summary_few_shots.append({"role": "user", "content": query})
     # chat_history_summary_few_shots.append({"role": "assistant", "content": response_summary})
     print(f"🤖: {response}")
-    print(f"summary: {response_summary}")
-    response_key_attr = llm.generate_answer(get_key_attributes_prompt.format(user_prompt=response_summary),
+    print(f"summary: {processed_summary}")
+    response_key_attr = llm.generate_answer(get_key_attributes_prompt.format(user_prompt=processed_summary),
                                             chat_history=extract_key_attributes_shots)
     key_attributes_dict = convert_text_to_dict(response_key_attr)
     processed_dict = processing_dict(key_attributes_dict)

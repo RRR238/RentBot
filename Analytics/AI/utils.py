@@ -1,6 +1,7 @@
 import json
 from langchain.schema import HumanMessage, AIMessage
 import math
+import re
 
 def convert_text_to_dict(llm_output):
     final_dict = {}
@@ -136,3 +137,22 @@ def cosine_similarity(vec1, vec2):
         return 0.0  # Avoid division by zero
 
     return dot_product / (norm_a * norm_b)
+
+def chat_history_summary_post_processing(summary):
+    summary = summary.lower()
+
+    # Phrases to remove up to next comma or period
+    removable_phrases = ["bez", "netreba", "nemá", "nevyžaduje", "neviem", "nemusí"]
+    for phrase in removable_phrases:
+        if phrase in summary:
+            summary = re.sub(rf'{phrase}[^,.]*[,.]\s*',
+                             '',
+                             summary,
+                             flags=re.IGNORECASE)
+
+    # Restore specific known useful phrase if removed
+    if "bez problémov s parkovaním" in summary:
+        summary += " bez problémov s parkovaním"
+
+    return summary.strip()
+
