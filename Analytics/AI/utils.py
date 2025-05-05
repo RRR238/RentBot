@@ -59,33 +59,26 @@ def prepare_filters(processed_dict):
 
     return filter
 
+def prepare_filters_qdrant(processed_dict):
+    filter = []
+    for k,v in processed_dict.items():
+        if k=='price_rent' and v is not None:
+            filter.append({'type':"lte", 'key':"price_rent",'value':v})
+        if k=='size' and v is not None:
+            filter.append({'type': "gte", 'key': "size", 'value': v})
+        if k=='rooms' and v is not None:
+            filter.append({'type': "term", 'key': "rooms", 'value': v})
+        if k=='rooms_min' and v is not None:
+            filter.append({'type': "gte", 'key': "rooms", 'value': v})
+        if k=='rooms_max' and v is not None:
+            filter.append({'type': "lte", 'key': "rooms", 'value': v})
+        if k=='property_type' and v is not None:
+            filter.append({'type': "term", 'key': "property_type", 'value': v})
+        if k=='property_status' and v is not None:
+            filter.append({'type': "term", 'key': "property_status", 'value': v})
 
-import requests
+    return filter
 
-def get_bounding_box(location_name):
-    url = "https://nominatim.openstreetmap.org/search"
-    params = {
-        'q': location_name,
-        'format': 'json',
-        'limit': 1,
-        'polygon_geojson': 0,
-        'addressdetails': 1
-    }
-
-    headers = {
-        'User-Agent': 'YourApp/1.0 (richardmacus0@gmail.com)'  # Always use a UA
-    }
-
-    response = requests.get(url, params=params, headers=headers)
-    data = response.json()
-
-    if data:
-        bounding_box = data[0]['boundingbox']  # [south, north, west, east]
-        print("Bounding Box:", bounding_box)
-        return bounding_box
-    else:
-        print("No results found.")
-        return None
 
 def few_shots_chat_history(shots, prompt_template):
     shots_for_memory = []
@@ -142,7 +135,7 @@ def chat_history_summary_post_processing(summary):
     summary = summary.lower()
 
     # Phrases to remove up to next comma or period
-    removable_phrases = ["bez", "netreba", "nemá", "nevyžaduje", "neviem", "nemusí"]
+    removable_phrases = ["bez ", "netreba ", "nemá ", "nevyžaduje ", "neviem ", "nemusí "]
     for phrase in removable_phrases:
         if phrase in summary:
             summary = re.sub(rf'{phrase}[^,.]*[,.]\s*',
@@ -151,7 +144,7 @@ def chat_history_summary_post_processing(summary):
                              flags=re.IGNORECASE)
 
     # Restore specific known useful phrase if removed
-    if "bez problémov s parkovaním" in summary:
+    if "bez problémov s parkovaním" in summary or "s bezproblémovým parkovaním" in summary:
         summary += " bez problémov s parkovaním"
 
     return summary.strip()

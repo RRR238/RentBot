@@ -1,12 +1,15 @@
 from Scrapping.Rent_offers_repository import Rent_offers_repository
 from Analytics.config import CONN_STRING
+from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
 
 repository = Rent_offers_repository(CONN_STRING)
-
+vdb = Vector_DB_Qdrant('rent-bot-index')
 
 sources = repository.get_all_source_urls()
 count = 1
 found_dups = 0
+not_deleted = []
+not_deleted_vdb = []
 l = len(sources)
 for i in sources:
 
@@ -19,8 +22,17 @@ for i in sources:
                                     coordinates=offer.coordinates,
                                     url=i):
 
-        repository.delete_by_source_urls([i])
+        # try:
+        #     repository.delete_by_source_urls([i])
+        # except:
+        #     not_deleted.append(i)
+        #     continue
+        # try:
+        #     vdb.delete_element(source_url=i)
+        # except:
+        #     not_deleted_vdb.append(i)
+
         found_dups += 1
-        #print(offer.price_rent,offer.size,offer.coordinates)
+        print(offer.price_rent,offer.size,offer.coordinates)
 
 print(found_dups)
