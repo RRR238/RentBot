@@ -30,7 +30,9 @@ class Rent_offer_model(Base):
     other_properties = Column(JSONB, nullable=True)  # Use JSONB for PostgreSQL optimization
     source = Column(Text, nullable=True)
     source_url = Column(Text, nullable=True)
-    coordinates = Column(Text, nullable=True)
+    latitude = Column(Float, nullable=True)
+    longtitude = Column(Float, nullable=True)
+    price_total = Column(Integer, nullable=True)
 
 class Offer_image_model(Base):
     __tablename__ = "images"  # Change to actual table name
