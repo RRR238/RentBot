@@ -109,3 +109,26 @@ class Rent_offers_repository:
                                      ).filter(
                                     Rent_offer_model.source_url == identifier
                                     ).first()
+
+    def update_offer(self,
+                     identifier,
+                     updates: dict) -> bool:
+        with (self.get_session() as session):
+            if isinstance(identifier, int):
+                offer = session.query(Rent_offer_model
+                                      ).filter(Rent_offer_model.id == identifier
+                                                                        ).first()
+            else:
+                offer = session.query(Rent_offer_model
+                                      ).filter(Rent_offer_model.source_url == identifier
+                                                                            ).first()
+
+            if not offer:
+                return False
+
+            for key, value in updates.items():
+                if hasattr(offer, key):
+                    setattr(offer, key, value)
+
+            session.commit()
+            return True
