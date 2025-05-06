@@ -63,7 +63,7 @@ def prepare_filters_qdrant(processed_dict):
     filter = []
     for k,v in processed_dict.items():
         if k=='price_rent' and v is not None:
-            filter.append({'type':"lte", 'key':"price_rent",'value':v})
+            filter.append({'type':"lte", 'key':"price_total",'value':v})
         if k=='size' and v is not None:
             filter.append({'type': "gte", 'key': "size", 'value': v})
         if k=='rooms' and v is not None:
@@ -135,7 +135,7 @@ def chat_history_summary_post_processing(summary):
     summary = summary.lower()
 
     # Phrases to remove up to next comma or period
-    removable_phrases = ["bez ", "netreba ", "nemá ", "nevyžaduje ", "neviem ", "nemusí "]
+    removable_phrases = ["bez ", "netreba ", "nemá ", "nevyžaduje ", "neviem ", "nemusí ", "nie nutne "]
     for phrase in removable_phrases:
         if phrase in summary:
             summary = re.sub(rf'{phrase}[^,.]*[,.]\s*',

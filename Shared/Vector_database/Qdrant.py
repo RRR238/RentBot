@@ -197,7 +197,7 @@ class Vector_DB_Qdrant(Vector_DB_interface):
             points=Filter(
                 must=[
                     FieldCondition(
-                        key="price",
+                        key="source_url",
                         match=MatchValue(value=source_url),
                     ),
                 ],
