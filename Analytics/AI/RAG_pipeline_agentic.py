@@ -20,7 +20,7 @@ warnings.filterwarnings("ignore",
 llm_langchain = ChatOpenAI(
     temperature=0.2,
     model_name="gpt-3.5-turbo",
-    #openai_api_key=,  # optional if set as ENV variable
+    #openai_api_key=
 )
 llm = LLM()
 vdb = Vector_DB_Qdrant('rent-bot-index')
