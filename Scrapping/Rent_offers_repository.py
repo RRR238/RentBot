@@ -53,7 +53,9 @@ class Rent_offers_repository:
                         ownership: str | None,
                         lat: float | None,
                         lon: float | None,
-                        url: str | None = None):
+                        url: str | None = None,
+                        precision_coordinates:float=0.001,
+                        precision_size:float=1):
         with self.get_session() as session:
             conditions = [
                 Rent_offer_model.price_rent == price_rent,
@@ -63,16 +65,16 @@ class Rent_offers_repository:
             ]
 
             if size is not None:
-                conditions.append(Rent_offer_model.size >= size - 1)
-                conditions.append(Rent_offer_model.size <= size + 1)
+                conditions.append(Rent_offer_model.size >= size - precision_size)
+                conditions.append(Rent_offer_model.size <= size + precision_size)
             else:
                 conditions.append(Rent_offer_model.size == size)
 
             if lat is not None and lon is not None:
-                conditions.append(Rent_offer_model.latitude >= lat - 0.01)
-                conditions.append(Rent_offer_model.latitude <= lat + 0.01)
-                conditions.append(Rent_offer_model.longtitude >= lon - 0.01)
-                conditions.append(Rent_offer_model.longtitude <= lon + 0.01)
+                conditions.append(Rent_offer_model.latitude >= lat - precision_coordinates)
+                conditions.append(Rent_offer_model.latitude <= lat + precision_coordinates)
+                conditions.append(Rent_offer_model.longtitude >= lon - precision_coordinates)
+                conditions.append(Rent_offer_model.longtitude <= lon + precision_coordinates)
 
             if url:
                 conditions.append(Rent_offer_model.source_url != url)

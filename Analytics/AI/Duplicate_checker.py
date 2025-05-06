@@ -24,13 +24,14 @@ Tvoja odpoveď:
 
 def extract_energy_price(lt: str) -> str:
     patterns = [
-        r'energie:(\d+)',                     # energie:100
+        r'energie:(\d+)',                    # energie:100
         r'\+(\d+)energie',                   # +100energie
         r'\+(\d+)€energie',                  # +100€energie
         r'\+(\d+)eurenergie',                # +100eurenergie
         r'energievrátaneinternetuatv:(\d+)', # energievrátaneinternetuatv:300
         r'\+(\d+),-',                        # +100,-
         r'\+energie(\d+)',                   # +energie100
+        r'cenanezahŕňaenergie(\d+)'          # cenanezahŕňaenergie250
     ]
 
     for pattern in patterns:
@@ -46,18 +47,18 @@ not_deleted = []
 not_deleted_vdb = []
 l = len(sources)
 duplicates=[]
-for i in sources[:100]:
+for i in sources:
 
     print(f"processing: {count}/{l}")
     # # # print(f"dups found: {found_dups}")
     # # # count += 1
     offer = repository.get_offer_by_id_or_url(i)
-    # # if offer.price_total is not None:
-    # #     count += 1
-    # #     continue
-    # #
+    # if offer.price_energies is not None:
+    #     count += 1
+    #     continue
+    #
     # lt = offer.description.lower().replace(' ','')
-    # print(offer.description)
+    # #print(offer.description)
     # manually = extract_energy_price(lt).strip()
     # #print(f"manually: {manually}")
     # if manually == 'None':
@@ -89,14 +90,14 @@ for i in sources[:100]:
     #     total = offer.price_rent + energies
     # else:
     #     total = offer.price_rent
-    #
+
     # try:
     #     lat, lon = get_coordinates(offer.location)
     # except:
     #     lat, lon = None, None
-    # repository.update_offer(i,{"latitude":lat,"longtitude":lon,"price_total":total})
+    # repository.update_offer(i,{"price_total":total,"price_energies":energies})
     # resource = vdb.get_element(source_url=i)[0].points[0].payload
-    # resource.update({"latitude":offer.latitude,"longtitude":offer.longtitude,"price_total":offer.price_total})
+    # resource.update({"price_total":total})
     # vdb.update_metadata_by_url(source_url=i,updated_metadata=resource)
     # count+=1
 
@@ -116,32 +117,25 @@ for i in sources[:100]:
         if len(dups) > 0:
             duplicates.append({
                 "original": i,
-                "duplicates": [
-                    {
-                        c.key: (
-                            getattr(dup, c.key).isoformat() if isinstance(getattr(dup, c.key), datetime)
-                            else getattr(dup, c.key)
-                        )
-                        for c in inspect(dup).mapper.column_attrs
-                    }
-                    for dup in dups
-                ]
+                "lat":offer.latitude,
+                "lon":offer.longtitude,
+                "duplicates": [{"source":dup.source_url, "lat":dup.latitude,"lon":dup.longtitude}for dup in dups]
             })
+#
+#
+        try:
+            repository.delete_by_source_urls([i])
+        except:
+            not_deleted.append(i)
+            continue
+        try:
+            vdb.delete_element(source_url=i)
+        except:
+            not_deleted_vdb.append(i)
+
+        found_dups += 1
 
     count += 1
-    #
-    #     try:
-    #         repository.delete_by_source_urls([i])
-    #     except:
-    #         not_deleted.append(i)
-    #         continue
-    #     try:
-    #         vdb.delete_element(source_url=i)
-    #     except:
-    #         not_deleted_vdb.append(i)
-    #
-    #     found_dups += 1
-    #     print(offer.price_rent,offer.size,offer.coordinates)
 
 with open("duplicates.json", "w", encoding="utf-8") as f:
     json.dump(duplicates, f, ensure_ascii=False, indent=2)
