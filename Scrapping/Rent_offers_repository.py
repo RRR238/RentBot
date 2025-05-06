@@ -45,17 +45,21 @@ class Rent_offers_repository:
                                 Rent_offer_model.source_url == source_url)
                                 ).scalar()
 
-
-    def duplicate_exists(self,
-                        price: float|None,
-                        size: float|None,
-                        coordinates: str|None,
-                        url:str|None=None) -> bool:
-
+    def find_duplicates(self,
+                        price_rent: float | None,
+                        price_energies: float | None,
+                        size: float | None,
+                        rooms: int | None,
+                        ownership: str | None,
+                        lat: float | None,
+                        lon: float | None,
+                        url: str | None = None):
         with self.get_session() as session:
             conditions = [
-                Rent_offer_model.price_rent == price,
-                Rent_offer_model.coordinates == coordinates
+                Rent_offer_model.price_rent == price_rent,
+                Rent_offer_model.price_energies == price_energies,
+                Rent_offer_model.rooms == rooms,
+                Rent_offer_model.ownership == ownership,
             ]
 
             if size is not None:
@@ -64,10 +68,16 @@ class Rent_offers_repository:
             else:
                 conditions.append(Rent_offer_model.size == size)
 
+            if lat is not None and lon is not None:
+                conditions.append(Rent_offer_model.latitude >= lat - 0.01)
+                conditions.append(Rent_offer_model.latitude <= lat + 0.01)
+                conditions.append(Rent_offer_model.longtitude >= lon - 0.01)
+                conditions.append(Rent_offer_model.longtitude <= lon + 0.01)
+
             if url:
                 conditions.append(Rent_offer_model.source_url != url)
 
-            return session.query(exists().where(and_(*conditions))).scalar()
+            return session.query(Rent_offer_model).filter(and_(*conditions)).all()
 
     def insert_offer_images(self, rent_offer_id: int, image_urls: list[str]):
         """Inserts multiple image URLs related to a specific rent offer."""
