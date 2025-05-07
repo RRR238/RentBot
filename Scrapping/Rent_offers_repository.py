@@ -45,29 +45,41 @@ class Rent_offers_repository:
                                 Rent_offer_model.source_url == source_url)
                                 ).scalar()
 
-
-    def duplicate_exists(self,
-                        price: float|None,
-                        size: float|None,
-                        coordinates: str|None,
-                        url:str|None=None) -> bool:
-
+    def find_duplicates(self,
+                        price_rent: float | None,
+                        price_energies: float | None,
+                        size: float | None,
+                        rooms: int | None,
+                        ownership: str | None,
+                        lat: float | None,
+                        lon: float | None,
+                        url: str | None = None,
+                        precision_coordinates:float=0.001,
+                        precision_size:float=1):
         with self.get_session() as session:
             conditions = [
-                Rent_offer_model.price_rent == price,
-                Rent_offer_model.coordinates == coordinates
+                Rent_offer_model.price_rent == price_rent,
+                Rent_offer_model.price_energies == price_energies,
+                Rent_offer_model.rooms == rooms,
+                Rent_offer_model.ownership == ownership,
             ]
 
             if size is not None:
-                conditions.append(Rent_offer_model.size >= size - 1)
-                conditions.append(Rent_offer_model.size <= size + 1)
+                conditions.append(Rent_offer_model.size >= size - precision_size)
+                conditions.append(Rent_offer_model.size <= size + precision_size)
             else:
                 conditions.append(Rent_offer_model.size == size)
+
+            if lat is not None and lon is not None:
+                conditions.append(Rent_offer_model.latitude >= lat - precision_coordinates)
+                conditions.append(Rent_offer_model.latitude <= lat + precision_coordinates)
+                conditions.append(Rent_offer_model.longtitude >= lon - precision_coordinates)
+                conditions.append(Rent_offer_model.longtitude <= lon + precision_coordinates)
 
             if url:
                 conditions.append(Rent_offer_model.source_url != url)
 
-            return session.query(exists().where(and_(*conditions))).scalar()
+            return session.query(Rent_offer_model).filter(and_(*conditions)).all()
 
     def insert_offer_images(self, rent_offer_id: int, image_urls: list[str]):
         """Inserts multiple image URLs related to a specific rent offer."""
@@ -109,3 +121,26 @@ class Rent_offers_repository:
                                      ).filter(
                                     Rent_offer_model.source_url == identifier
                                     ).first()
+
+    def update_offer(self,
+                     identifier,
+                     updates: dict) -> bool:
+        with (self.get_session() as session):
+            if isinstance(identifier, int):
+                offer = session.query(Rent_offer_model
+                                      ).filter(Rent_offer_model.id == identifier
+                                                                        ).first()
+            else:
+                offer = session.query(Rent_offer_model
+                                      ).filter(Rent_offer_model.source_url == identifier
+                                                                            ).first()
+
+            if not offer:
+                return False
+
+            for key, value in updates.items():
+                if hasattr(offer, key):
+                    setattr(offer, key, value)
+
+            session.commit()
+            return True

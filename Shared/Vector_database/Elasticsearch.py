@@ -153,24 +153,50 @@ class Vector_DB_Elasticsearch(Vector_DB_interface):
                                filter:list,
                                num_candidates:int = 500):
         # Step 1: Build the metadata filtering query
+        # vector_query_part = {
+        #         "size": k,  # This specifies how many documents you want to return (top k)
+        #         "query": {
+        #             "bool": {
+        #                 "filter": filter,
+        #                 #     [
+        #                 #     {"term": {"metadata.property_type.keyword": 'flat'}},
+        #                 #     {"term": {"metadata.rooms": 2}},
+        #                 #     {"range":{"metadata.price_rent":{"lte":1000}}}
+        #                 #     # Add other metadata filters here, for example, 'rooms' and 'price'
+        #                 # ],
+        #                 "should": [
+        #                     {
+        #                         "knn": {
+        #                             "field": "embedding",  # The field where vectors are stored
+        #                             "query_vector": vector_query,  # The query vector to search for
+        #                             "k": k,  # Number of nearest neighbors to return
+        #                             "num_candidates": num_candidates  # The number of candidates to consider before ranking
+        #                         }
+        #                     }
+        #                 ]
+        #             }
+        #         }
+        #     }
         vector_query_part = {
-                "size": k,  # This specifies how many documents you want to return (top k)
-                "query": {
-                    "bool": {
-                        "filter": filter,
-                        "should": [
-                            {
-                                "knn": {
-                                    "field": "embedding",  # The field where vectors are stored
-                                    "query_vector": vector_query,  # The query vector to search for
-                                    "k": k,  # Number of nearest neighbors to return
-                                    "num_candidates": num_candidates  # The number of candidates to consider before ranking
-                                }
-                            }
-                        ]
+
+            "size": k,
+            "query": {
+                "script_score": {
+                    "query": {
+                        "bool": {
+                            "filter": filter  # your existing filter list
+                        }
+                    },
+                    "script": {
+                        "source": "cosineSimilarity(params.query_vector, 'embedding') + 1.0",  # score shifted to [0,2]
+                        "params": {
+                            "query_vector": vector_query  # your embedding vector
+                        }
+
                     }
                 }
             }
+        }
 
         # Perform the search with the combined query
         response = self.__client.search(index=self.index_name,

@@ -28,7 +28,7 @@
         "response": "cena: 1100, \npoloha: Košice, \npočet izieb: None, \nrozloha: None, \ntyp nehnuteľnosti: mezonet"
     },
     {
-        "query": "oftový byt v Nitre s výhľadom na mesto, 800 € mesačne, 70 m²",
+        "query": "Loftový byt v Nitre s výhľadom na mesto, 800 € mesačne, 70 m²",
         "response": "cena: 800\npoloha: Nitra\npočet izieb: None\nrozloha: 70\ntyp nehnuteľnosti: loft"
     },
     {
