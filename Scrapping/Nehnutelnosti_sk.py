@@ -17,6 +17,7 @@ from Rent_offers_repository import Rent_offers_repository
 from Shared.LLM import LLM
 from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
 from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
+from langdetect import detect, DetectorFactory
 
 
 
@@ -508,6 +509,7 @@ class Nehnutelnosti_sk_processor:
                           title,
                           description,
                           other_attributes=None):
+        description_sk_only = Nehnutelnosti_sk_processor.remove_non_slovak_sections(description)
         if other_attributes:
             other_attributes_formatted = "\n".join(f"{k.strip().replace(
                                             '\xa0', '').rstrip(
@@ -516,18 +518,38 @@ class Nehnutelnosti_sk_processor:
             text_to_embedd = (
                 f"NADPIS:\n{title}\n\n"
                 f"ZÁKLADNÉ ÚDAJE:\n{other_attributes_formatted}\n\n"
-                f"OPIS:\n{description}"
+                f"OPIS:\n{description_sk_only}"
             )
         else:
             text_to_embedd = (
                 f"NADPIS:\n{title}\n\n"
-                f"OPIS:\n{description}"
+                f"OPIS:\n{description_sk_only}"
             )
 
         embedding = llm.get_embedding(text_to_embedd,'text-embedding-3-large')
         #print(text_to_embedd)
 
         return embedding
+
+    @staticmethod
+    def remove_non_slovak_sections(
+                                   text: str) -> str:
+        # Split the text into paragraphs or lines
+        sections = text.split("\n")
+        slovak_sections = []
+
+        for section in sections:
+            stripped = section.strip()
+            if not stripped:
+                continue
+            try:
+                lang = detect(stripped)
+                if lang == "sk":  # keep only Slovak
+                    slovak_sections.append(stripped)
+            except:
+                continue  # skip if detection fails
+
+        return "\n".join(slovak_sections)
 
     def delete_invalid_offers(self):
         case_nr = 1
