@@ -18,6 +18,7 @@ from Shared.LLM import LLM
 from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
 from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
 from langdetect import detect, DetectorFactory
+import re
 
 
 
@@ -89,10 +90,7 @@ class Nehnutelnosti_sk_processor:
             prices = self.get_price(soup)
             description = self.get_description(soup)
             images= self.get_images(detail_link)
-            try:
-                coordinates = [str(i) for i in get_coordinates(location)]
-            except:
-                coordinates = None
+            coordinates = get_coordinates(location)
             year_of_construction = int(other_properties['Rok výstavby:']) if 'Rok výstavby:' in other_properties.keys() else None
             approval_year = int(other_properties['Rok kolaudácie:']) if 'Rok kolaudácie:' in other_properties.keys() else None
             last_reconstruction_year = int(other_properties['Rok poslednej rekonštrukcie:']) if 'Rok poslednej rekonštrukcie:' in other_properties.keys() else None
@@ -371,10 +369,17 @@ class Nehnutelnosti_sk_processor:
 
                 results = self.process_detail(link)
 
-                coordinates = ";".join(results['coordinates']) if results['coordinates'] else None
-                if self.db_repository.duplicate_exists(results['prices']['rent'],
+                if self.db_repository.find_duplicates(results['prices']['rent'],
                                                        results['key_attributes']['size'],
-                                                       coordinates):
+                                                       results['coordinates'],
+                                                        results['prices']['energies'],
+                                                        results['key_attributes']['size'],
+                                                        results['key_attributes']['rooms'],
+                                                        results['ownership'].lower() if results['ownership'] else None,
+                                                        results['coordinates'][0] if results['coordinates'] else None,
+                                                        results['coordinates'][1] if results['coordinates'] else None,
+                                                        link,
+                                                        ):
 
                     print(f"Duplicate found for offer: {link}")
                     process_n += 1
@@ -399,7 +404,8 @@ class Nehnutelnosti_sk_processor:
                     "title": results['title'],
                     "location": results['location'],
                     "property_type": property_type.lower() if property_type else None,
-                    "property_status": results['key_attributes']['property_status'].lower() if results['key_attributes']['property_status'] else None,
+                    "property_status": results['key_attributes']['property_status'].lower()
+                                            if results['key_attributes']['property_status'] else None,
                     "rooms": results['key_attributes']['rooms'],
                     "size": results['key_attributes']['size'],
                     "year_of_construction":results['year_of_construction'],
@@ -410,13 +416,16 @@ class Nehnutelnosti_sk_processor:
                     "price_rent": results['prices']['rent'],
                     "price_ms": results['prices']['meter squared'],
                     "price_energies":  results['prices']['energies'],
+                    "price_total": self.extract_energy_price(results['description'],
+                                                             results['prices']['rent']),
                     "description": results['description'],
                     "other_properties": results['other_properties'],
                     "floor":results['floor'],
                     "positioning": results['positioning'].lower() if results['positioning'] else None,
                     "source": self.source,
                     "source_url": results['source_url'],
-                    "coordinates": coordinates
+                    "latitude": results['coordinates'][0] if results['coordinates'] else None,
+                    "longtitude": results['coordinates'][1] if results['coordinates'] else None
                 })
                 print(f"writing images to DB...")
                 # self.db_repository.insert_offer_images(new_offer.id,results['images'][:4]
@@ -551,6 +560,68 @@ class Nehnutelnosti_sk_processor:
 
         return "\n".join(slovak_sections)
 
+    def extract_energy_price(self,
+                             description:str|None,
+                             price_rent:int|None,
+                             prompt:str="""Z nasledujúceho opisu nehnuteľnosti extrahuj cenu **čisto za energie**, ak je to možné.
+                             Pozor – uveď **iba cenu za energie**! Ak je v texte uvedené „cena nájmu <cena> vrátane energií“, odpíš: None.
+
+                             {description}
+
+                             Odpovedz IBA číslom. Ak nie je možné určiť konkrétnu sumu, odpíš: None.
+                             Tvoja odpoveď:
+                             """
+                             ):
+
+        lt = description.lower().replace(' ', '')
+        manually = self.extract_energy_price_by_pattern(lt).strip()
+        if manually is None:
+            generated = self.llm.generate_answer(
+                                        prompt=prompt.format(
+                                        description=description)
+                                        ).strip()
+            try:
+                generated = int(re.sub(r'\D', '', generated))
+                if generated == 'None':
+                    energies = None
+                elif generated >= price_rent:
+                    energies = None
+                else:
+                    energies = generated
+            except:
+                energies = None
+        else:
+            try:
+                energies = int(manually)
+            except:
+                energies = None
+
+        if energies and price_rent:
+            total = price_rent + energies
+        else:
+            total = price_rent
+
+        return total
+
+    def extract_energy_price_by_pattern(self,
+                                        lt: str) -> str|None:
+        patterns = [
+            r'energie:(\d+)',  # energie:100
+            r'\+(\d+)energie',  # +100energie
+            r'\+(\d+)€energie',  # +100€energie
+            r'\+(\d+)eurenergie',  # +100eurenergie
+            r'energievrátaneinternetuatv:(\d+)',  # energievrátaneinternetuatv:300
+            r'\+(\d+),-',  # +100,-
+            r'\+energie(\d+)',  # +energie100
+            r'cenanezahŕňaenergie(\d+)'  # cenanezahŕňaenergie250
+        ]
+
+        for pattern in patterns:
+            match = re.search(pattern, lt)
+            if match:
+                return match.group(1)
+        return None
+
     def delete_invalid_offers(self):
         case_nr = 1
         invalid = 0
@@ -567,7 +638,7 @@ class Nehnutelnosti_sk_processor:
                 elif response.status_code in [301, 302, 303, 307, 308]:
                     print(f"Redirected to: {response.headers.get('Location')}")
                     self.db_repository.delete_by_source_urls([url])
-                    #252kjOPJKAZself.vdb.delete_element(source_url=url)
+                    self.vdb.delete_element(source_url=url)
                     invalid += 1
                 else:
                     print(f"Status code: {response.status_code}")
