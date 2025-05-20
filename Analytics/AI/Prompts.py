@@ -1,23 +1,3 @@
-check_conversation_prompt = """
-Tvojou úlohou je určiť, či sa nový vstup používateľa stále týka tej istej nehnuteľnosti ako predchádzajúca konverzácia, alebo ide o nový a samostatný dopyt.
-
-KONVERZÁCIA:
-{chat_history}
-
-NOVÝ VSTUP:
-{user_prompt}
-
-Pravidlá:
-- Ak nový vstup odpovedá na otázku asistenta → odpovedz: `POKRAČUJ`
-- Ak nový vstup mení alebo spresňuje parametre tej istej nehnuteľnosti (napr. cena, počet izieb, rozloha, lokalita v tom istom meste, terasa, parkovanie, vybavenie, upresnenie preferencií ako poschodie, výhľad...), stále ide o rovnaký dopyt → odpovedz: `POKRAČUJ`
-- Ak nový vstup naznačuje úplne inú nehnuteľnosť (HLAVNE iný typ bývania – dom/chalupa vs byt, mezonet vs byt, alebo zmena viacerých kľúčových parametrov naraz, ako cena výrazne vyššia, úplne iná lokalita alebo požiadavky na rozlohu) → odpovedz: `NOVÝ DOPYT`
-- Ak nový vstup len pridáva alebo maže parametre (napr. cena, rozloha, počet izieb, záhrada, terasa, balkón, parkovanie, upresnenie lokality alebo poschodia), považuj to za ten istý dopyt → odpovedz: `POKRAČUJ`
-- Ak nový vstup je iba jediné slovo týkajúce sa vybavenia alebo časti nehnuteľnosti (napr. "klimatizácia", "balkón", "garáž" atď.), považuj to stále za ten istý dopyt → odpovedz: `POKRAČUJ`
-
-Dôležité:  
-- Nepíš žiadne vysvetlenia, odpovedz **LEN** jedným slovom: `POKRAČUJ` alebo `NOVÝ DOPYT`
-"""
-
 summarize_chat_history_prompt = """
 Na základe histórie konverzácie, predchádzajúcej sumarizácie a nasledujúcej novej informácie, aktualizuj a stručne zhrň aktuálne preferencie používateľa ohľadom nehnuteľnosti do krátkeho odstavca.  
 Zameraj sa IBA NA FAKTY a konkrétne požiadavky.  
@@ -58,6 +38,8 @@ rozloha: <tvoja dedukcia> (uveď iba číslo, ak je to možné. Ak je uvedený r
 typ nehnuteľnosti: <tvoja dedukcia> (vyber iba jednu z nasledujúcich možností: "dom", "loft", "mezonet", "penthouse", "byt", "garzónka". Ak nie je možné určiť, priraď hodnotu None.),
 
 novostavba: <tvoja dedukcia> (priraď hodnotu True, ak je z promptu zrejmé, že ide o novostavbu. Inak priraď hodnotu None.)
+
+lokalita: <tvoja dedukcia> (Urči iba mesto alebo mestskú časť. Ignoruj konkrétne body na mape, ako napr. „pri lese“, „pri jazere“, „blízko prírody“ a podobne. Ak nie je možné určiť, priraď hodnotu None.)
 
 Ak niektoré hodnoty nie je možné určiť, priraď k danej premennej hodnotu None.
 
@@ -105,4 +87,22 @@ Kladiem ti nasledujúce požiadavky:
 8. Rozhovor neukončuj. Iba sa pýtaj otázky.
 
 Tvoj cieľ: získať všetky potrebné informácie, bez opakovania otázok, bez navrhovania riešení – iba otázkami.
+"""
+
+summary_prompt = """
+Z nasledujúcej požiadavky používateľa vytvor veľmi stručné zhrnutie, ktoré vyjadruje len požiadavky na typ bývania, vybavenie alebo životný štýl.
+
+NEZAHRŇUJ žiadne informácie o:
+- cene (napr. "do 800 eur")
+- meste alebo mestskej časti (napr. "v Bratislave", "v Ružinove" a pod.)
+- počte izieb (napr. "dvojizbový byt")
+- rozlohe (napr. "60 m²")
+
+Zameraj sa iba na špecifické požiadavky ako: balkón, parkovanie, klimatizácia, blízkosť prírody, jazera a pod.
+
+Vstup: "{cleaned_prompt}"
+
+Zhrnutie:
+
+
 """
