@@ -3,7 +3,7 @@ from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from Prompts import get_key_attributes_prompt, agentic_flow_prompt,summarize_chat_history_prompt
+from Prompts import get_key_attributes_prompt, agentic_flow_prompt,summarize_chat_history_prompt, summarize_chat_history_prompt_v_2
 from utils import chat_history_summary_post_processing, extract_chat_history_as_dict, format_chat_history, convert_text_to_dict, processing_dict,prepare_filters_qdrant, strip_standardized_data
 from Shared.LLM import LLM
 from Shots import chat_history_summary_few_shots, extract_key_attributes_shots
@@ -95,40 +95,40 @@ while True:
     #                                                                                      chat_history=formatted_chat_history))
     # print(response_query_classification)
 
-    response_summary = llm.generate_answer(summarize_chat_history_prompt.format(conversation_history=formatted_chat_history,
+    response_summary = llm.generate_answer(summarize_chat_history_prompt_v_2.format(conversation_history=formatted_chat_history,
                                                                                 original_summary=org_summary,
                                                                                 user_prompt=query))
                                                                                 #chat_history=chat_history_summary_few_shots)
 
-    processed_summary = chat_history_summary_post_processing(response_summary)
-    summary_to_embedd = strip_standardized_data(processed_summary)
+    print(f"summary: {response_summary}")
+    processed_summary = response_summary[:response_summary.index(', ostatné preferencie')] #chat_history_summary_post_processing(response_summary)
+    summary_to_embedd = response_summary[response_summary.index(', ostatné preferencie')+len(', ostatné preferencie: '):]#strip_standardized_data(processed_summary)
     org_summary = response_summary #processed_summary
     # chat_history_summary_few_shots.append({"role": "user", "content": query})
     # chat_history_summary_few_shots.append({"role": "assistant", "content": response_summary})
     #print(f"🤖: {response}")
-    print(f"summary: {response_summary}")
     print(f"processed summary: {processed_summary}")
     print(f"sumary to embedd: {summary_to_embedd}")
-    response_key_attr = llm.generate_answer(get_key_attributes_prompt.format(user_prompt=response_summary),
-                                            chat_history=extract_key_attributes_shots)
-    key_attributes_dict = convert_text_to_dict(response_key_attr)
-    processed_dict = processing_dict(key_attributes_dict)
-    print(processed_dict)
-    filters = prepare_filters_qdrant(processed_dict)
-
-    parts['response_summary'] = response_summary
-    parts['processed_summary'] = processed_summary
-    parts['summary_to_embedd'] = summary_to_embedd
-    parts['results'] = []
-
-    embedding = llm.get_embedding(summary_to_embedd, model='text-embedding-3-large') #processed_summary
-    results = vdb.filtered_vector_search(embedding, 15, filter=filters)[0]
-    for i in results.points:
-        parts['results'].append(i.payload['source_url'])
-        print(i.payload['source_url'])
-
+    # response_key_attr = llm.generate_answer(get_key_attributes_prompt.format(user_prompt=response_summary),
+    #                                         chat_history=extract_key_attributes_shots)
+    # key_attributes_dict = convert_text_to_dict(response_key_attr)
+    # processed_dict = processing_dict(key_attributes_dict)
+    # print(processed_dict)
+    # filters = prepare_filters_qdrant(processed_dict)
+    #
+    # parts['response_summary'] = response_summary
+    # parts['processed_summary'] = processed_summary
+    # parts['summary_to_embedd'] = summary_to_embedd
+    # parts['results'] = []
+    #
+    # embedding = llm.get_embedding(summary_to_embedd, model='text-embedding-3-large') #processed_summary
+    # results = vdb.filtered_vector_search(embedding, 15, filter=filters)[0]
+    # for i in results.points:
+    #     parts['results'].append(i.payload['source_url'])
+    #     print(i.payload['source_url'])
+    #
     response = agentic_chain.predict(input=query)
-    parts['response'] = response
+    # parts['response'] = response
 
     # if any(phrase in response.lower() for phrase in skip_phrases):
     #     print("skipping to next question")
@@ -138,9 +138,9 @@ while True:
         # continue
     if any(phrase in response.lower() for phrase in finish_phrases):
         print(f"🤖: Ďakujem za vaše odpovede. Ak budete chcieť doplniť ďalšie kritériá, neváhajte mi napísať.")
-        parts['response'] = response
+        #parts['response'] = response
         continue
 
     print(f"🤖: {response}")
-    convo.append(parts)
+    #convo.append(parts)
     #print(f"chat history length: {len(memory.chat_memory.messages)}")

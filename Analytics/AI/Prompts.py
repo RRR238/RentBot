@@ -23,6 +23,28 @@ Nová informácia:
 Tvoje zhrnutie kľúčových údajov a preferencií:
 """
 
+summarize_chat_history_prompt_v_2 = """
+Na základe histórie konverzácie, predchádzajúcej sumarizácie a nasledujúcej novej informácie, aktualizuj a stručne zhrň aktuálne preferencie používateľa ohľadom nehnuteľnosti.  
+Tvoja odpoveď musí byť v nasledujúcom formáte:  
+cena: <tvoja dedukcia>, počet izieb: <tvoja dedukcia>, počet izieb MIN: <tvoja dedukcia>, počet izieb MAX: <tvoja dedukcia>, rozloha: <tvoja dedukcia>, typ nehnuteľnosti: <tvoja dedukcia>, novostavba: <tvoja dedukcia>, lokalita: <tvoja dedukcia>, ostatné preferencie: <tvoja dedukcia>  
+
+Ak niektoré hodnoty nie je možné určiť, priraď k danej premennej hodnotu None.
+**Priraď hodnoty iba k uvedeným kategóriám! Nevytváraj nové kategórie.**
+**Ak používateľ nemá preferenciu ohľadom nejakého kritéria, alebo vyslovene uvedie, že niečo nechce alebo nepotrebuje, NEUVÁDZAJ toto kritérium v tvojej odpovedi nijakým spôsobom !!!**
+
+História konverzácie:  
+{conversation_history}
+
+Predchádzajúca sumarizácia:  
+{original_summary}
+
+Nová informácia:  
+{user_prompt}
+
+Tvoje zhrnutie kľúčových údajov a preferencií:
+
+"""
+
 get_key_attributes_prompt = """Na základe nasledujúceho promptu používateľa vydedukuj hodnoty pre tieto premenné:
 
 cena: <tvoja dedukcia> (uveď iba číslo. Ak je uvedený ROZSAH a nie konkrétne číslo, použi najvyššiu hodnotu z rozsahu. Ak nie je možné určiť presné číslo, priraď hodnotu None.),
@@ -48,24 +70,6 @@ Prompt: {user_prompt}
 Tvoj výstup:
 """
 
-follow_up_questions_prompt = """Toto je dopyt používateľa ohľadom požadovanej nehnuteľnosti:  
-{original_summary}
-
-Toto sú vydedukované kľúčové údaje:  
-{key_attributes}
-
-Niektorým kľúčovým atribútom bola priradená hodnota *None*, pretože z používateľovho dopytu sa nedali jednoznačne určiť.  
-Navrhni doplňujúce otázky, pomocou ktorých by sa dali tieto údaje získať.
-
-Ak *žiadnemu* z atribútov nebola priradená hodnota *None*, polož otázky, ktoré pomôžu spresniť preferencie používateľa — napríklad, či má záujem o balkón, parkovanie, klimatizáciu a podobne. Buď kreatívny.
-POZOR - polož najviac 2 otázky, ktoré považuješ za najdôležitejšie.
-Výstup v tomto formate:
-· <otázka 1>
-· <otázka 2>
-
-Tvoje otázky:
-"""
-
 agentic_flow_prompt ="""
 Tvojou úlohou je získať a zhrnúť preferencie používateľa ohľadom ideálnej nehnuteľnosti na prenájom.
 
@@ -87,22 +91,4 @@ Kladiem ti nasledujúce požiadavky:
 8. Rozhovor neukončuj. Iba sa pýtaj otázky.
 
 Tvoj cieľ: získať všetky potrebné informácie, bez opakovania otázok, bez navrhovania riešení – iba otázkami.
-"""
-
-summary_prompt = """
-Z nasledujúcej požiadavky používateľa vytvor veľmi stručné zhrnutie, ktoré vyjadruje len požiadavky na typ bývania, vybavenie alebo životný štýl.
-
-NEZAHRŇUJ žiadne informácie o:
-- cene (napr. "do 800 eur")
-- meste alebo mestskej časti (napr. "v Bratislave", "v Ružinove" a pod.)
-- počte izieb (napr. "dvojizbový byt")
-- rozlohe (napr. "60 m²")
-
-Zameraj sa iba na špecifické požiadavky ako: balkón, parkovanie, klimatizácia, blízkosť prírody, jazera a pod.
-
-Vstup: "{cleaned_prompt}"
-
-Zhrnutie:
-
-
 """
