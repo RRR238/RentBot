@@ -25,12 +25,14 @@ Tvoje zhrnutie kľúčových údajov a preferencií:
 
 summarize_chat_history_prompt_v_2 = """
 Na základe histórie konverzácie, predchádzajúcej sumarizácie a nasledujúcej novej informácie, aktualizuj a stručne zhrň aktuálne preferencie používateľa ohľadom nehnuteľnosti.  
-Tvoja odpoveď musí byť v nasledujúcom formáte:  
+Tvoja odpoveď musí byť v nasledujúcom formáte:
+
 cena: <tvoja dedukcia>, počet izieb: <tvoja dedukcia>, počet izieb MIN: <tvoja dedukcia>, počet izieb MAX: <tvoja dedukcia>, rozloha: <tvoja dedukcia>, typ nehnuteľnosti: <tvoja dedukcia>, novostavba: <tvoja dedukcia>, lokalita: <tvoja dedukcia>, ostatné preferencie: <tvoja dedukcia>  
 
 Ak niektoré hodnoty nie je možné určiť, priraď k danej premennej hodnotu None.
 **Priraď hodnoty iba k uvedeným kategóriám! Nevytváraj nové kategórie.**
 **Ak používateľ nemá preferenciu ohľadom nejakého kritéria, alebo vyslovene uvedie, že niečo nechce alebo nepotrebuje, NEUVÁDZAJ toto kritérium v tvojej odpovedi nijakým spôsobom !!!**
+**„Pri kategórii 'novostavba' iba uveď áno/nie podľa toho, či používateľ preferuje novostavbu alebo nie (alebo None, ak sa nedá určiť). Nedopĺňaj žiadne ďalšie informácie o statuse stavby.** 
 
 História konverzácie:  
 {conversation_history}

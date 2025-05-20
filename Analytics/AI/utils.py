@@ -253,3 +253,15 @@ def strip_standardized_data(text: str) -> str:
     text = text.strip(' ,.')
 
     return text
+
+
+def remove_none_or_nie_fields(text: str) -> str:
+    # This regex matches patterns like "key: none" or "key: nie" (case-insensitive, leading/trailing whitespace handled)
+    cleaned_text = re.sub(r'\b[^:,\n]+:\s*(none|nie)\b\s*,?', '', text.lower(), flags=re.IGNORECASE)
+
+    # Clean up redundant commas and whitespace
+    cleaned_text = re.sub(r',\s*,', ',', cleaned_text)  # Double commas
+    cleaned_text = re.sub(r'^,|,$', '', cleaned_text)  # Leading/trailing commas
+    cleaned_text = re.sub(r'\s{2,}', ' ', cleaned_text)  # Extra spaces
+
+    return cleaned_text.strip()
