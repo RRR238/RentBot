@@ -17,6 +17,7 @@ from Rent_offers_repository import Rent_offers_repository
 from Shared.LLM import LLM
 from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
 from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
+from langdetect import detect, DetectorFactory
 
 
 
@@ -508,6 +509,7 @@ class Nehnutelnosti_sk_processor:
                           title,
                           description,
                           other_attributes=None):
+        description_sk_only = Nehnutelnosti_sk_processor.remove_non_slovak_sections(description)
         if other_attributes:
             other_attributes_formatted = "\n".join(f"{k.strip().replace(
                                             '\xa0', '').rstrip(
@@ -516,18 +518,38 @@ class Nehnutelnosti_sk_processor:
             text_to_embedd = (
                 f"NADPIS:\n{title}\n\n"
                 f"ZÁKLADNÉ ÚDAJE:\n{other_attributes_formatted}\n\n"
-                f"OPIS:\n{description}"
+                f"OPIS:\n{description_sk_only}"
             )
         else:
             text_to_embedd = (
                 f"NADPIS:\n{title}\n\n"
-                f"OPIS:\n{description}"
+                f"OPIS:\n{description_sk_only}"
             )
 
         embedding = llm.get_embedding(text_to_embedd,'text-embedding-3-large')
         #print(text_to_embedd)
 
         return embedding
+
+    @staticmethod
+    def remove_non_slovak_sections(
+                                   text: str) -> str:
+        # Split the text into paragraphs or lines
+        sections = text.split("\n")
+        slovak_sections = []
+
+        for section in sections:
+            stripped = section.strip()
+            if not stripped:
+                continue
+            try:
+                lang = detect(stripped)
+                if lang == "sk":  # keep only Slovak
+                    slovak_sections.append(stripped)
+            except:
+                continue  # skip if detection fails
+
+        return "\n".join(slovak_sections)
 
     def delete_invalid_offers(self):
         case_nr = 1
@@ -545,7 +567,7 @@ class Nehnutelnosti_sk_processor:
                 elif response.status_code in [301, 302, 303, 307, 308]:
                     print(f"Redirected to: {response.headers.get('Location')}")
                     self.db_repository.delete_by_source_urls([url])
-                    self.vdb.delete_element(source_url=url)
+                    #252kjOPJKAZself.vdb.delete_element(source_url=url)
                     invalid += 1
                 else:
                     print(f"Status code: {response.status_code}")
@@ -556,12 +578,12 @@ class Nehnutelnosti_sk_processor:
         print(f"deleted {invalid} offers")
 
 
-processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
-                                       auth_token =auth_token_nehnutelnosti,
-                                       db_repository =Rent_offers_repository(os.getenv('connection_string')),
-                                        llm =LLM(),
-                                        vector_db = Vector_DB_Qdrant('test')
-                                        )
+# processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
+#                                        auth_token =auth_token_nehnutelnosti,
+#                                        db_repository =Rent_offers_repository(os.getenv('connection_string')),
+#                                         llm =LLM(),
+#                                         vector_db = Vector_DB_Qdrant('test')
+#                                         )
 #processor.pagination_check()
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
