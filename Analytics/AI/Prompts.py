@@ -24,28 +24,64 @@ Tvoje zhrnutie kľúčových údajov a preferencií:
 """
 
 summarize_chat_history_prompt_v_2 = """
-Na základe histórie konverzácie, predchádzajúcej sumarizácie a nasledujúcej novej informácie, aktualizuj a stručne zhrň aktuálne preferencie používateľa ohľadom nehnuteľnosti.  
+Na základe histórie konverzácie a nasledujúcej novej informácie, aktualizuj a doplň aktuálnu sumarizáciu preferencií používateľa ohľadom nehnuteľnosti.
 Tvoja odpoveď musí byť v nasledujúcom formáte:
 
-cena: <tvoja dedukcia>, počet izieb: <tvoja dedukcia>, počet izieb MIN: <tvoja dedukcia>, počet izieb MAX: <tvoja dedukcia>, rozloha: <tvoja dedukcia>, typ nehnuteľnosti: <tvoja dedukcia>, novostavba: <tvoja dedukcia>, lokalita: <tvoja dedukcia>, ostatné preferencie: <tvoja dedukcia>  
+cena: <tvoja dedukcia>, počet izieb: <tvoja dedukcia>, rozloha: <tvoja dedukcia>, typ nehnuteľnosti: <tvoja dedukcia>, stav nehnuteľnosti: <tvoja dedukcia>, lokalita: <tvoja dedukcia>, ostatné preferencie: <tvoja dedukcia>
+
+Pravidlá:
 
 Ak niektoré hodnoty nie je možné určiť, priraď k danej premennej hodnotu None.
-**Priraď hodnoty iba k uvedeným kategóriám! Nevytváraj nové kategórie.**
-**Ak používateľ nemá preferenciu ohľadom nejakého kritéria, alebo vyslovene uvedie, že niečo nechce alebo nepotrebuje, NEUVÁDZAJ toto kritérium v tvojej odpovedi nijakým spôsobom !!!**
-**„Pri kategórii 'novostavba' iba uveď áno/nie podľa toho, či používateľ preferuje novostavbu alebo nie (alebo None, ak sa nedá určiť). Nedopĺňaj žiadne ďalšie informácie o statuse stavby.** 
 
-História konverzácie:  
+Priraď hodnoty iba k uvedeným kategóriám! Nevytváraj nové kategórie.
+
+Ak používateľ nemá preferenciu ohľadom nejakého kritéria, alebo vyslovene uvedie, že niečo nechce alebo nepotrebuje (používa slová ako „nechcem“, „neviem“, „netreba“, „je mi to jedno“ a podobne), neuvádzaj toto kritérium do kategórie „ostatné preferencie“.
+
+Pri kategórii „stav nehnuteľnosti“ iba uveď: novostavba / staršia stavba / bez striktneho vymedzenia (alebo None, ak sa nedá určiť). Nedopĺňaj žiadne ďalšie informácie o stave stavby do kategórie „ostatné preferencie“.
+
+História konverzácie:
 {conversation_history}
 
-Predchádzajúca sumarizácia:  
-{original_summary}
-
-Nová informácia:  
+Nová informácia:
 {user_prompt}
 
-Tvoje zhrnutie kľúčových údajov a preferencií:
+Predchádzajúca sumarizácia:
+{original_summary}
+
+Aktualizovaná sumarizácia preferencií:
 
 """
+summarize_chat_history_prompt_simple = """
+História konverzácie:
+{conversation_history}
+
+Nová informácia:
+{user_prompt}
+
+Predchádzajúca sumarizácia:
+{original_summary}
+
+Aktualizovaná sumarizácia preferencií:
+
+"""
+
+system_message = {
+    "role": "system",
+    "content": """
+Si precízny realitný asistent. Tvojou úlohou je na základe histórie konverzácie a novej informácie aktualizovať sumarizáciu preferencií používateľa ohľadom nehnuteľnosti.
+
+Musíš DÔSLEDNE dodržať nasledovné pravidlá:
+
+- Výstup musí byť presne v tomto formáte:
+    cena: ..., počet izieb: ..., rozloha: ..., typ nehnuteľnosti: ..., stav nehnuteľnosti: ..., lokalita: ..., ostatné preferencie: ...
+- Ak sa nedá niečo určiť, použi None.
+- Nikdy nezahŕňaj negatívne, odmietavé alebo presne neurčené preferencie (používateľ použije slová ako napr. „nepotrebuje“, „nechce“, „je mu to jedno“, „bez“ a pod.).
+- Ak používateľ niečo výslovne nechce alebo ignoruje, túto informáciu vynechaj úplne. Nezahrňuj ju do „ostatných preferencií“.
+- Pokiaľ ide o stav nehnuteľnosti, uveď iba, či používateľ preferuje: novostavbu / starší byt / bez striktnej preferencie.
+- Nepíš žiadne komentáre typu „nevyjadril sa“, „nevieme“, „nezáleží“ – tieto informácie ignoruj.
+"""
+}
+
 
 get_key_attributes_prompt = """Na základe nasledujúceho promptu používateľa vydedukuj hodnoty pre tieto premenné:
 
