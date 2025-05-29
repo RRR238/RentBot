@@ -1,87 +1,54 @@
-summarize_chat_history_prompt = """
-Na základe histórie konverzácie, predchádzajúcej sumarizácie a nasledujúcej novej informácie, aktualizuj a stručne zhrň aktuálne preferencie používateľa ohľadom nehnuteľnosti do krátkeho odstavca.  
-Zameraj sa IBA NA FAKTY a konkrétne požiadavky.  
-Nepodávaj štylizovanú odpoveď – výstup má byť iba heslovité zhrnutie kľúčových parametrov!  
-**Nezačínaj slovami ako "Používateľ preferuje" ani inými podobnými frázami.**  
-**Nevysvetľuj motivácie používateľa.**
-
-**Ak používateľ zmení dopyt (uvedie napr. „alebo radšej domček...“, prípadne zmení mnoho kľúčových parametrov naraz), vytvor NOVÝ DOPYT – neprepájaj ho s pôvodným.**  
-
-Zachovaj logickú nadväznosť (napr. „zvýš cenu na 4000“ = nová cena je 4000).  
-POZOR – uprav len existujúce údaje, ak sa týkajú rovnakého dopytu.  
-POZOR – ak používateľ použije „alebo“, nahraď pôvodný údaj novým (napr. uvedie „alebo stačia len 2 izby“ – nahradíš pôvodný počet izieb novým uvedeným počtom) - V žiadnom prípade nepripájaj nový údaj k starému, iba ho nahraď !
-
-História konverzácie:
-{conversation_history}
-
-Predchádzajúca sumarizácia:
-{original_summary}
-
-Nová informácia:  
-{user_prompt}
-
-Tvoje zhrnutie kľúčových údajov a preferencií:
-"""
-
 summarize_chat_history_prompt_v_2 = """
-Na základe histórie konverzácie a nasledujúcej novej informácie, aktualizuj a doplň aktuálnu sumarizáciu preferencií používateľa ohľadom nehnuteľnosti.
+Na základe histórie konverzácie medzi agentom a používateľom nizsie (text medzi symbolmi ```), doplň a aktualizuj sumarizáciu preferencií (text medzi symbomi ''') používateľa ohľadom nehnuteľnosti.
 Tvoja odpoveď musí byť v nasledujúcom formáte:
 
 cena: <tvoja dedukcia>, počet izieb: <tvoja dedukcia>, rozloha: <tvoja dedukcia>, typ nehnuteľnosti: <tvoja dedukcia>, stav nehnuteľnosti: <tvoja dedukcia>, lokalita: <tvoja dedukcia>, ostatné preferencie: <tvoja dedukcia>
 
 Pravidlá:
 
-Ak niektoré hodnoty nie je možné určiť, priraď k danej premennej hodnotu None.
+- Zohľadni celú konverzáciu od začiatku až po koniec.
 
-Priraď hodnoty iba k uvedeným kategóriám! Nevytváraj nové kategórie.
+- Ak niektoré hodnoty nie je možné určiť, priraď k danej premennej hodnotu None.
 
-Ak používateľ nemá preferenciu ohľadom nejakého kritéria, alebo vyslovene uvedie, že niečo nechce alebo nepotrebuje (používa slová ako „nechcem“, „neviem“, „netreba“, „je mi to jedno“ a podobne), neuvádzaj toto kritérium do kategórie „ostatné preferencie“.
+- Priraď hodnoty iba k uvedeným kategóriám! Nevytváraj nové kategórie.
 
-Pri kategórii „stav nehnuteľnosti“ iba uveď: novostavba / staršia stavba / bez striktneho vymedzenia (alebo None, ak sa nedá určiť). Nedopĺňaj žiadne ďalšie informácie o stave stavby do kategórie „ostatné preferencie“.
+- Ak používateľ nemá preferenciu ohľadom nejakého kritéria, alebo vyslovene uvedie, že niečo nechce alebo nepotrebuje (používa slová ako „nechcem“, „neviem“, „netreba“, „je mi to jedno“ a podobne), neuvádzaj toto kritérium do kategórie „ostatné preferencie“.
 
-História konverzácie:
-{conversation_history}
+- Pri kategórii „stav nehnuteľnosti“ iba uveď: novostavba / staršia stavba / bez striktneho vymedzenia (alebo None, ak sa nedá určiť). Nedopĺňaj žiadne ďalšie informácie o stave stavby do kategórie „ostatné preferencie“.
 
-Nová informácia:
-{user_prompt}
+História konverzácie medzi agentom a používateľom:
+```{conversation_history}```
 
-Predchádzajúca sumarizácia:
-{original_summary}
-
-Aktualizovaná sumarizácia preferencií:
-
-"""
-summarize_chat_history_prompt_simple = """
-História konverzácie:
-{conversation_history}
-
-Nová informácia:
-{user_prompt}
-
-Predchádzajúca sumarizácia:
-{original_summary}
+Aktuálna sumarizácia preferencií:
+'''{original_summary}'''
 
 Aktualizovaná sumarizácia preferencií:
 
 """
 
-system_message = {
-    "role": "system",
-    "content": """
-Si precízny realitný asistent. Tvojou úlohou je na základe histórie konverzácie a novej informácie aktualizovať sumarizáciu preferencií používateľa ohľadom nehnuteľnosti.
+summarize_chat_history_prompt_v_3 = """
+Na základe histórie konverzácie medzi agentom a používateľom nizsie (text medzi symbolmi ```), doplň a aktualizuj sumarizáciu preferencií (text medzi symbomi ''') používateľa ohľadom nehnuteľnosti.
+Tvoja odpoveď musí byť v nasledujúcom formáte:
 
-Musíš DÔSLEDNE dodržať nasledovné pravidlá:
+cena: <tvoja dedukcia>, počet izieb: <tvoja dedukcia>, rozloha: <tvoja dedukcia>, typ nehnuteľnosti: <tvoja dedukcia>, novostavba: <tvoja dedukcia> (priraď hodnotu True, ak je z promptu zrejmé, že ide o novostavbu. Inak priraď hodnotu None.), lokalita: <tvoja dedukcia> (Urči iba mesto alebo mestskú časť. Konkrétne body na mape, ako napr. „pri lese“, „pri jazere“, a podobne zaraď do kategórie ostatné preferencie), ostatné preferencie: <tvoja dedukcia>
 
-- Výstup musí byť presne v tomto formáte:
-    cena: ..., počet izieb: ..., rozloha: ..., typ nehnuteľnosti: ..., stav nehnuteľnosti: ..., lokalita: ..., ostatné preferencie: ...
-- Ak sa nedá niečo určiť, použi None.
-- Nikdy nezahŕňaj negatívne, odmietavé alebo presne neurčené preferencie (používateľ použije slová ako napr. „nepotrebuje“, „nechce“, „je mu to jedno“, „bez“ a pod.).
-- Ak používateľ niečo výslovne nechce alebo ignoruje, túto informáciu vynechaj úplne. Nezahrňuj ju do „ostatných preferencií“.
-- Pokiaľ ide o stav nehnuteľnosti, uveď iba, či používateľ preferuje: novostavbu / starší byt / bez striktnej preferencie.
-- Nepíš žiadne komentáre typu „nevyjadril sa“, „nevieme“, „nezáleží“ – tieto informácie ignoruj.
+Pravidlá:
+
+- Zohľadni celú konverzáciu od začiatku až po koniec.
+
+- Ak niektoré hodnoty nie je možné určiť, priraď k danej premennej hodnotu None.
+
+- Priraď hodnoty iba k uvedeným kategóriám! Nevytváraj nové kategórie.
+
+História konverzácie medzi agentom a používateľom:
+```{conversation_history}```
+
+Aktuálna sumarizácia preferencií:
+'''{original_summary}'''
+
+Aktualizovaná sumarizácia preferencií:
+
 """
-}
-
 
 get_key_attributes_prompt = """Na základe nasledujúceho promptu používateľa vydedukuj hodnoty pre tieto premenné:
 
@@ -125,8 +92,7 @@ Kladiem ti nasledujúce požiadavky:
 4. Ak už máš hodnoty pre všetky HLAVNÉ premenné, pýtaj sa na doplnkové detaily ako napr. poloha,balkón,poschodie,parkovanie,klimatizácia,zariadenie ,atď. - Vymysli si čo najviac rôznych doplnkových otázok týkajúcich sa exteriéru aj interiéru.
 5. Vždy pokladaj iba konkrétne otázky týkajúce sa nejakého kritéria alebo detailu – nepýtaj sa všeobecné otázky typu „aké máte ďalšie preferencie?“, „chceli by ste ešte niečo doplniť?“ a podobne.
 6. V odpovedi neuvádzaj sumarizáciu doterajších požiadaviek používateľa !
-7. Ak používateľ nemá preferenciu alebo nevie odpovedať, prejdi na ďalšiu otázku. 
-8. Rozhovor neukončuj. Iba sa pýtaj otázky.
+7. Ak používateľ nemá preferenciu alebo nevie odpovedať, prejdi na ďalšiu otázku.
 
 Tvoj cieľ: získať všetky potrebné informácie, bez opakovania otázok, bez navrhovania riešení – iba otázkami.
 """

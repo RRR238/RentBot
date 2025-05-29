@@ -121,7 +121,7 @@ def few_shots_chat_history(shots, prompt_template):
 
 def extract_chat_history_as_dict(memory):
     chat_history = []
-    for message in memory.chat_memory.messages[1:]:
+    for message in memory.chat_memory.messages:
         role = "user" if isinstance(message, HumanMessage) else "assistant"
         chat_history.append({"role": role, "content": message.content})
     return chat_history
@@ -255,13 +255,39 @@ def strip_standardized_data(text: str) -> str:
     return text
 
 
+import re
+
 def remove_none_or_nie_fields(text: str) -> str:
-    # This regex matches patterns like "key: none" or "key: nie" (case-insensitive, leading/trailing whitespace handled)
-    cleaned_text = re.sub(r'\b[^:,\n]+:\s*(none|nie)\b\s*,?', '', text.lower(), flags=re.IGNORECASE)
+    text = text.lower()
 
-    # Clean up redundant commas and whitespace
-    cleaned_text = re.sub(r',\s*,', ',', cleaned_text)  # Double commas
-    cleaned_text = re.sub(r'^,|,$', '', cleaned_text)  # Leading/trailing commas
-    cleaned_text = re.sub(r'\s{2,}', ' ', cleaned_text)  # Extra spaces
+    # Remove key: none or key: nie
+    text = re.sub(r'\b[^:,\n]+:\s*(none|nie|neviem|nevie|nevieme|netreba|nemusí)\b\s*,?', '', text, flags=re.IGNORECASE)
 
-    return cleaned_text.strip()
+    # Define more targeted and safer patterns
+    patterns = [
+        r'\bbez\s+\w+(?:\s+\w+)?[,.]?',
+        r'\bnie\s+\w+(?:\s+\w+)?[,.]?',
+        r'\bnechce(?:m|š|me)?\s+\w+(?:\s+\w+)?[,.]?',
+        r'\bnetreba\s+\w+(?:\s+\w+)?[,.]?',
+        r'\bnepotrebu(?:je|jem|jeme)\s+\w+(?:\s+\w+)?[,.]?',
+        r'\bnevyžaduje(?:m|š|me)?\s+\w+(?:\s+\w+)?[,.]?',
+        r'\bnem(?:á|ám|áme)\s+\w+(?:\s+\w+)?[,.]?',
+        r'\bneviem(?:e)?\s+\w+(?:\s+\w+)?[,.]?',
+        r'\bnemusí(?:a)?\s+\w+(?:\s+\w+)?[,.]?',
+        r'\bje mi jedno\s+\w+(?:\s+\w+)?[,.]?',
+        r'\b\w+(?:\s+\w+)?\s+nie je dôležit[ýáé][,.]?',
+        r'\bneuviedol\s+\w+(?:\s+\w+)?[,.]?',
+        r'\bneuvádza\s+\w+(?:\s+\w+)?[,.]?',
+        r'\bnevad[iy]\s+\w+(?:\s+\w+)?[,.]?'
+    ]
+
+    for pattern in patterns:
+        text = re.sub(pattern, '', text, flags=re.IGNORECASE)
+
+    # Clean up commas and whitespace
+    text = re.sub(r',\s*,', ',', text)
+    text = re.sub(r'\s*,\s*', ', ', text)
+    text = re.sub(r'\s{2,}', ' ', text)
+    text = re.sub(r'^,|,$', '', text)
+
+    return text.strip()
