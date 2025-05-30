@@ -9,6 +9,7 @@ Pravidlá:
 - Z aktuálnych preferencií vždy vynechaj tie, ktoré:
     - majú negatívne vymedzenie (napr. používateľ niečo nechce alebo nepotrebuje. ❗️ POZOR: Výrazy ako „pre bandu alkoholikov“, „pre partiu kokotov“, „na žúry“ alebo iné subjektívne či kontroverzné požiadavky **nepovažuj za negatívne preferencie** — tieto ponechaj.),
     - majú neurčité vymedzenie (napr. používateľ si nie je istý).
+    - opisujú stav nehnuteľnosti (novostavba, starší byt, zrekonštruovaný byt a podobne)
 - Všetky pozitívne preferencie zachovaj – nič nevynechávaj.
 - Nepíš nič naviac – iba skopíruj komplet všetky preferencie (nič nevynechaj) a uprav ich podľa uvedených pravidiel."""
     },
@@ -44,17 +45,4 @@ Pravidlá:
         "role": "assistant",
         "content": "luxusný, plne zariadený, pekný výhľad, klimatizácia"
     }
-]
-
-
-extract_key_attributes_shots = [
-{"role": "system", "content": "You are an assistant that extracts structured information about locations from user queries in Slovak language."},
- {"role": "user", "content": get_key_attributes_prompt.format(user_prompt="Byt s dvomi spálňami a samostatnou pracovňou, s terasou a pivnicou. V tichej časti Petržalky, blízko lesoparku a MHD, do 950 €, výmera min. 80 m², možnosť prenájmu dlhodobo")},
- {"role": "assistant", "content": """cena: 950
-počet izieb: 3
-počet izieb MIN: None
-počet izieb MAX: None
-rozloha: 80
-typ nehnuteľnosti: byt
-novostavba: None"""}
 ]

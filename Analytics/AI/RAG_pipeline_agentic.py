@@ -22,7 +22,7 @@ warnings.filterwarnings("ignore",
 
 llm_langchain = ChatOpenAI(
     temperature=0.2,
-    model_name="gpt-3.5-turbo",
+    model_name="gpt-4o",
     #openai_api_key=
 )
 llm = LLM()
@@ -106,14 +106,14 @@ while True:
         processed_summary = response_summary[:response_summary.index(', ostatné preferencie')] #chat_history_summary_post_processing(response_summary)
         #summary_stripped_negatives = remove_none_or_nie_fields(response_summary[response_summary.index(', ostatné preferencie')+len(', ostatné preferencie: '):])
         summary_to_embedd = llm.generate_answer(prompt=response_summary[response_summary.index(', ostatné preferencie')+len(', ostatné preferencie: '):],
-                                                chat_history=chat_history_summary_few_shots)
+                                                chat_history=chat_history_summary_few_shots, model="gpt-4o")
         org_summary = response_summary
     except:
         processed_summary = org_summary[:response_summary.index(', ostatné preferencie')]  # chat_history_summary_post_processing(response_summary)
         #summary_stripped_negatives = remove_none_or_nie_fields(
             #response_summary[response_summary.index(', ostatné preferencie') + len(', ostatné preferencie: '):])
         summary_to_embedd = llm.generate_answer(prompt=response_summary[response_summary.index(', ostatné preferencie') + len(', ostatné preferencie: '):],
-                                                chat_history=chat_history_summary_few_shots)
+                                                chat_history=chat_history_summary_few_shots, model="gpt-4o")
 
     print(f"processed summary: {processed_summary}")
     print(f"sumary to embedd: {summary_to_embedd}")
@@ -136,6 +136,7 @@ while True:
         print(i.payload['source_url'])
     # #
     response = agentic_chain.predict(input=query)
+    questions+=1
     #parts['response'] = response
 
     if any(phrase in response.lower() for phrase in skip_phrases) and len(memory.chat_memory.messages)<=5:
@@ -145,8 +146,12 @@ while True:
         print(f"🤖: {response}")
         continue
 
-    if any(phrase in response.lower() for phrase in finish_phrases):
+    if any(phrase in response.lower() for phrase in finish_phrases) or questions >= 10:
         print(f"🤖: Ďakujem za vaše odpovede. Ak budete chcieť doplniť ďalšie kritériá, neváhajte mi napísať.")
+        memory.chat_memory.messages[-1] = AIMessage(
+            content="Ďakujem za vaše odpovede. Ak budete chcieť doplniť ďalšie kritériá, neváhajte mi napísať."
+        )
+        questions=0
         #parts['response'] = response
         continue
 
