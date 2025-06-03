@@ -30,7 +30,7 @@ summarize_chat_history_prompt_v_3 = """
 Na základe histórie konverzácie medzi agentom a používateľom nizsie (text medzi symbolmi ```), doplň a aktualizuj sumarizáciu preferencií (text medzi symbomi ''') používateľa ohľadom nehnuteľnosti.
 Tvoja odpoveď musí byť v nasledujúcom formáte:
 
-cena: <tvoja dedukcia>, počet izieb: <tvoja dedukcia>, rozloha: <tvoja dedukcia>, typ nehnuteľnosti: <tvoja dedukcia>, novostavba: <tvoja dedukcia> (priraď hodnotu True, ak je z promptu zrejmé, že ide o novostavbu. Inak priraď hodnotu None.), lokalita: <tvoja dedukcia> (Urči iba mesto alebo mestskú časť. Konkrétne body na mape, ako napr. „pri lese“, „pri jazere“, a podobne zaraď do kategórie ostatné preferencie), ostatné preferencie: <tvoja dedukcia>
+cena: <tvoja dedukcia>, počet izieb: <tvoja dedukcia>, rozloha: <tvoja dedukcia>, typ nehnuteľnosti: <tvoja dedukcia>, novostavba: <tvoja dedukcia> (priraď hodnotu True, ak je z promptu zrejmé, že ide o novostavbu. Inak priraď hodnotu None.), lokalita: <tvoja dedukcia> (Urči iba mesto alebo mestskú časť. Konkrétne body na mape, ako napr. „pri lese“, „pri jazere“, „v centre mesta“, „v pokojnej štvrti“ a podobne zaraď do kategórie ostatné preferencie), ostatné preferencie: <tvoja dedukcia>
 
 Pravidlá:
 
@@ -49,6 +49,31 @@ História konverzácie medzi agentom a používateľom:
 
 Aktuálna sumarizácia preferencií:
 '''{original_summary}'''
+
+Aktualizovaná sumarizácia preferencií:
+
+"""
+
+summarize_chat_history_prompt_v_4 = """
+Na základe histórie konverzácie medzi agentom a používateľom nizsie (text medzi symbolmi ```), vytvor sumarizáciu preferencií (text medzi symbomi ''') používateľa ohľadom nehnuteľnosti.
+Tvoja odpoveď musí byť v nasledujúcom formáte:
+
+cena: <tvoja dedukcia>, počet izieb: <tvoja dedukcia>, rozloha: <tvoja dedukcia>, typ nehnuteľnosti: <tvoja dedukcia>, novostavba: <tvoja dedukcia> (priraď hodnotu True, ak je z promptu zrejmé, že ide o novostavbu. Inak priraď hodnotu None.), lokalita: <tvoja dedukcia> (Urči iba mesto alebo mestskú časť. Konkrétne body na mape, ako napr. „pri lese“, „pri jazere“, „v centre mesta“, „v pokojnej štvrti“ a podobne zaraď do kategórie ostatné preferencie), ostatné preferencie: <tvoja dedukcia>
+
+Pravidlá:
+
+- Zohľadni celú konverzáciu od začiatku až po koniec.
+
+- Ak niektoré hodnoty nie je možné určiť, priraď k danej premennej hodnotu None.
+
+- Priraď hodnoty iba k uvedeným kategóriám! Nevytváraj nové kategórie.
+
+- Ak používateľ uvedie, že nechce/nepotrebuje nejakú preferenciu, ktorá už je zahrnutá v sumarizácii, tak ju odtiaľ len odstráň.
+
+- Ak používateľ uvedie, že chce zmeniť nejakú preferenciu, ktorá už je zahrnutá v sumarizácii, tak ju zmeň podľa požiadavky používateľa.
+
+História konverzácie medzi agentom a používateľom:
+```{conversation_history}```
 
 Aktualizovaná sumarizácia preferencií:
 
@@ -83,6 +108,7 @@ agentic_flow_prompt ="""
 Tvojou úlohou je získať a zhrnúť preferencie používateľa ohľadom ideálnej nehnuteľnosti na prenájom.
 
 *Primárne potrebuješ získať hodnoty pre tieto HLAVNÉ premenné*:
+- lokalita (Vždy zisti konkrétne mesto alebo mestskú časť, nestačí zistiť len všeobecne určenú oblasť (napr. moderná štvrť, okraj mesta, blízko lesa, pri jazere a podobne))
 - cena (nájom)
 - počet izieb
 - rozloha

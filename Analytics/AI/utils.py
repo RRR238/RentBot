@@ -23,7 +23,7 @@ def processing_dict(key_attributes_dict):
                               "loft":"loft",
                               "mezonet":"mezonet",
                               "byt":"flat",
-                              "garzonka":"studio",
+                              "garzónka":"studio",
                               "penthouse":"penthouse"}
     for k,v in key_attributes_dict.items():
         if v == 'None':
