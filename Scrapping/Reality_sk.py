@@ -305,10 +305,7 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
             prices = self.get_price(soup)
             description = self.get_description(soup)
             #images= self.get_images(detail_link)
-            try:
-                coordinates = [str(i) for i in get_coordinates(location)]
-            except:
-                coordinates = None
+            coordinates = get_coordinates(location)
             year_of_construction = int(other_properties['Rok výstavby:']) if 'Rok výstavby:' in other_properties.keys() else None
             approval_year = int(
                 other_properties['Rok kolaudácie:']) if 'Rok kolaudácie:' in other_properties.keys() else None

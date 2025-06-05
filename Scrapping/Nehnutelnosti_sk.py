@@ -138,11 +138,18 @@ class Nehnutelnosti_sk_processor:
     def get_title(self,
                   soup,
                   element = 'h1',
-                  element_class='MuiTypography-root MuiTypography-h4 mui-1wj7mln'):
-        title = soup.find(element,
-                          class_ = element_class
-                          ).text.strip()
-        return title
+                  element_class=('MuiTypography-root MuiTypography-h4 mui-1wj7mln',
+                                 'MuiTypography-root MuiTypography-h4 mui-hrlyv4')):
+        for i in element_class:
+            try:
+                title = soup.find(element,
+                                  class_ = i
+                                  ).text.strip()
+                return title
+            except:
+                continue
+
+        return None
 
     def get_location(self,
                      soup,
@@ -387,8 +394,8 @@ class Nehnutelnosti_sk_processor:
 
                 embedding = self.embedd_rent_offer(self.llm,
                                                    results['title'],
-                                                   results['description'],
-                                                   results['other_properties'])
+                                                   results['description'])
+                                                   #results['other_properties'])
                 results["source_url"] = link
                 #offers.append(results)
                 if "mezonet" in results['title'].lower():
@@ -428,8 +435,8 @@ class Nehnutelnosti_sk_processor:
                     "longtitude": results['coordinates'][1] if results['coordinates'] else None
                 })
                 print(f"writing images to DB...")
-                # self.db_repository.insert_offer_images(new_offer.id,results['images'][:4]
-                #                                         if len(results['images']) >= 4 else results['images'])
+                self.db_repository.insert_offer_images(new_offer.id,results['images'][:4]
+                                                        if len(results['images']) >= 4 else results['images'])
                 keys_to_remove = {"created_at",
                                   '_sa_instance_state',
                                   "title",
@@ -578,13 +585,12 @@ class Nehnutelnosti_sk_processor:
         if manually is None:
             generated = self.llm.generate_answer(
                                         prompt=prompt.format(
-                                        description=description)
+                                        description=description),
+                                        model="gpt-4o"
                                         ).strip()
             try:
                 generated = int(re.sub(r'\D', '', generated))
-                if generated == 'None':
-                    energies = None
-                elif generated >= price_rent:
+                if generated >= price_rent:
                     energies = None
                 else:
                     energies = generated
@@ -625,6 +631,7 @@ class Nehnutelnosti_sk_processor:
     def delete_invalid_offers(self):
         case_nr = 1
         invalid = 0
+        deleted_from_db_not_from_vdb = []
         all_urls = self.db_repository.get_all_source_urls()
         for url in all_urls:
             print(f"processing {case_nr}/{len(all_urls)}, invalid URLs found: {invalid}")
@@ -637,8 +644,14 @@ class Nehnutelnosti_sk_processor:
                 # If it's a redirect (301, 302...), it's likely expired
                 elif response.status_code in [301, 302, 303, 307, 308]:
                     print(f"Redirected to: {response.headers.get('Location')}")
-                    self.db_repository.delete_by_source_urls([url])
-                    self.vdb.delete_element(source_url=url)
+                    try:
+                        self.db_repository.delete_by_source_urls([url])
+                    except:
+                        continue
+                    try:
+                        self.vdb.delete_element(source_url=url)
+                    except:
+                        deleted_from_db_not_from_vdb.append(url)
                     invalid += 1
                 else:
                     print(f"Status code: {response.status_code}")
@@ -647,19 +660,21 @@ class Nehnutelnosti_sk_processor:
             case_nr += 1
 
         print(f"deleted {invalid} offers")
+        with open(f'deleted_from_db_not_from_vdb.json', 'w',encoding="utf-8") as json_file:
+            json.dump(deleted_from_db_not_from_vdb, json_file, ensure_ascii=False, indent=4)
 
 
-# processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
-#                                        auth_token =auth_token_nehnutelnosti,
-#                                        db_repository =Rent_offers_repository(os.getenv('connection_string')),
-#                                         llm =LLM(),
-#                                         vector_db = Vector_DB_Qdrant('test')
-#                                         )
+processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
+                                       auth_token =auth_token_nehnutelnosti,
+                                       db_repository =Rent_offers_repository(os.getenv('connection_string')),
+                                        llm =LLM(),
+                                        vector_db = Vector_DB_Qdrant('test')
+                                        )
 #processor.pagination_check()
 # page = processor.get_page(nehnutelnosti_base_url)
 # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
 # print(links)
-#print(processor.process_detail("https://www.nehnutelnosti.sk/detail/JuDP5eqrN15/prenajom-2-izbovy-dizajnovy-byt-oproti-hant-arene-ulicatrnavska-cesta-"))
+print(processor.process_detail("https://www.nehnutelnosti.sk/detail/Jui9fSCyeCn/exkluzivne-ponukame-na-prenajom-jedinecny-3-izbovy-byt-v-historickom-centre-bratislavy"))
 # print(len(links))
 # print(links[149])
 #processor.process_offers(1,3)
