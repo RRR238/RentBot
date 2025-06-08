@@ -65,14 +65,14 @@ class Vector_DB_Qdrant(Vector_DB_interface):
         if postgres_id:
             filter_conditions.append(
                 FieldCondition(
-                    key="metadata.id",
+                    key="id",
                     match=MatchValue(value=postgres_id)
                 )
             )
         if source_url:
             filter_conditions.append(
                 FieldCondition(
-                    key="metadata.source_url",
+                    key="source_url",
                     match=MatchValue(value=source_url)
                 )
             )

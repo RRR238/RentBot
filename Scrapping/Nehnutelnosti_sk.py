@@ -154,11 +154,18 @@ class Nehnutelnosti_sk_processor:
     def get_location(self,
                      soup,
                      element='p',
-                     element_class='MuiTypography-root MuiTypography-body2 MuiTypography-noWrap mui-3vjwr4'):
-        location = soup.find(element,
-                             class_=element_class
-                             ).text.strip()
-        return location
+                     element_class=('MuiTypography-root MuiTypography-body2 MuiTypography-noWrap mui-3vjwr4',
+                                    'MuiTypography-root MuiTypography-body2 MuiTypography-noWrap mui-kri7tw')):
+        for i in element_class:
+            try:
+                location = soup.find(element,
+                                     class_=element_class
+                                     ).text.strip()
+                return location
+            except:
+                continue
+
+        return None
 
     def get_key_attributes(self, soup):
         icons = DOM_identifiers.nehnutelnosti_icons
@@ -228,7 +235,8 @@ class Nehnutelnosti_sk_processor:
     def get_price(self,
                   soup,
                   rent_element='p',
-                  rent_class="MuiTypography-root MuiTypography-h3 mui-fm8hb4",
+                  rent_class=("MuiTypography-root MuiTypography-h3 mui-fm8hb4",
+                              "MuiTypography-root MuiTypography-h3 mui-9867wo"),
                   meter_squared_element='p',
                   meter_squared_class="MuiTypography-root MuiTypography-label2 mui-ifbhxp"):
 
@@ -236,10 +244,16 @@ class Nehnutelnosti_sk_processor:
                  "energies":None,
                  "meter squared":None
                  }
-        price_rent = soup.find(rent_element,
-                               rent_class
-                          ).text.strip(
-                        )
+
+        for i in rent_class:
+            try:
+                price_rent = soup.find(rent_element,
+                                       i
+                                  ).text.strip(
+                                )
+                break
+            except:
+                continue
 
         price_energies = None
         try:
@@ -358,12 +372,17 @@ class Nehnutelnosti_sk_processor:
         return images
 
     def process_offers_single_page(self,
-                                   page_url,
-                                   current_page,
+                                   page_url=None,
+                                   current_page=0,
+                                   custom_links=None,
                                    sleep=3):
 
-        page = self.get_page(page_url)
-        detail_links = self.get_details_links(BeautifulSoup(page.text,'html.parser'))
+        if page_url:
+            page = self.get_page(page_url)
+            detail_links = self.get_details_links(BeautifulSoup(page.text,'html.parser'))
+        if custom_links:
+            detail_links=custom_links
+
         process_n = 1
         #offers = []
         for link in detail_links:
@@ -375,18 +394,15 @@ class Nehnutelnosti_sk_processor:
                     continue
 
                 results = self.process_detail(link)
-
-                if self.db_repository.find_duplicates(results['prices']['rent'],
-                                                       results['key_attributes']['size'],
-                                                       results['coordinates'],
-                                                        results['prices']['energies'],
-                                                        results['key_attributes']['size'],
-                                                        results['key_attributes']['rooms'],
-                                                        results['ownership'].lower() if results['ownership'] else None,
-                                                        results['coordinates'][0] if results['coordinates'] else None,
-                                                        results['coordinates'][1] if results['coordinates'] else None,
-                                                        link,
-                                                        ):
+                if self.db_repository.find_duplicates(price_rent=results['prices']['rent'],
+                                                    price_energies = results['prices']['energies'],
+                                                    size=results['key_attributes']['size'],
+                                                    rooms=results['key_attributes']['rooms'],
+                                                    ownership=results['ownership'].lower() if results['ownership'] else None,
+                                                    lat=results['coordinates'][0] if results['coordinates'] else None,
+                                                    lon=results['coordinates'][1] if results['coordinates'] else None,
+                                                    url=link
+                                                    ):
 
                     print(f"Duplicate found for offer: {link}")
                     process_n += 1
@@ -434,9 +450,9 @@ class Nehnutelnosti_sk_processor:
                     "latitude": results['coordinates'][0] if results['coordinates'] else None,
                     "longtitude": results['coordinates'][1] if results['coordinates'] else None
                 })
-                print(f"writing images to DB...")
-                self.db_repository.insert_offer_images(new_offer.id,results['images'][:4]
-                                                        if len(results['images']) >= 4 else results['images'])
+                #print(f"writing images to DB...")
+                # self.db_repository.insert_offer_images(new_offer.id,results['images'][:4]
+                #                                         if len(results['images']) >= 4 else results['images'])
                 keys_to_remove = {"created_at",
                                   '_sa_instance_state',
                                   "title",
@@ -484,7 +500,8 @@ class Nehnutelnosti_sk_processor:
             url = f"{self.base_url}&page={current_page}"
             try:
                 #all_offers[current_page] = self.process_offers_single_page(url,current_page)
-                self.process_offers_single_page(url, current_page)
+                self.process_offers_single_page(page_url=url,
+                                                current_page=current_page)
             except Exception as e:
                 print(f"failed to process page: {url}, error: {e}")
                 self.failed_pages += 1
@@ -581,7 +598,7 @@ class Nehnutelnosti_sk_processor:
                              ):
 
         lt = description.lower().replace(' ', '')
-        manually = self.extract_energy_price_by_pattern(lt).strip()
+        manually = self.extract_energy_price_by_pattern(lt)
         if manually is None:
             generated = self.llm.generate_answer(
                                         prompt=prompt.format(
@@ -598,7 +615,7 @@ class Nehnutelnosti_sk_processor:
                 energies = None
         else:
             try:
-                energies = int(manually)
+                energies = int(manually.strip())
             except:
                 energies = None
 
@@ -664,17 +681,17 @@ class Nehnutelnosti_sk_processor:
             json.dump(deleted_from_db_not_from_vdb, json_file, ensure_ascii=False, indent=4)
 
 
-processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
-                                       auth_token =auth_token_nehnutelnosti,
-                                       db_repository =Rent_offers_repository(os.getenv('connection_string')),
-                                        llm =LLM(),
-                                        vector_db = Vector_DB_Qdrant('test')
-                                        )
-#processor.pagination_check()
-# page = processor.get_page(nehnutelnosti_base_url)
-# links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
-# print(links)
-print(processor.process_detail("https://www.nehnutelnosti.sk/detail/Jui9fSCyeCn/exkluzivne-ponukame-na-prenajom-jedinecny-3-izbovy-byt-v-historickom-centre-bratislavy"))
+# processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
+#                                        auth_token =auth_token_nehnutelnosti,
+#                                        db_repository =Rent_offers_repository(os.getenv('connection_string')),
+#                                         llm =LLM(),
+#                                         vector_db = Vector_DB_Qdrant('rent-bot-index')
+#                                         )
+# #processor.pagination_check()
+# # page = processor.get_page(nehnutelnosti_base_url)
+# # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
+# # print(links)
+#print(processor.process_detail("https://www.nehnutelnosti.sk/detail/JujZUqLjUT7/2-izbbytl-krasne-prostrediel-klimatizacia"))
 # print(len(links))
 # print(links[149])
-#processor.process_offers(1,3)
+#processor.process_offers(1,1)
