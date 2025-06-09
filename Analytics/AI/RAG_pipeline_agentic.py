@@ -137,18 +137,18 @@ while True:
         processed_dict['rooms_max'] = None
 
     print(processed_dict)
-    #filters = prepare_filters_qdrant(processed_dict)
+    filters = prepare_filters_qdrant(processed_dict)
     #
     # parts['response_summary'] = response_summary
     # parts['processed_summary'] = processed_summary
     # parts['summary_to_embedd'] = summary_to_embedd
     # parts['results'] = []
     #
-    # embedding = llm.get_embedding(summary_to_embedd, model='text-embedding-3-large') #processed_summary
-    # results = vdb.filtered_vector_search(embedding, 15, filter=filters)[0]
-    # for i in results.points:
-    #     #parts['results'].append(i.payload['source_url'])
-    #     print(i.payload['source_url'])
+    embedding = llm.get_embedding(summary_to_embedd, model='text-embedding-3-large') #processed_summary
+    results = vdb.filtered_vector_search(embedding, 15, filter=filters)[0]
+    for i in results.points:
+        #parts['results'].append(i.payload['source_url'])
+        print(i.payload['source_url'])
     # #
     response = agentic_chain.predict(input=query)
     questions+=1
