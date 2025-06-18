@@ -65,14 +65,14 @@ class Vector_DB_Qdrant(Vector_DB_interface):
         if postgres_id:
             filter_conditions.append(
                 FieldCondition(
-                    key="metadata.id",
+                    key="id",
                     match=MatchValue(value=postgres_id)
                 )
             )
         if source_url:
             filter_conditions.append(
                 FieldCondition(
-                    key="metadata.source_url",
+                    key="source_url",
                     match=MatchValue(value=source_url)
                 )
             )
@@ -204,3 +204,29 @@ class Vector_DB_Qdrant(Vector_DB_interface):
             ),
         )
         return True
+
+    def get_all_metadata(self,
+                         batch_size: int = 100):
+        all_payloads = []
+        scroll_offset = None
+
+        while True:
+            response = self.__client.scroll(
+                collection_name=self.index_name,
+                limit=batch_size,
+                with_payload=True,
+                with_vectors=False,
+                offset=scroll_offset
+            )
+
+            if not response or not response[0]:
+                break
+
+            points_batch, scroll_offset = response
+            for point in points_batch:
+                all_payloads.append(point.payload)
+
+            if scroll_offset is None:
+                break
+
+        return all_payloads

@@ -17,6 +17,8 @@ from Rent_offers_repository import Rent_offers_repository
 from Shared.LLM import LLM
 from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
 from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
+from langdetect import detect, DetectorFactory
+import re
 
 
 
@@ -88,10 +90,7 @@ class Nehnutelnosti_sk_processor:
             prices = self.get_price(soup)
             description = self.get_description(soup)
             images= self.get_images(detail_link)
-            try:
-                coordinates = [str(i) for i in get_coordinates(location)]
-            except:
-                coordinates = None
+            coordinates = get_coordinates(location)
             year_of_construction = int(other_properties['Rok výstavby:']) if 'Rok výstavby:' in other_properties.keys() else None
             approval_year = int(other_properties['Rok kolaudácie:']) if 'Rok kolaudácie:' in other_properties.keys() else None
             last_reconstruction_year = int(other_properties['Rok poslednej rekonštrukcie:']) if 'Rok poslednej rekonštrukcie:' in other_properties.keys() else None
@@ -139,20 +138,34 @@ class Nehnutelnosti_sk_processor:
     def get_title(self,
                   soup,
                   element = 'h1',
-                  element_class='MuiTypography-root MuiTypography-h4 mui-1wj7mln'):
-        title = soup.find(element,
-                          class_ = element_class
-                          ).text.strip()
-        return title
+                  element_class=('MuiTypography-root MuiTypography-h4 mui-1wj7mln',
+                                 'MuiTypography-root MuiTypography-h4 mui-hrlyv4')):
+        for i in element_class:
+            try:
+                title = soup.find(element,
+                                  class_ = i
+                                  ).text.strip()
+                return title
+            except:
+                continue
+
+        return None
 
     def get_location(self,
                      soup,
                      element='p',
-                     element_class='MuiTypography-root MuiTypography-body2 MuiTypography-noWrap mui-3vjwr4'):
-        location = soup.find(element,
-                             class_=element_class
-                             ).text.strip()
-        return location
+                     element_class=('MuiTypography-root MuiTypography-body2 MuiTypography-noWrap mui-3vjwr4',
+                                    'MuiTypography-root MuiTypography-body2 MuiTypography-noWrap mui-kri7tw')):
+        for i in element_class:
+            try:
+                location = soup.find(element,
+                                     class_=element_class
+                                     ).text.strip()
+                return location
+            except:
+                continue
+
+        return None
 
     def get_key_attributes(self, soup):
         icons = DOM_identifiers.nehnutelnosti_icons
@@ -222,7 +235,8 @@ class Nehnutelnosti_sk_processor:
     def get_price(self,
                   soup,
                   rent_element='p',
-                  rent_class="MuiTypography-root MuiTypography-h3 mui-fm8hb4",
+                  rent_class=("MuiTypography-root MuiTypography-h3 mui-fm8hb4",
+                              "MuiTypography-root MuiTypography-h3 mui-9867wo"),
                   meter_squared_element='p',
                   meter_squared_class="MuiTypography-root MuiTypography-label2 mui-ifbhxp"):
 
@@ -230,10 +244,16 @@ class Nehnutelnosti_sk_processor:
                  "energies":None,
                  "meter squared":None
                  }
-        price_rent = soup.find(rent_element,
-                               rent_class
-                          ).text.strip(
-                        )
+
+        for i in rent_class:
+            try:
+                price_rent = soup.find(rent_element,
+                                       i
+                                  ).text.strip(
+                                )
+                break
+            except:
+                continue
 
         price_energies = None
         try:
@@ -352,12 +372,17 @@ class Nehnutelnosti_sk_processor:
         return images
 
     def process_offers_single_page(self,
-                                   page_url,
-                                   current_page,
+                                   page_url=None,
+                                   current_page=0,
+                                   custom_links=None,
                                    sleep=3):
 
-        page = self.get_page(page_url)
-        detail_links = self.get_details_links(BeautifulSoup(page.text,'html.parser'))
+        if page_url:
+            page = self.get_page(page_url)
+            detail_links = self.get_details_links(BeautifulSoup(page.text,'html.parser'))
+        if custom_links:
+            detail_links=custom_links
+
         process_n = 1
         #offers = []
         for link in detail_links:
@@ -369,11 +394,15 @@ class Nehnutelnosti_sk_processor:
                     continue
 
                 results = self.process_detail(link)
-
-                coordinates = ";".join(results['coordinates']) if results['coordinates'] else None
-                if self.db_repository.duplicate_exists(results['prices']['rent'],
-                                                       results['key_attributes']['size'],
-                                                       coordinates):
+                if self.db_repository.find_duplicates(price_rent=results['prices']['rent'],
+                                                    price_energies = results['prices']['energies'],
+                                                    size=results['key_attributes']['size'],
+                                                    rooms=results['key_attributes']['rooms'],
+                                                    ownership=results['ownership'].lower() if results['ownership'] else None,
+                                                    lat=results['coordinates'][0] if results['coordinates'] else None,
+                                                    lon=results['coordinates'][1] if results['coordinates'] else None,
+                                                    url=link
+                                                    ):
 
                     print(f"Duplicate found for offer: {link}")
                     process_n += 1
@@ -381,8 +410,8 @@ class Nehnutelnosti_sk_processor:
 
                 embedding = self.embedd_rent_offer(self.llm,
                                                    results['title'],
-                                                   results['description'],
-                                                   results['other_properties'])
+                                                   results['description'])
+                                                   #results['other_properties'])
                 results["source_url"] = link
                 #offers.append(results)
                 if "mezonet" in results['title'].lower():
@@ -394,11 +423,14 @@ class Nehnutelnosti_sk_processor:
                                       if results['key_attributes'][key] == True][0]
 
                 print(f"writing rent offer to DB...")
+                price_energies = results['prices']['energies'] if results['prices']['energies'] else self.extract_energy_price(results['description'],
+                                                             results['prices']['rent'])
                 new_offer = self.db_repository.insert_rent_offer({
                     "title": results['title'],
                     "location": results['location'],
                     "property_type": property_type.lower() if property_type else None,
-                    "property_status": results['key_attributes']['property_status'].lower() if results['key_attributes']['property_status'] else None,
+                    "property_status": results['key_attributes']['property_status'].lower()
+                                            if results['key_attributes']['property_status'] else None,
                     "rooms": results['key_attributes']['rooms'],
                     "size": results['key_attributes']['size'],
                     "year_of_construction":results['year_of_construction'],
@@ -408,16 +440,18 @@ class Nehnutelnosti_sk_processor:
                     "ownership": results['ownership'].lower() if results['ownership'] else None,
                     "price_rent": results['prices']['rent'],
                     "price_ms": results['prices']['meter squared'],
-                    "price_energies":  results['prices']['energies'],
+                    "price_energies": price_energies,
+                    "price_total": results['prices']['rent']+price_energies if price_energies else results['prices']['rent'],
                     "description": results['description'],
                     "other_properties": results['other_properties'],
                     "floor":results['floor'],
                     "positioning": results['positioning'].lower() if results['positioning'] else None,
                     "source": self.source,
                     "source_url": results['source_url'],
-                    "coordinates": coordinates
+                    "latitude": results['coordinates'][0] if results['coordinates'] else None,
+                    "longtitude": results['coordinates'][1] if results['coordinates'] else None
                 })
-                print(f"writing images to DB...")
+                #print(f"writing images to DB...")
                 # self.db_repository.insert_offer_images(new_offer.id,results['images'][:4]
                 #                                         if len(results['images']) >= 4 else results['images'])
                 keys_to_remove = {"created_at",
@@ -467,7 +501,8 @@ class Nehnutelnosti_sk_processor:
             url = f"{self.base_url}&page={current_page}"
             try:
                 #all_offers[current_page] = self.process_offers_single_page(url,current_page)
-                self.process_offers_single_page(url, current_page)
+                self.process_offers_single_page(page_url=url,
+                                                current_page=current_page)
             except Exception as e:
                 print(f"failed to process page: {url}, error: {e}")
                 self.failed_pages += 1
@@ -508,6 +543,7 @@ class Nehnutelnosti_sk_processor:
                           title,
                           description,
                           other_attributes=None):
+        description_sk_only = Nehnutelnosti_sk_processor.remove_non_slovak_sections(description)
         if other_attributes:
             other_attributes_formatted = "\n".join(f"{k.strip().replace(
                                             '\xa0', '').rstrip(
@@ -516,12 +552,12 @@ class Nehnutelnosti_sk_processor:
             text_to_embedd = (
                 f"NADPIS:\n{title}\n\n"
                 f"ZÁKLADNÉ ÚDAJE:\n{other_attributes_formatted}\n\n"
-                f"OPIS:\n{description}"
+                f"OPIS:\n{description_sk_only}"
             )
         else:
             text_to_embedd = (
                 f"NADPIS:\n{title}\n\n"
-                f"OPIS:\n{description}"
+                f"OPIS:\n{description_sk_only}"
             )
 
         embedding = llm.get_embedding(text_to_embedd,'text-embedding-3-large')
@@ -529,9 +565,86 @@ class Nehnutelnosti_sk_processor:
 
         return embedding
 
+    @staticmethod
+    def remove_non_slovak_sections(
+                                   text: str) -> str:
+        # Split the text into paragraphs or lines
+        sections = text.split("\n")
+        slovak_sections = []
+
+        for section in sections:
+            stripped = section.strip()
+            if not stripped:
+                continue
+            try:
+                lang = detect(stripped)
+                if lang == "sk":  # keep only Slovak
+                    slovak_sections.append(stripped)
+            except:
+                continue  # skip if detection fails
+
+        return "\n".join(slovak_sections)
+
+    def extract_energy_price(self,
+                             description:str|None,
+                             price_rent:int|None,
+                             prompt:str="""Z nasledujúceho opisu nehnuteľnosti extrahuj cenu **čisto za energie**, ak je to možné.
+                             Pozor – uveď **iba cenu za energie**! Ak je v texte uvedené „cena nájmu <cena> vrátane energií“, odpíš: None.
+
+                             {description}
+
+                             Odpovedz IBA číslom. Ak nie je možné určiť konkrétnu sumu, odpíš: None.
+                             Tvoja odpoveď:
+                             """
+                             ):
+
+        lt = description.lower().replace(' ', '')
+        manually = self.extract_energy_price_by_pattern(lt)
+        if manually is None:
+            generated = self.llm.generate_answer(
+                                        prompt=prompt.format(
+                                        description=description),
+                                        model="gpt-4o"
+                                        ).strip()
+            try:
+                generated = int(re.sub(r'\D', '', generated))
+                if generated >= price_rent:
+                    energies = None
+                else:
+                    energies = generated
+            except:
+                energies = None
+        else:
+            try:
+                energies = int(manually.strip())
+            except:
+                energies = None
+
+        return energies
+
+    def extract_energy_price_by_pattern(self,
+                                        lt: str) -> str|None:
+        patterns = [
+            r'energie:(\d+)',  # energie:100
+            r'\+(\d+)energie',  # +100energie
+            r'\+(\d+)€energie',  # +100€energie
+            r'\+(\d+)eurenergie',  # +100eurenergie
+            r'energievrátaneinternetuatv:(\d+)',  # energievrátaneinternetuatv:300
+            r'\+(\d+),-',  # +100,-
+            r'\+energie(\d+)',  # +energie100
+            r'cenanezahŕňaenergie(\d+)'  # cenanezahŕňaenergie250
+        ]
+
+        for pattern in patterns:
+            match = re.search(pattern, lt)
+            if match:
+                return match.group(1)
+        return None
+
     def delete_invalid_offers(self):
         case_nr = 1
         invalid = 0
+        deleted_from_db_not_from_vdb = []
         all_urls = self.db_repository.get_all_source_urls()
         for url in all_urls:
             print(f"processing {case_nr}/{len(all_urls)}, invalid URLs found: {invalid}")
@@ -544,8 +657,14 @@ class Nehnutelnosti_sk_processor:
                 # If it's a redirect (301, 302...), it's likely expired
                 elif response.status_code in [301, 302, 303, 307, 308]:
                     print(f"Redirected to: {response.headers.get('Location')}")
-                    self.db_repository.delete_by_source_urls([url])
-                    self.vdb.delete_element(source_url=url)
+                    try:
+                        self.db_repository.delete_by_source_urls([url])
+                    except:
+                        continue
+                    try:
+                        self.vdb.delete_element(source_url=url)
+                    except:
+                        deleted_from_db_not_from_vdb.append(url)
                     invalid += 1
                 else:
                     print(f"Status code: {response.status_code}")
@@ -554,19 +673,21 @@ class Nehnutelnosti_sk_processor:
             case_nr += 1
 
         print(f"deleted {invalid} offers")
+        with open(f'deleted_from_db_not_from_vdb.json', 'w',encoding="utf-8") as json_file:
+            json.dump(deleted_from_db_not_from_vdb, json_file, ensure_ascii=False, indent=4)
 
 
-processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
-                                       auth_token =auth_token_nehnutelnosti,
-                                       db_repository =Rent_offers_repository(os.getenv('connection_string')),
-                                        llm =LLM(),
-                                        vector_db = Vector_DB_Qdrant('test')
-                                        )
-#processor.pagination_check()
-# page = processor.get_page(nehnutelnosti_base_url)
-# links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
-# print(links)
-#print(processor.process_detail("https://www.nehnutelnosti.sk/detail/JuDP5eqrN15/prenajom-2-izbovy-dizajnovy-byt-oproti-hant-arene-ulicatrnavska-cesta-"))
+# processor = Nehnutelnosti_sk_processor(base_url= nehnutelnosti_base_url,
+#                                        auth_token =auth_token_nehnutelnosti,
+#                                        db_repository =Rent_offers_repository(os.getenv('connection_string')),
+#                                         llm =LLM(),
+#                                         vector_db = Vector_DB_Qdrant('rent-bot-index')
+#                                         )
+# #processor.pagination_check()
+# # page = processor.get_page(nehnutelnosti_base_url)
+# # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
+# # print(links)
+#print(processor.process_detail("https://www.nehnutelnosti.sk/detail/JujZUqLjUT7/2-izbbytl-krasne-prostrediel-klimatizacia"))
 # print(len(links))
 # print(links[149])
-#processor.process_offers(1,3)
+#processor.process_offers(1,1)
