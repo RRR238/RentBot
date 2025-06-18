@@ -101,10 +101,10 @@ while True:
     print(processed_dict)
     filters = prepare_filters_qdrant(processed_dict)
 
-    # embedding = llm.get_embedding(summary_to_embedd, model='text-embedding-3-large')
-    # results = vdb.filtered_vector_search(embedding, 50, filter=filters)[0]
-    # for i in results.points:
-    #     print(i.payload['source_url'])
+    embedding = llm.get_embedding(summary_to_embedd, model='text-embedding-3-large')
+    results = vdb.filtered_vector_search(embedding, 10, filter=filters)[0]
+    for i in results.points:
+        print(i.payload['source_url'])
 
     response = agentic_chain.predict(input=query)
     questions+=1
