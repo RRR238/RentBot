@@ -423,6 +423,8 @@ class Nehnutelnosti_sk_processor:
                                       if results['key_attributes'][key] == True][0]
 
                 print(f"writing rent offer to DB...")
+                price_energies = results['prices']['energies'] if results['prices']['energies'] else self.extract_energy_price(results['description'],
+                                                             results['prices']['rent'])
                 new_offer = self.db_repository.insert_rent_offer({
                     "title": results['title'],
                     "location": results['location'],
@@ -438,9 +440,8 @@ class Nehnutelnosti_sk_processor:
                     "ownership": results['ownership'].lower() if results['ownership'] else None,
                     "price_rent": results['prices']['rent'],
                     "price_ms": results['prices']['meter squared'],
-                    "price_energies":  results['prices']['energies'],
-                    "price_total": self.extract_energy_price(results['description'],
-                                                             results['prices']['rent']),
+                    "price_energies": price_energies,
+                    "price_total": results['prices']['rent']+price_energies if price_energies else results['prices']['rent'],
                     "description": results['description'],
                     "other_properties": results['other_properties'],
                     "floor":results['floor'],
@@ -619,12 +620,7 @@ class Nehnutelnosti_sk_processor:
             except:
                 energies = None
 
-        if energies and price_rent:
-            total = price_rent + energies
-        else:
-            total = price_rent
-
-        return total
+        return energies
 
     def extract_energy_price_by_pattern(self,
                                         lt: str) -> str|None:
