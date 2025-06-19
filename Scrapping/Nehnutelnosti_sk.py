@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from lxml import etree
-import DOM_identifiers
+import Scrapping.DOM_identifiers as DOM_identifiers
 import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 import os
 import json
 from Shared.Geolocation import get_coordinates
-from Rent_offers_repository import Rent_offers_repository
+from Scrapping.Rent_offers_repository import Rent_offers_repository
 from Shared.LLM import LLM
 from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
 from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
