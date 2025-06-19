@@ -93,7 +93,7 @@ while True:
     except:
         processed_dict = prev_key_attributes_dict
 
-    if processed_dict['property_type'] in ['house','loft','mezonet','garzónka','garzonka','garsónka', 'garsonka']:
+    if processed_dict['property_type'] in ['loft','garzónka','garzonka','garsónka', 'garsonka']:
         processed_dict['rooms'] = None
         processed_dict['rooms_min'] = None
         processed_dict['rooms_max'] = None
