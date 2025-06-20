@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+sqlalchemy>=2.0
+asyncpg
+PyJWT
+bcrypt
+slowapi
+pytest
+jsonschema
+python-dotenv
