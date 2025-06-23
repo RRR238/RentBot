@@ -1,16 +1,17 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import LoginForm from "./components/LoginForm";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import OffersPage from "./components/OffersPage";
+import AISearchPage from "./components/AISearchPage";
+import LoginForm from "./components/LoginForm";
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<LoginForm />} />
+        <Route path="/login" element={<LoginForm />} />
         <Route path="/offers" element={<OffersPage />} />
-        {/* Placeholder for AI Search page */}
-        <Route path="/ai-search" element={<div style={{padding: "2rem"}}><h1>AI Search (Coming Soon)</h1></div>} />
+        <Route path="/ai-search" element={<AISearchPage />} />
+        <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </Router>
   );
