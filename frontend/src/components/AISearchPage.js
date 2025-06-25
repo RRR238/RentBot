@@ -14,6 +14,7 @@ const flatTypes = [
 ];
 
 const OFFERS_PER_PAGE = 20;
+const MAX_CHAT_MESSAGES = 40;
 
 function AISearchPage() {
   // Filter states
@@ -182,16 +183,31 @@ function AISearchPage() {
     }
   };
 
+  const handleClearChat = () => {
+  // Uncomment for real backend:
+  /*
+  fetch("http://localhost:5000/chat/session", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ session_id: chatSessionId }),
+  });
+  */
+  setChatMessages([]);
+  setChatSessionId(null);
+};
+
   // --- Chat logic ---
   const handleSendChat = async (e) => {
-    e.preventDefault();
-    if (!chatInput.trim()) return;
+  e.preventDefault();
+  if (!chatInput.trim() || chatMessages.length >= MAX_CHAT_MESSAGES) return;
 
-    const userMessage = { sender: "user", text: chatInput };
-    setChatMessages((msgs) => [...msgs, userMessage]);
-    setChatLoading(true);
+  const userMessage = { sender: "user", text: chatInput };
+  setChatMessages((msgs) => [...msgs, userMessage]);
+  setChatLoading(true);
 
-    // 1. Create chat session (mock)
+  
+
+  if (!chatSessionId) {
     // Uncomment for real backend:
     /*
     const sessionRes = await fetch("http://localhost:5000/chat/session", { method: "POST" });
@@ -235,9 +251,37 @@ function AISearchPage() {
         setChatLoading(false);
       }, 1000);
     }, 700);
+  } else {
+    // Session already exists, just send message (mock)
+    // Uncomment for real backend:
+    /*
+    fetch("http://localhost:5000/chat/message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: chatSessionId, message: chatInput }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        setChatMessages(msgs => [...msgs, { sender: "bot", text: data.reply }]);
+        setChatLoading(false);
+      })
+      .catch(() => {
+        setChatMessages(msgs => [...msgs, { sender: "bot", text: "Error contacting chatbot." }]);
+        setChatLoading(false);
+      });
+    */
+    // Mock bot reply:
+    setTimeout(() => {
+      setChatMessages(msgs => [
+        ...msgs,
+        { sender: "bot", text: "This is a mock reply from the AI chatbot." }
+      ]);
+      setChatLoading(false);
+    }, 1000);
+  }
 
-    setChatInput("");
-  };
+  setChatInput("");
+};
 
   return (
     <div style={{ display: "flex", height: "100vh" }}>
@@ -372,35 +416,52 @@ function AISearchPage() {
           </div>
           {/* Search & Show Offers Buttons */}
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-            <button
-              onClick={handleSearch}
-              style={{
-                background: "#007bff",
-                color: "#fff",
-                border: "none",
-                borderRadius: "4px",
-                padding: "0.75rem 1.5rem",
-                fontWeight: "bold",
-                cursor: "pointer",
-              }}
-            >
-              Search
-            </button>
-            <button
-              style={{
-                background: "#28a745",
-                color: "#fff",
-                border: "none",
-                borderRadius: "4px",
-                padding: "0.75rem 1.5rem",
-                fontWeight: "bold",
-                cursor: "pointer",
-              }}
-              onClick={handleShowOffers}
-            >
-              Show offers
-            </button>
-          </div>
+  <button
+    onClick={handleSearch}
+    style={{
+      background: "#007bff",
+      color: "#fff",
+      border: "none",
+      borderRadius: "4px",
+      padding: "0.75rem 1.5rem",
+      fontWeight: "bold",
+      cursor: "pointer",
+    }}
+    disabled={offers.length === 0 || chatLoading}
+  >
+    Filter
+  </button>
+  <button
+    style={{
+      background: "#28a745",
+      color: "#fff",
+      border: "none",
+      borderRadius: "4px",
+      padding: "0.75rem 1.5rem",
+      fontWeight: "bold",
+      cursor: "pointer",
+    }}
+    onClick={handleShowOffers}
+    disabled={chatMessages.length === 0 || chatLoading}
+  >
+    Show offers
+  </button>
+  <button
+    style={{
+      background: "#dc3545",
+      color: "#fff",
+      border: "none",
+      borderRadius: "4px",
+      padding: "0.75rem 1.5rem",
+      fontWeight: "bold",
+      cursor: "pointer",
+    }}
+    onClick={() => setOffers([])}
+    //disabled={chatMessages.length === 0 || chatLoading}
+  >
+    Clear results
+  </button>
+</div>
         </div>
         {/* AI search results */}
         {loading ? (
@@ -488,34 +549,53 @@ function AISearchPage() {
             }}
           >
             <div
-              style={{
-                background: "#007bff",
-                color: "#fff",
-                padding: "0.75rem 1rem",
-                borderRadius: "12px 12px 0 0",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                fontWeight: "bold",
-                fontSize: "1.1rem"
-              }}
-            >
-              AI Chat
-              <button
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "#fff",
-                  fontSize: "1.2rem",
-                  cursor: "pointer",
-                  marginLeft: "0.5rem"
-                }}
-                onClick={() => setChatOpen(false)}
-                aria-label="Minimize chat"
-              >
-                &minus;
-              </button>
-            </div>
+  style={{
+    background: "#007bff",
+    color: "#fff",
+    padding: "0.75rem 1rem",
+    borderRadius: "12px 12px 0 0",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    fontWeight: "bold",
+    fontSize: "1.1rem",
+    position: "relative"
+  }}
+>
+  AI Chat
+  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+    <button
+      onClick={handleClearChat}
+      style={{
+        background: "#fff",
+        color: "#007bff",
+        border: "none",
+        borderRadius: "4px",
+        padding: "0.2rem 0.7rem",
+        fontWeight: "bold",
+        fontSize: "0.95rem",
+        cursor: "pointer",
+        marginRight: "0.5rem"
+      }}
+      title="Clear chat history"
+    >
+      🗑
+    </button>
+    <button
+      style={{
+        background: "transparent",
+        border: "none",
+        color: "#fff",
+        fontSize: "1.2rem",
+        cursor: "pointer"
+      }}
+      onClick={() => setChatOpen(false)}
+      aria-label="Minimize chat"
+    >
+      &minus;
+    </button>
+  </div>
+</div>
             <div
               ref={chatWindowRef}
               style={{
@@ -565,37 +645,50 @@ function AISearchPage() {
               }}
             >
               <input
-                type="text"
-                value={chatInput}
-                onChange={e => setChatInput(e.target.value)}
-                placeholder="Type your message..."
-                style={{
-                  flex: 1,
-                  border: "none",
-                  outline: "none",
-                  padding: "0.5rem",
-                  borderRadius: "6px",
-                  fontSize: "1rem",
-                  background: "#f4f4f4"
-                }}
-                disabled={chatLoading}
-              />
-              <button
-                type="submit"
-                disabled={chatLoading || !chatInput.trim()}
-                style={{
-                  background: "#007bff",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "0.5rem 1rem",
-                  marginLeft: "0.5rem",
-                  fontWeight: "bold",
-                  cursor: chatLoading || !chatInput.trim() ? "not-allowed" : "pointer"
-                }}
-              >
-                Send
-              </button>
+  type="text"
+  value={chatInput}
+  onChange={e => setChatInput(e.target.value)}
+  placeholder={
+    chatMessages.length >= MAX_CHAT_MESSAGES
+      ? "Message limit reached. Clear chat to continue."
+      : "Type your message..."
+  }
+  style={{
+    flex: 1,
+    border: "none",
+    outline: "none",
+    padding: "0.5rem",
+    borderRadius: "6px",
+    fontSize: "1rem",
+    background: "#f4f4f4"
+  }}
+  disabled={chatLoading || chatMessages.length >= MAX_CHAT_MESSAGES}
+/>
+<button
+  type="submit"
+  disabled={
+    chatLoading ||
+    !chatInput.trim() ||
+    chatMessages.length >= MAX_CHAT_MESSAGES
+  }
+  style={{
+    background: "#007bff",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    padding: "0.5rem 1rem",
+    marginLeft: "0.5rem",
+    fontWeight: "bold",
+    cursor:
+      chatLoading ||
+      !chatInput.trim() ||
+      chatMessages.length >= MAX_CHAT_MESSAGES
+        ? "not-allowed"
+        : "pointer"
+  }}
+>
+  Send
+</button>
             </form>
           </div>
         )}
