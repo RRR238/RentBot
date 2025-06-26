@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import OfferCard from "./OfferCard";
+import { useNavigate } from "react-router-dom";
 
 // Property type categories for checkboxes
 const flatTypes = [
@@ -21,6 +22,15 @@ const houseTypes = [
 const OFFERS_PER_PAGE = 20;
 
 function OffersPage() {
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+      navigate("/login");
+    }
+  }, [navigate]);
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
 
