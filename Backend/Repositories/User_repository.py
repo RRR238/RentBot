@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 from Backend.Entities import User
 from sqlalchemy.orm import class_mapper
+from sqlalchemy import select, delete
 
 
 class User_repository:
@@ -20,5 +20,8 @@ class User_repository:
         result = await self.db.execute(stmt)
         return result.scalars().first()
 
-    def as_dict(self):
-        return {c.key: getattr(self, c.key) for c in class_mapper(self.__class__).columns}
+    async def delete_user_by_id(self, user_id: int) -> bool:
+        stmt = delete(User).where(User.id == user_id)
+        result = await self.db.execute(stmt)
+        await self.db.commit()
+        return result.rowcount > 0

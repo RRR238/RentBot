@@ -10,6 +10,6 @@ if not database_url:
     raise ValueError("DATABASE_URL is not set.")
 
 # Create async engine and session maker
-engine = create_async_engine(database_url, echo=False)
+engine = create_async_engine(database_url, connect_args={"statement_cache_size": 0},echo=False)
 AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
 Base = declarative_base()
