@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import OfferCard from "./OfferCard";
+import { useNavigate } from "react-router-dom";
+
 
 const flatTypes = [
   { key: "studio", label: "Studio" },
@@ -17,6 +19,39 @@ const OFFERS_PER_PAGE = 20;
 const MAX_CHAT_MESSAGES = 40;
 
 function AISearchPage() {
+
+  useEffect(() => {
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+      navigate("/login");
+    }
+  }, [navigate]);
+}
+
+useEffect(() => {
+  if (chatOpen) {
+    const token = localStorage.getItem("jwtToken");
+    fetch("http://localhost:5000/chat/history", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "session expired") {
+          setChatMessages([]);
+          setChatSessionId(null);
+        } else {
+          setChatMessages(data.history);
+          setChatSessionId(data.session_id || null);
+        }
+      })
+      .catch(() => {
+        setChatMessages([{ sender: "bot", text: "Failed to load chat history." }]);
+      });
+  }
+}, [chatOpen]);
   // Filter states
   const [maxPrice, setMaxPrice] = useState(5000);
   const [size, setSize] = useState({ from: "", to: "" });
@@ -74,7 +109,13 @@ function AISearchPage() {
       types: selectedTypes.join(","),
       rooms,
     });
-    fetch(`http://localhost:5000/ai-show-offers?${params.toString()}`)
+    fetch(`http://localhost:5000/ai-show-offers?${params.toString()}`,{
+  method: "GET",
+  headers: {
+    "Authorization": `Bearer ${token}`,
+  },
+  // ...other options...
+})
       .then(res => res.json())
       .then(data => {
         setOffers(data.offers || []);
@@ -126,7 +167,13 @@ function AISearchPage() {
       types: selectedTypes.join(","),
       rooms,
     });
-    fetch(`http://localhost:5000/ai-search?${params.toString()}`)
+    fetch(`http://localhost:5000/ai-search?${params.toString()}`,{
+  method: "GET",
+  headers: {
+    "Authorization": `Bearer ${token}`,
+  },
+  // ...other options...
+})
       .then(res => res.json())
       .then(data => {
         setOffers(data.offers || []);
@@ -188,7 +235,8 @@ function AISearchPage() {
   /*
   fetch("http://localhost:5000/chat/session", {
     method: "DELETE",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}` },
     body: JSON.stringify({ session_id: chatSessionId }),
   });
   */
@@ -210,7 +258,9 @@ function AISearchPage() {
   if (!chatSessionId) {
     // Uncomment for real backend:
     /*
-    const sessionRes = await fetch("http://localhost:5000/chat/session", { method: "POST" });
+    const sessionRes = await fetch("http://localhost:5000/chat/session", { method: "POST",headers:{"Content-Type": "application/json",
+    "Authorization": `Bearer ${token}` }
+    });
     if (!sessionRes.ok) {
       setChatMessages(msgs => [...msgs, { sender: "bot", text: "Failed to start chat session." }]);
       setChatLoading(false);
@@ -229,7 +279,8 @@ function AISearchPage() {
       /*
       fetch("http://localhost:5000/chat/message", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+                  "Authorization": `Bearer ${token}` },
         body: JSON.stringify({ session_id: sessionData.session_id, message: chatInput }),
       })
         .then(res => res.json())
@@ -257,7 +308,7 @@ function AISearchPage() {
     /*
     fetch("http://localhost:5000/chat/message", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
       body: JSON.stringify({ session_id: chatSessionId, message: chatInput }),
     })
       .then(res => res.json())
