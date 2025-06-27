@@ -47,49 +47,63 @@ function OffersPage() {
   // Fetch offers (with filters and page)
   const fetchOffers = (page = currentPage) => {
     setLoading(true);
-     /*
-  const params = new URLSearchParams({
-    page,
-    limit: OFFERS_PER_PAGE,
-    price_min: 0,
-    price_max: maxPrice,
-    size_min: size.from,
-    size_max: size.to,
-    types: selectedTypes.join(","),
-    rooms,
-  });
-  fetch(`http://localhost:5000/offers?${params.toString()}`)
-    .then(res => res.json())
-    .then(data => {
-      setOffers(data.offers || []);
-      setTotalPages(Math.ceil(data.total / OFFERS_PER_PAGE));
-      setLoading(false);
-    })
-    .catch(() => setLoading(false));
-  */
-    const mockOffers = [
-      {
-        url: 'https://www.reality.sk/byty/prenajom-penthouse-novostavba-safranova-zahrada-4-izb-byt-s-terasou-2x-garazove-statie/JuUemf05CHR/',
-        price: 2000,
-        location: 'Bratislava'
-      },
-      {
-        url: 'https://www.reality.sk/byty/luxusny-penthouse-na-prenajom/Ju_3cQtsESZ/',
-        price: 1200,
-        location: 'Bratislava'
-      },
-      {
-        url: 'https://www.reality.sk/byty/prenajom/JuEaCQ1rVQq/',
-        price: 800,
-        location: 'Bratislava'
-      }
+
+  const token = localStorage.getItem("jwtToken");
+  const allTypes = [...flatTypes.map(t => t.key), ...houseTypes.map(t => t.key)];
+
+const params = new URLSearchParams({
+  page,
+  limit: OFFERS_PER_PAGE,
+  price_min: 0,
+  price_max: maxPrice,
+  size_min: size.from === "" ? 0 : size.from,
+  size_max: size.to === "" ? 1000 : size.to,
+  types: selectedTypes.length === 0 ? allTypes.join(",") : selectedTypes.join(","),
+});
+  fetch(`http://localhost:5000/offers?${params.toString()}`, {
+  method: "GET",
+  headers: {
+    "Authorization": `Bearer ${token}`,
+  },
+})
+  .then(res => {
+    if (res.status === 401) {
+      navigate("/login");
+      return null;
+    }
+    return res.json();
+  })
+  .then(data => {
+    if (!data) return;
+    setOffers(data.offers || []);
+    setTotalPages(Math.ceil(data.total / OFFERS_PER_PAGE));
+    setLoading(false);
+  })
+  .catch(() => setLoading(false));
+  
+    //const mockOffers = [
+      // {
+      //   url: 'https://www.reality.sk/byty/prenajom-penthouse-novostavba-safranova-zahrada-4-izb-byt-s-terasou-2x-garazove-statie/JuUemf05CHR/',
+      //   price: 2000,
+      //   location: 'Bratislava'
+      // },
+      // {
+      //   url: 'https://www.reality.sk/byty/luxusny-penthouse-na-prenajom/Ju_3cQtsESZ/',
+      //   price: 1200,
+      //   location: 'Bratislava'
+      // },
+      // {
+      //   url: 'https://www.reality.sk/byty/prenajom/JuEaCQ1rVQq/',
+      //   price: 800,
+      //   location: 'Bratislava'
+      // }
       // Add more mock offers as needed
-    ];
-    setTimeout(() => {
-      setOffers(mockOffers);
-      setTotalPages(Math.ceil(mockOffers.length/OFFERS_PER_PAGE)); // Example: 3 pages
-      setLoading(false);
-    }, 500);
+    //];
+    // setTimeout(() => {
+    //   setOffers(mockOffers);
+    //   setTotalPages(Math.ceil(mockOffers.length/OFFERS_PER_PAGE)); // Example: 3 pages
+    //   setLoading(false);
+    // }, 500);
   };
 
   // Initial fetch

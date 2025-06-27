@@ -1,7 +1,8 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from Repositories.User_repository import User_repository
+from Repositories.Offers_repository import Offers_repository
 from Dependency_injection import get_db, endpoint_verification
 from Entities import User
 from Singletons import security_manager
@@ -10,6 +11,7 @@ import uvicorn
 from dotenv import load_dotenv
 import os
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional
 
 load_dotenv()
 host = os.getenv('HOST')
@@ -96,6 +98,37 @@ async def delete_user(user_id: int,
     return JSONResponse(
         status_code=200,
         content={"message": f"User with ID {user_id} has been deleted successfully."}
+    )
+
+
+@app.get("/offers")
+async def offers(page:int,
+                   limit:int,
+                   price_min:int,
+                   price_max: int,
+                   size_min: int,
+                    size_max:  int,
+                    types: str,
+                    jwtTokenPayload: dict = Depends(endpoint_verification),
+                    db_connection: AsyncSession = Depends(get_db)
+                    ):
+
+    types_list = types.split(',')
+    rooms = [int(i[0]) for i in types_list if 'rooms' in i or 'plus' in i]
+    filtered_types = [t for t in types_list if 'rooms' not in t.lower() and 'plus' not in t.lower()]
+    # Check if any item was removed (i.e., it matched 'rooms' or 'plus')
+    if len(filtered_types) < len(types_list):
+        filtered_types.append('flat')
+    offers_repo = Offers_repository(db_connection)
+    rent_offers = await offers_repo.get_filtered_rent_offers(price_max,
+                                                             size_min,
+                                                             size_max,
+                                                             filtered_types,
+                                                             rooms,
+                                                             page)
+    return JSONResponse(
+        status_code=200,
+        content=rent_offers
     )
 
 
