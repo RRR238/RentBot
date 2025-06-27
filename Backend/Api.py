@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from Repositories.User_repository import User_repository
 from Dependency_injection import get_db, endpoint_verification
@@ -36,7 +36,7 @@ async def registration(user: User_model,
         status_code=201,
         content={
             "message": "User created successfully",
-            "user": added_user,
+            "user": added_user.as_dict(),
         },
     )
 
@@ -59,6 +59,7 @@ async def login(user: User_model,
                             detail="Invalid password")
 
     token = security_manager.create_jwt_token({
+        "userID": existing_user.id,
         "name": user.username,
         "password": user.password
     })
@@ -68,6 +69,25 @@ async def login(user: User_model,
             "access_token": token,
             "token_type": "bearer"
         }
+    )
+
+
+@app.delete("/delete-user")
+async def delete_user(user_id: int,
+                      jwtTokenPayload: dict = Depends(endpoint_verification),
+                      db_connection: AsyncSession = Depends(get_db)):
+    user_repo = User_repository(db_connection)
+    success = await user_repo.delete_user_by_id(user_id)
+
+    if not success:
+        raise HTTPException(
+            status_code=404,
+            detail=f"User with ID {user_id} not found."
+        )
+
+    return JSONResponse(
+        status_code=200,
+        content={"message": f"User with ID {user_id} has been deleted successfully."}
     )
 
 
