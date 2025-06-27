@@ -11,16 +11,17 @@ function LoginForm() {
     e.preventDefault();
     setMessage("");
     try {
-       const response = {'ok':true} //await fetch("http://localhost:5000", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ username, password }),
-      // });
+       const response = await fetch("http://localhost:5000/login", {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({ username, password }),
+       });
       if (response.ok) {
-        const data = {'type':'bearer','token':'1514165196r3e4rgfreg19641w96gf1'}//await response.json();
+        const data = await response.json();
         if (data.token && data.type === "bearer") {
           // Store token if needed
           localStorage.setItem("jwtToken", data.token);
+          localStorage.setItem("jwtTokenExpiry", (Date.now() + 60 * 60 * 1000).toString());
           // Navigate to Offers page
           navigate("/offers");
         } else {
