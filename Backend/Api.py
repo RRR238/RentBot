@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from Repositories.User_repository import User_repository
 from Dependency_injection import get_db, endpoint_verification
@@ -16,6 +17,13 @@ port = int(os.getenv('PORT'))
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Or specify your frontend URL e.g., ["http://localhost:3000"]
+    allow_credentials=True,
+    allow_methods=["*"],  # Or ["POST", "GET", "OPTIONS"]
+    allow_headers=["*"],
+)
 
 @app.post("/registration")
 async def registration(user: User_model,
@@ -66,8 +74,8 @@ async def login(user: User_model,
     return JSONResponse(
         status_code=200,
         content={
-            "access_token": token,
-            "token_type": "bearer"
+            "token": token,
+            "type": "bearer"
         }
     )
 

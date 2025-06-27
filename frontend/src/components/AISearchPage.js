@@ -19,6 +19,7 @@ const OFFERS_PER_PAGE = 20;
 const MAX_CHAT_MESSAGES = 40;
 
 function AISearchPage() {
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("jwtToken");
@@ -26,7 +27,7 @@ function AISearchPage() {
       navigate("/login");
     }
   }, [navigate]);
-}
+
 
 useEffect(() => {
   if (chatOpen) {
