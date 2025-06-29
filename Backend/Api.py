@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from Repositories.User_repository import User_repository
@@ -11,7 +11,6 @@ import uvicorn
 from dotenv import load_dotenv
 import os
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Optional
 
 load_dotenv()
 host = os.getenv('HOST')
@@ -21,9 +20,9 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Or specify your frontend URL e.g., ["http://localhost:3000"]
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Or ["POST", "GET", "OPTIONS"]
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
@@ -113,9 +112,11 @@ async def offers(page:int,
                     db_connection: AsyncSession = Depends(get_db)
                     ):
 
-    types_list = types.split(',')
+    types_list = types.split(',') if "," in types else [types]
     rooms = [int(i[0]) for i in types_list if 'rooms' in i or 'plus' in i]
     filtered_types = [t for t in types_list if 'rooms' not in t.lower() and 'plus' not in t.lower()]
+
+    filters={}
     # Check if any item was removed (i.e., it matched 'rooms' or 'plus')
     if len(filtered_types) < len(types_list):
         filtered_types.append('flat')

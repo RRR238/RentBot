@@ -12,6 +12,11 @@ if not database_url:
     raise ValueError("DATABASE_URL is not set.")
 
 # Create async engine and session maker
-engine = create_async_engine(database_url,future=True, echo=False)
+engine = create_async_engine(database_url,future=True,
+                             echo=False,
+                             connect_args={"statement_cache_size": 0,
+                                           "server_settings": {"application_name": "fastapi-app"}
+                                           }
+                             )
 AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
 Base = declarative_base()
