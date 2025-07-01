@@ -28,31 +28,7 @@ function AISearchPage() {
     }
   }, [navigate]);
 
-
-useEffect(() => {
-  if (chatOpen) {
-    const token = localStorage.getItem("jwtToken");
-    fetch("http://localhost:5000/chat/history", {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-      },
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === "session expired") {
-          setChatMessages([]);
-          setChatSessionId(null);
-        } else {
-          setChatMessages(data.history);
-          setChatSessionId(data.session_id || null);
-        }
-      })
-      .catch(() => {
-        setChatMessages([{ sender: "bot", text: "Failed to load chat history." }]);
-      });
-  }
-}, [chatOpen]);
+ 
   // Filter states
   const [maxPrice, setMaxPrice] = useState(5000);
   const [size, setSize] = useState({ from: "", to: "" });
@@ -73,9 +49,56 @@ useEffect(() => {
   const [chatLoading, setChatLoading] = useState(false);
   const chatWindowRef = useRef(null);
 
-  useEffect(() => {
+  const [notification, setNotification] = useState("");
+
+   useEffect(() => {
     setChatOpen(true);
   }, []);
+
+useEffect(() => {
+  if (chatOpen) {
+    const token = localStorage.getItem("jwtToken");
+    fetch("http://localhost:5000/chat/fetch-history", {
+  method: "GET",
+  headers: {
+    "Authorization": `Bearer ${token}`,
+  },
+})
+  .then(res => {
+    if (res.status === 401) {
+      navigate("/login");
+      return null;
+    }
+    if (res.status === 404) {
+      setChatMessages([]);
+      setChatSessionId(null);
+      return null;
+    }
+    return res.json();
+  })
+  .then(data => {
+  if (!data) return;
+  if (data.status === "session expired") {
+    setChatMessages([]);
+    setChatSessionId(null);
+  } else if (Array.isArray(data.history)) {
+    setChatMessages(
+      data.history.map(msg => ({
+        sender: msg.role === "Human" ? "user" : "bot",
+        text: msg.message
+      }))
+    );
+    setChatSessionId(data.session_id || null);
+  } else {
+    setChatMessages([]);
+    setChatSessionId(data.session_id || null);
+  }
+})
+  .catch(() => {
+    setChatMessages([]);
+  });
+  }
+}, [chatOpen]);
 
   useEffect(() => {
     if (chatWindowRef.current) {
@@ -258,10 +281,16 @@ useEffect(() => {
 
   if (!chatSessionId) {
     // Uncomment for real backend:
-    /*
-    const sessionRes = await fetch("http://localhost:5000/chat/session", { method: "POST",headers:{"Content-Type": "application/json",
+    const token = localStorage.getItem("jwtToken");
+    const sessionRes = await fetch("http://localhost:5000/chat/create-session", { method: "POST",headers:{"Content-Type": "application/json",
     "Authorization": `Bearer ${token}` }
     });
+
+    if (sessionRes.status === 401) {
+  navigate("/login");
+  return;
+}
+
     if (!sessionRes.ok) {
       setChatMessages(msgs => [...msgs, { sender: "bot", text: "Failed to start chat session." }]);
       setChatLoading(false);
@@ -269,67 +298,110 @@ useEffect(() => {
     }
     const sessionData = await sessionRes.json();
     setChatSessionId(sessionData.session_id);
-    */
+    
     // Mock session creation:
     setTimeout(() => {
-      const mockSessionId = "mock-session-123";
-      setChatSessionId(mockSessionId);
+      // const mockSessionId = "mock-session-123";
+      // setChatSessionId(mockSessionId);
 
       // 2. Send message to chatbot (mock)
       // Uncomment for real backend:
-      /*
-      fetch("http://localhost:5000/chat/message", {
-        method: "POST",
-        headers: { "Content-Type": "application/json",
-                  "Authorization": `Bearer ${token}` },
-        body: JSON.stringify({ session_id: sessionData.session_id, message: chatInput }),
-      })
-        .then(res => res.json())
-        .then(data => {
-          setChatMessages(msgs => [...msgs, { sender: "bot", text: data.reply }]);
-          setChatLoading(false);
-        })
-        .catch(() => {
-          setChatMessages(msgs => [...msgs, { sender: "bot", text: "Error contacting chatbot." }]);
-          setChatLoading(false);
-        });
-      */
+      
+      fetch("http://localhost:5000/chat/generate-answer", {
+  method: "POST",
+  headers: { 
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}` 
+  },
+  body: JSON.stringify({ session_id: sessionData.session_id, message: chatInput }),
+})
+  .then(res => {
+    if (res.status === 401) {
+      navigate("/login");
+      return null;
+    }
+    if (res.status === 404) {
+      setChatMessages([]);
+      setChatSessionId(null);
+      setNotification("Session expired. Please start a new chat.");
+      setChatLoading(false);
+      setTimeout(() => setNotification(""), 3000); // Hide after 3 seconds
+      return null;
+    }
+    return res.json();
+  })
+  .then(data => {
+    if (!data) return;
+    // If backend returns array of {role, message}
+    if (Array.isArray(data)) {
+      setChatMessages(
+        data.map(msg => ({
+          sender: msg.role === "Human" ? "user" : "bot",
+          text: msg.message
+        }))
+      );
+    } else if (data.reply) {
+      // fallback for single reply
+      setChatMessages(msgs => [...msgs, { sender: "bot", text: data.reply }]);
+    }
+    setChatLoading(false);
+  })
+  .catch(() => {
+    setChatMessages(msgs => [...msgs, { sender: "bot", text: "Error contacting chatbot." }]);
+    setChatLoading(false);
+  });
+      
       // Mock bot reply:
-      setTimeout(() => {
-        setChatMessages(msgs => [
-          ...msgs,
-          { sender: "bot", text: "This is a mock reply from the AI chatbot." }
-        ]);
-        setChatLoading(false);
-      }, 1000);
+      // setTimeout(() => {
+      //   setChatMessages(msgs => [
+      //     ...msgs,
+      //     { sender: "bot", text: "This is a mock reply from the AI chatbot." }
+      //   ]);
+      //   setChatLoading(false);
+      // }, 1000);
     }, 700);
   } else {
     // Session already exists, just send message (mock)
     // Uncomment for real backend:
-    /*
-    fetch("http://localhost:5000/chat/message", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-      body: JSON.stringify({ session_id: chatSessionId, message: chatInput }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        setChatMessages(msgs => [...msgs, { sender: "bot", text: data.reply }]);
-        setChatLoading(false);
-      })
-      .catch(() => {
-        setChatMessages(msgs => [...msgs, { sender: "bot", text: "Error contacting chatbot." }]);
-        setChatLoading(false);
-      });
-    */
-    // Mock bot reply:
-    setTimeout(() => {
-      setChatMessages(msgs => [
-        ...msgs,
-        { sender: "bot", text: "This is a mock reply from the AI chatbot." }
-      ]);
+    const token = localStorage.getItem("jwtToken");
+    fetch("http://localhost:5000/chat/generate-answer", {
+  method: "POST",
+  headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+  body: JSON.stringify({ session_id: chatSessionId, message: chatInput }),
+})
+  .then(res => {
+    if (res.status === 401) {
+      navigate("/login");
+      return null;
+    }
+    if (res.status === 404) {
+      setChatMessages([]);
+      setChatSessionId(null);
+      setNotification("Session expired. Please start a new chat.");
       setChatLoading(false);
-    }, 1000);
+      setTimeout(() => setNotification(""), 3000); // Hide after 3 seconds
+      return null;
+    }
+    return res.json();
+  })
+  .then(data => {
+    if (!data) return;
+    setChatMessages(msgs => [...msgs, { sender: "bot", text: data.reply }]);
+    setChatLoading(false);
+  })
+  .catch(() => {
+    setChatMessages(msgs => [...msgs, { sender: "bot", text: "Error contacting chatbot." }]);
+    setChatLoading(false);
+  });
+    
+    // Mock bot reply:
+    // setTimeout(() => {
+    //   setChatMessages(msgs => [
+    //     ...msgs,
+    //     { sender: "bot", text: "This is a mock reply from the AI chatbot." }
+    //   ]);
+    //   setChatLoading(false);
+    // }, 1000);
   }
 
   setChatInput("");
@@ -583,6 +655,25 @@ useEffect(() => {
             &#8594;
           </button>
         </div>
+        {notification && (
+  <div
+    style={{
+      position: "fixed",
+      bottom: "100px",
+      right: "40px",
+      background: "#dc3545",
+      color: "#fff",
+      padding: "0.75rem 1.5rem",
+      borderRadius: "8px",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
+      zIndex: 2000,
+      fontWeight: "bold",
+      fontSize: "1rem"
+    }}
+  >
+    {notification}
+  </div>
+)}
         {/* Chat Window */}
         {chatOpen && (
           <div
