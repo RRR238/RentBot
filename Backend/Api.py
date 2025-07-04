@@ -12,9 +12,9 @@ import uvicorn
 from dotenv import load_dotenv
 import os
 from sqlalchemy.ext.asyncio import AsyncSession
-from AI.Singletons import llm_langchain
-from AI.Utils import prepare_chat_memory
-from AI.Services import generate_ai_answer
+from AI.Singletons import llm_langchain, llm, vector_db
+from AI.Utils import prepare_chat_memory, prepare_chat_history_for_summarization
+from AI.Services import generate_ai_answer, search_by_summarized_preferences
 
 load_dotenv()
 host = os.getenv('HOST')
@@ -164,20 +164,20 @@ async def generate_answer(user_message:User_message_model,
             status_code=404,
             detail="Session expired."
         )
-    chat_history = await chat_session_repo.get_active_chat_history(user_message.session_id)
-    chat_memory = prepare_chat_memory(chat_history,
-                                      user_message.message)
-    generated_answer = await generate_ai_answer(llm_langchain,
-                                          chat_memory)
-
     new_user_message = Chat_history(session_id=user_message.session_id,
                                     role='Human',
                                     message=user_message.message)
+    new_user_message_id = await chat_session_repo.add_new_message(new_user_message)
+    chat_history = await chat_session_repo.get_active_chat_history(user_message.session_id)
+    chat_memory = prepare_chat_memory(chat_history)
+    generated_answer = await generate_ai_answer(llm_langchain,
+                                          chat_memory)
+
     new_ai_message = Chat_history(session_id=user_message.session_id,
                                     role='AI',
                                     message=generated_answer)
-    new_user_message_id = await chat_session_repo.add_new_message(new_user_message)
-    new_user_message_id = await chat_session_repo.add_new_message(new_ai_message)
+
+    new_ai_message_id = await chat_session_repo.add_new_message(new_ai_message)
     await chat_session_repo.update_last_interaction(user_message.session_id)
 
     return JSONResponse(
@@ -219,6 +219,31 @@ async def close_session(session: Chat_session_model,
     return Response(status_code=204)
 
 
+@app.get("/search/find-results/{session_id}")
+async def find_results(session_id:int,
+                        page:int,
+                        limit:int,
+                        price_min:int,
+                        price_max: int,
+                        size_min: int,
+                        size_max:  int,
+                        types: str,
+                        jwtTokenPayload: dict = Depends(endpoint_verification),
+                        db_connection: AsyncSession = Depends(get_db)
+                        ):
+    chat_session_repo = Chat_session_repository(db_connection)
+    is_active_session = await chat_session_repo.is_session_active_by_session_id(session_id)
+    if not is_active_session:
+        await chat_session_repo.mark_session_inactive_by_session_id(session_id)
+        raise HTTPException(
+            status_code=404,
+            detail="Session expired."
+        )
+    chat_history = await chat_session_repo.get_active_chat_history(session_id)
+    chat_memory = prepare_chat_memory(chat_history)
+    results = await search_by_summarized_preferences(llm,
+                                                     vector_db,
+                                                     chat_memory)
 
 
 if __name__ == "__main__":

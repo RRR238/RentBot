@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String,BigInteger, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String,BigInteger, DateTime, ForeignKey, Boolean, Text
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -43,3 +43,13 @@ class Chat_history(Base):
     message = Column(String)
 
     chat_session = relationship("Chat_session", back_populates="chat_history")
+
+
+class Cached_vector_search_results(Base):
+    __tablename__ = 'cached_vector_search_results'
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    session_id = Column(BigInteger, ForeignKey('chat_sessions.id', ondelete="CASCADE"))
+    source_url = Column(Text, nullable=True)
+    location = Column(Text, nullable=False)
+    price_total = Column(Integer, nullable=True)
