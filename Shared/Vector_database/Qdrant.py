@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from qdrant_client import QdrantClient
+from qdrant_client import QdrantClient, AsyncQdrantClient
 from qdrant_client.models import Distance, VectorParams
 from qdrant_client.http.models import PointStruct
 import uuid
@@ -16,6 +16,10 @@ class Vector_DB_Qdrant(Vector_DB_interface):
                         url=os.getenv('QDRANT_ENDPOINT'),
                         api_key=os.getenv('QDRANT_API_KEY'),
                     )
+        self.__async_client = AsyncQdrantClient(
+            url=os.getenv('QDRANT_ENDPOINT'),
+            api_key=os.getenv('QDRANT_API_KEY'),
+        )
         self.index_name = index_name
 
     def create_index(self,
@@ -153,6 +157,50 @@ class Vector_DB_Qdrant(Vector_DB_interface):
         response = self.__client.query_batch_points(collection_name=self.index_name,
                                                     requests=search_query
                                                     )
+
+        return response
+
+    async def filtered_vector_search_async(self,
+                                     vector_query: list,
+                                     k: int,
+                                     filter: list[dict]):
+        filters = []
+        for i in filter:
+            if i['type'] == 'term':
+                filters.append(
+                    FieldCondition(
+                        key=i['key'],
+                        match=MatchValue(value=i['value'])
+                    )
+                )
+            elif i['type'] == 'gte':
+                filters.append(
+                    FieldCondition(
+                        key=i['key'],
+                        range=Range(gte=i['value'])
+                    )
+                )
+            else:
+                filters.append(
+                    FieldCondition(
+                        key=i['key'],
+                        range=Range(lte=i['value'])
+                    )
+                )
+
+        search_query = [
+            QueryRequest(
+                query=vector_query,
+                filter=Filter(must=filters),
+                limit=k,
+                with_payload=True
+            )
+        ]
+
+        response = await self.__async_client.query_batch_points(
+            collection_name=self.index_name,
+            requests=search_query
+        )
 
         return response
 
