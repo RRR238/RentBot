@@ -46,7 +46,7 @@ def processing_dict(key_attributes_dict):
     return key_attributes_dict
 
 
-def prepare_filters(processed_dict):
+def prepare_filters_elastic(processed_dict):
     filter = []
     for k,v in processed_dict.items():
         if k=='price_rent' and v is not None:
