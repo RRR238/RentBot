@@ -14,6 +14,7 @@ import re
 from Rent_offers_repository import Rent_offers_repository
 from Shared.LLM import LLM
 from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
+from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
 
 load_dotenv()  # Loads environment variables from .env file
 
@@ -298,17 +299,14 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
         resp = self.get_page(detail_link)
         if resp.status_code == 200:
             soup = BeautifulSoup(resp.text,'html.parser')
-            title = self.get_title(soup,element_class="detail-title pt-4 pb-2")
+            title = self.get_title(soup,element_class=("detail-title pt-4 pb-2",))
             location = self.get_location(soup,element='div',element_class="d-inline-block ml-2")
             key_attributes = self.get_key_attributes(soup)
             other_properties = self.get_other_properties(soup)
             prices = self.get_price(soup)
             description = self.get_description(soup)
             #images= self.get_images(detail_link)
-            try:
-                coordinates = [str(i) for i in get_coordinates(location)]
-            except:
-                coordinates = None
+            coordinates = get_coordinates(location)
             year_of_construction = int(other_properties['Rok výstavby:']) if 'Rok výstavby:' in other_properties.keys() else None
             approval_year = int(
                 other_properties['Rok kolaudácie:']) if 'Rok kolaudácie:' in other_properties.keys() else None
@@ -417,7 +415,7 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
 #                                     auth_token_reality,
 #                                     Rent_offers_repository(os.getenv('connection_string')),
 #                                      LLM(),
-#                                      Vector_DB('rent-bot-index')
+#                                      Vector_DB_Qdrant('rent-bot-index')
 #                                      )
 # #
 # page = processor.get_page(reality_base_url)
@@ -435,5 +433,5 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
 # print(imgs)
 # print(imgs[0])
 
-#processor.process_offers(1,3)
-#print(processor_reality.process_detail('https://www.reality.sk/byty/realfinn-exkluzivne-prenajom-zariadeny-2-izbovy-apartman-v-starej-lesnej-video/JuhtXaxTBoX/'))
+#processor_reality.process_offers(1,1)
+#print(processor_reality.process_detail('https://www.reality.sk/byty/3-izbovy-byt-s-terasou-a-garazou-v-kvalitnej-novostavbe-na-skalickej-ceste-v-tichej-a-vyhladavanej-casti-bratislavy-nove-mesto/JusKB2ec2sw/'))

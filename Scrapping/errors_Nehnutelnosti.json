@@ -1,74 +1,78 @@
 [
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JuDP5eqrN15/prenajom-2-izbovy-dizajnovy-byt-oproti-hant-arene-ulicatrnavska-cesta-",
-        "error": "can only join an iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/JuNChpBSBSd8/studio---1-izbovy-byt-na-prenajoml-bratislava---stare-mestol-eurovea-od-157",
+        "error": "(psycopg2.OperationalError) server closed the connection unexpectedly\n\tThis probably means the server terminated abnormally\n\tbefore or while processing the request.\nserver closed the connection unexpectedly\n\tThis probably means the server terminated abnormally\n\tbefore or while processing the request.\n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JurCTedrQ1a/2-izbovy-byt-trencin-na-prenajoml-sihot",
-        "error": "can only join an iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/JuqpngO7b2I/dizajnovy-bytl-klemensova-u--historicke-centruml-nova-dobova-rekonstrukcial-zariadeny",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/Jukt-kkg8ve/prenajom-styloveho-2-izboveho-bytu-v-starom-meste-na-ulici-lermontovova",
-        "error": "can only join an iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/Juwq0AAyrIo/utulna-garsonkal-nam-hraniciarovl-bratislaval-petrzalka",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju3aUMKP8XU/prenajom-bytu",
-        "error": "can only join an iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/Jui1YCCZoV-/prenajom-1-izboveho-bytu---gajova-ulica",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JutBuFhTyyF/2-izbovy-byt-na-prenajom",
-        "error": "can only join an iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/JuJwlwuCSK_/na-prenajom-2-izbovy-byt-ivanka-pri-dunaji",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JuC2QBQ4CeO/cena-vratane-vsetkych-energii",
-        "error": "can only join an iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/Juc_8X6ALgK7/prenajate-na-prenajom-3-izbovy-byt-pezinok-kucisdorfska-dolina",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju1RSMd8lO_/2-izb-byt-panorama--novostavba-s-parkovanim",
-        "error": "can only join an iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/Ju4Ir0RVFIm/na-prenajom-pekny-svetly-zariadeny-byt-ivanka-pri-dunaji",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju8MLIOykX1/ponukam-na-prenajom-3-izbovy-byt-v-novostavbe",
-        "error": "can only join an iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/JuLVAuLW5N_/na-prenajom-1-izbovy-byt-v-rodinnom-dome-modra",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JuxMDk6gJp5/prenajom-zariadeny-2-izbovy-byt-skalica--560-eur",
-        "error": "can only join an iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/Ju4JXkSLr_q/rebsk-prenajom-2i-byt-s-parkovanim-v-uzavretom-areali-bratislava-ii",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju8mGB_sK1u/velky-2---izbovy-apartman-vysoke-tatry",
-        "error": "can only join an iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/JuVY0m-CiDJg/prenajom-3i-byt-so-zahradoul-petrzalkal-bratislava",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju-PH-_nEQ6/1i-zrekonstruovany-byt-v-dobrej-lokalite",
-        "error": "can only join an iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/JubPtH5fAZC/prenajom-izby-v-srdci-stareho-mesta---gundulicova-ull-bratislava",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JuxfJVka7VN/3-izb-mezanin-2-kupelnel-2-lodzie",
-        "error": "can only join an iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/JuAgJH5rjBv/na-prenajom-3-izbovy-byt-s-krasnym-vyhladom-na-zamok-simak",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JulPlSluI7P/3-izbovy-byt-na-prenajom-ihned-k-dispozicii",
-        "error": "can only join an iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/Ju-3Cw6DtNB/na-prenajom-2-izbovy-byt-v-novostavbe-na-terase---volny-ihned",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JuPlh1fy7zG/3-izbovy-byt-s-balkonoml-foncorda",
-        "error": "Response ended prematurely"
+        "link": "https://www.nehnutelnosti.sk/detail/JuOW1K7pBi_/metropolitan-novy-moderny-3i-byt-s-parkovanim-na-prenajoml-bory",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju3M6jiWe3n/garsonka-v-dubravke-s-balkonom-volne",
-        "error": "can only join an iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/Ju9B-7a2weU/prenajoml-2-izb-byt-stefanikova-ulica",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JuHjux5xlZe/directrealna-prenajom-priestranny-2-izbovy-byt-s-loggiou-a-parkovacim-miestom-na-ulici-k-lomu-v-bratislave",
-        "error": "can only join an iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/Ju9RAtC-LzZ/na-prenajom-3-izbovy-byt-bratislava-raca",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JuOeQe39KpN/na-prenajom-prerobena-zariadena-garsonkal-33-m2l-senica",
-        "error": "can only join an iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/Ju1h6QduQHO/exkluzivny-3-izbovy-byt-s-garazoul-2-parkovacimi-miestami-a-spickovym-vybavenim",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JuHIHqStTwA/na-prenajom-tiny-house-hlohovec",
-        "error": "can only join an iterable"
+        "link": "https://www.nehnutelnosti.sk/detail/JuXuQji1PjS/unikatny-staromestsky-byt-vo-vile-s-vyhladom-na-hrad-",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/Jur9RBnFRO01/na-prenajom-2-izbovy-byt-s-garazovym-statim-v-novostavbe",
+        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
     }
 ]
