@@ -1,17 +1,20 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from Repositories.User_repository import User_repository
 from Repositories.Offers_repository import Offers_repository
 from Repositories.Chat_sessions_repository import Chat_session_repository
 from Dependency_injection import get_db, endpoint_verification
 from Entities import User, Chat_session, Chat_history
 from Singletons import security_manager
-from Models import User_model, User_message_model
+from Models import User_model, User_message_model, Chat_session_model
 import uvicorn
 from dotenv import load_dotenv
 import os
 from sqlalchemy.ext.asyncio import AsyncSession
+from AI.Singletons import llm_langchain
+from AI.Utils import prepare_chat_memory
+from AI.Services import generate_ai_answer
 
 load_dotenv()
 host = os.getenv('HOST')
@@ -26,6 +29,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.post("/registration")
 async def registration(user: User_model,
@@ -155,20 +159,25 @@ async def generate_answer(user_message:User_message_model,
     chat_session_repo = Chat_session_repository(db_connection)
     is_active_session = await chat_session_repo.is_session_active_by_session_id(user_message.session_id)
     if not is_active_session:
-        await chat_session_repo.delete_chat_session(user_message.session_id)
+        await chat_session_repo.mark_session_inactive_by_session_id(user_message.session_id)
         raise HTTPException(
             status_code=404,
             detail="Session expired."
         )
+    chat_history = await chat_session_repo.get_active_chat_history(user_message.session_id)
+    chat_memory = prepare_chat_memory(chat_history,
+                                      user_message.message)
+    generated_answer = await generate_ai_answer(llm_langchain,
+                                          chat_memory)
+
     new_user_message = Chat_history(session_id=user_message.session_id,
                                     role='Human',
                                     message=user_message.message)
-    new_user_message_id = await chat_session_repo.add_new_message(new_user_message)
-    generated_answer = 'hello from backend !'
-    new_AI_message = Chat_history(session_id=user_message.session_id,
+    new_ai_message = Chat_history(session_id=user_message.session_id,
                                     role='AI',
                                     message=generated_answer)
-    new_AI_message_id = await chat_session_repo.add_new_message(new_AI_message)
+    new_user_message_id = await chat_session_repo.add_new_message(new_user_message)
+    new_user_message_id = await chat_session_repo.add_new_message(new_ai_message)
     await chat_session_repo.update_last_interaction(user_message.session_id)
 
     return JSONResponse(
@@ -184,7 +193,7 @@ async def fetch_history(jwtTokenPayload: dict = Depends(endpoint_verification),
     user_id = jwtTokenPayload['userID']
     active_session = await chat_session_repo.get_active_session_by_user_id(user_id)
     if not active_session:
-        await chat_session_repo.delete_all_sessions_for_user(user_id)
+        await chat_session_repo.mark_all_sessions_inactive_by_user(user_id)
         raise HTTPException(
             status_code=404,
             detail="Active session not found."
@@ -197,6 +206,19 @@ async def fetch_history(jwtTokenPayload: dict = Depends(endpoint_verification),
         content={'history':chat_history,
                  'session_id':active_session}
     )
+
+
+@app.post("/chat/close-session")
+async def close_session(session: Chat_session_model,
+                        jwtTokenPayload: dict = Depends(endpoint_verification),
+                        db_connection: AsyncSession = Depends(get_db)
+                        ):
+    chat_session_repo = Chat_session_repository(db_connection)
+    await chat_session_repo.mark_session_inactive_by_session_id(session.session_id)
+
+    return Response(status_code=204)
+
+
 
 
 if __name__ == "__main__":

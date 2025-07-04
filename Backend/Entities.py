@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String,BigInteger, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String,BigInteger, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -27,6 +27,7 @@ class Chat_session(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     last_interaction = Column(DateTime(timezone=True),default=datetime.utcnow, server_default=func.now(),nullable=False)
     user_id = Column(BigInteger, ForeignKey('users.id', ondelete="CASCADE"))
+    is_active = Column(Boolean, default=True, nullable=False)
 
     user = relationship("User", back_populates="chat_sessions")
     chat_history = relationship('Chat_history',back_populates='chat_session')

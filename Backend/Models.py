@@ -10,3 +10,7 @@ class User_message_model(BaseModel):
     session_id: int
     message: str
 
+
+class Chat_session_model(BaseModel):
+    session_id: int
+

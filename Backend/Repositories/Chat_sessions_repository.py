@@ -75,25 +75,27 @@ class Chat_session_repository:
 
         return [{"role": role, "message": message} for role, message in rows]
 
-    async def delete_chat_session(self, session_id: int):
+    async def delete_chat_session_by_session_id(self, session_id: int):
         # Delete the chat session only
         await self.db.execute(
             delete(Chat_session).where(Chat_session.id == session_id)
         )
         await self.db.commit()
 
-    async def delete_all_sessions_for_user(self, user_id: int):
-        # Step 1: Find all session IDs for the user
-        stmt_sessions = select(Chat_session.id).where(Chat_session.user_id == user_id)
-        result = await self.db.execute(stmt_sessions)
-        session_ids = [row[0] for row in result.fetchall()]
+    async def mark_session_inactive_by_session_id(self, session_id: int):
+        stmt = (
+            update(Chat_session)
+            .where(Chat_session.id == session_id)
+            .values(is_active=False)
+        )
+        await self.db.execute(stmt)
+        await self.db.commit()
 
-        if not session_ids:
-            return  # Nothing to delete
-
-        # Step 2: Delete the chat sessions only
-        stmt_delete_sessions = delete(Chat_session).where(Chat_session.id.in_(session_ids))
-        await self.db.execute(stmt_delete_sessions)
-
-        # Step 3: Commit transaction
+    async def mark_all_sessions_inactive_by_user(self, user_id: int):
+        stmt = (
+            update(Chat_session)
+            .where(Chat_session.user_id == user_id)
+            .values(is_active=False)
+        )
+        await self.db.execute(stmt)
         await self.db.commit()

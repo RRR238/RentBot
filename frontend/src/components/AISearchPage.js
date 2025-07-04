@@ -256,17 +256,30 @@ useEffect(() => {
 
   const handleClearChat = () => {
   // Uncomment for real backend:
-  /*
-  fetch("http://localhost:5000/chat/session", {
-    method: "DELETE",
-    headers: { "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}` },
-    body: JSON.stringify({ session_id: chatSessionId }),
+  const token = localStorage.getItem("jwtToken");
+  fetch("http://localhost:5000/chat/close-session", {
+  method: "POST",
+  headers: { 
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}` 
+  },
+  body: JSON.stringify({ session_id: chatSessionId }),
+})
+  .then(res => {
+    if (res.status === 401) {
+      navigate("/login");
+      return null;
+    }
+    // Optionally handle other statuses if needed
+    return res.json();
+  })
+  .catch(() => {
+    // Optionally handle network errors
   });
-  */
-  setChatMessages([]);
-  setChatSessionId(null);
-};
+
+setChatMessages([]);
+setChatSessionId(null);
+  }
 
   // --- Chat logic ---
   const handleSendChat = async (e) => {
