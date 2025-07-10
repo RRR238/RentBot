@@ -15,6 +15,8 @@ const flatTypes = [
   { key: "loft", label: "Loft" },
 ];
 
+const allTypes = [...flatTypes.map(t => t.key), "house"];
+
 const OFFERS_PER_PAGE = 20;
 const MAX_CHAT_MESSAGES = 40;
 
@@ -50,6 +52,11 @@ function AISearchPage() {
   const chatWindowRef = useRef(null);
 
   const [notification, setNotification] = useState("");
+  const [offersShown, setOffersShown] = useState(false);
+
+  const [filtersDirty, setFiltersDirty] = useState(false);
+  const [showFilterInfo, setShowFilterInfo] = useState(false);
+  
 
    useEffect(() => {
     setChatOpen(true);
@@ -106,73 +113,80 @@ useEffect(() => {
     }
   }, [chatMessages, chatOpen]);
 
+  
+
   const handleTypeToggle = (type) => {
     setSelectedTypes(selectedTypes =>
       selectedTypes.includes(type)
         ? selectedTypes.filter(t => t !== type)
         : [...selectedTypes, type]
     );
+    setFiltersDirty(true);
   };
 
-  const handleMaxPriceChange = (e) => setMaxPrice(Number(e.target.value));
-  const handleSizeChange = (e) => setSize({ ...size, [e.target.name]: e.target.value });
-  const handleRoomsChange = (e) => setRooms(e.target.value);
+  const handleMaxPriceChange = (e) => {setMaxPrice(Number(e.target.value));
+                                        setFiltersDirty(true);
+                                        };
+  const handleSizeChange = (e) => {setSize({ ...size, [e.target.name]: e.target.value });
+                                    setFiltersDirty(true);
+                                };
+  const handleRoomsChange = (e) => {setRooms(e.target.value);
+                                      setFiltersDirty(true);
+                                    };
 
   const handleShowOffers = () => {
     setLoading(true);
 
     // Uncomment this block to use real backend fetching:
-    /*
-    const params = new URLSearchParams({
-      page: currentPage,
-      limit: OFFERS_PER_PAGE,
-      price_min: 0,
-      price_max: maxPrice,
-      size_min: size.from,
-      size_max: size.to,
-      types: selectedTypes.join(","),
-      rooms,
-    });
-    fetch(`http://localhost:5000/ai-show-offers?${params.toString()}`,{
+    const token = localStorage.getItem("jwtToken");
+    fetch(`http://localhost:5000/search/find-results/${chatSessionId}`, {
   method: "GET",
   headers: {
     "Authorization": `Bearer ${token}`,
   },
   // ...other options...
 })
-      .then(res => res.json())
-      .then(data => {
-        setOffers(data.offers || []);
-        setTotalPages(Math.ceil(data.total / OFFERS_PER_PAGE));
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-    */
+  .then(res => {
+    if (res.status === 401) {
+      navigate("/login");
+      return null;
+    }
+    return res.json();
+  })
+  .then(data => {
+    if (!data) return;
+    setOffers(data.offers || []);
+    setTotalPages(Math.ceil(data.total / OFFERS_PER_PAGE));
+    setLoading(false);
+    setOffersShown(true);
+  })
+  .catch(() => setLoading(false));
+  
 
     // Mock data for development:
-    const mockOffers = [
-      {
-        url: 'https://www.reality.sk/byty/prenajom-penthouse-novostavba-safranova-zahrada-4-izb-byt-s-terasou-2x-garazove-statie/JuUemf05CHR/',
-        price: 2000,
-        location: 'Bratislava'
-      },
-      {
-        url: 'https://www.reality.sk/byty/luxusny-penthouse-na-prenajom/Ju_3cQtsESZ/',
-        price: 1200,
-        location: 'Bratislava'
-      },
-      {
-        url: 'https://www.reality.sk/byty/prenajom/JuEaCQ1rVQq/',
-        price: 800,
-        location: 'Bratislava'
-      }
-      // Add more mock offers as needed
-    ];
-    setTimeout(() => {
-      setOffers(mockOffers);
-      setTotalPages(Math.ceil(mockOffers.length/OFFERS_PER_PAGE)); // Example: 2 pages
-      setLoading(false);
-    }, 500);
+    // const mockOffers = [
+    //   {
+    //     url: 'https://www.reality.sk/byty/prenajom-penthouse-novostavba-safranova-zahrada-4-izb-byt-s-terasou-2x-garazove-statie/JuUemf05CHR/',
+    //     price: 2000,
+    //     location: 'Bratislava'
+    //   },
+    //   {
+    //     url: 'https://www.reality.sk/byty/luxusny-penthouse-na-prenajom/Ju_3cQtsESZ/',
+    //     price: 1200,
+    //     location: 'Bratislava'
+    //   },
+    //   {
+    //     url: 'https://www.reality.sk/byty/prenajom/JuEaCQ1rVQq/',
+    //     price: 800,
+    //     location: 'Bratislava'
+    //   }
+    //   // Add more mock offers as needed
+    // ];
+    // setTimeout(() => {
+    //   setOffers(mockOffers);
+    //   setTotalPages(Math.ceil(mockOffers.length/OFFERS_PER_PAGE)); // Example: 2 pages
+    //   setLoading(false);
+    // }, 500);
   };
 
   // Function to fetch AI search results (mocked)
@@ -180,7 +194,7 @@ useEffect(() => {
     setLoading(true);
 
     // Uncomment this block to use real backend fetching:
-    /*
+    const token = localStorage.getItem("jwtToken");    
     const params = new URLSearchParams({
       page,
       limit: OFFERS_PER_PAGE,
@@ -191,68 +205,92 @@ useEffect(() => {
       types: selectedTypes.join(","),
       rooms,
     });
-    fetch(`http://localhost:5000/ai-search?${params.toString()}`,{
+   fetch(`http://localhost:5000/search/fetch-filtered-results/${chatSessionId}?${params.toString()}`, {
   method: "GET",
   headers: {
     "Authorization": `Bearer ${token}`,
   },
   // ...other options...
 })
-      .then(res => res.json())
-      .then(data => {
-        setOffers(data.offers || []);
-        setTotalPages(Math.ceil(data.total / OFFERS_PER_PAGE));
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-    */
+  .then(res => {
+    if (res.status === 401) {
+      navigate("/login");
+      return null;
+    }
+    if (res.status === 404) {
+      setOffers([]);
+      setNotification("Session expired");
+      setTimeout(() => setNotification(""), 3000); // Hide after 3 seconds
+      setLoading(false);
+      return null;
+    }
+    return res.json();
+  })
+  .then(data => {
+    if (!data) return;
+    setOffers(data.offers || []);
+    setTotalPages(Math.ceil(data.total / OFFERS_PER_PAGE));
+    setLoading(false);
+  })
+  .catch(() => setLoading(false));
+    
 
     // Mock data for development:
-    const mockOffers = [
-      {
-        url: 'https://www.reality.sk/byty/prenajom-penthouse-novostavba-safranova-zahrada-4-izb-byt-s-terasou-2x-garazove-statie/JuUemf05CHR/',
-        price: 2000,
-        location: 'Bratislava'
-      },
-      {
-        url: 'https://www.reality.sk/byty/luxusny-penthouse-na-prenajom/Ju_3cQtsESZ/',
-        price: 1200,
-        location: 'Bratislava'
-      },
-      {
-        url: 'https://www.reality.sk/byty/prenajom/JuEaCQ1rVQq/',
-        price: 800,
-        location: 'Bratislava'
-      }
-      // Add more mock offers as needed
-    ];
-    setTimeout(() => {
-      setOffers(mockOffers);
-      setTotalPages(Math.ceil(mockOffers.length/OFFERS_PER_PAGE)); // Example: 3 pages
-      setLoading(false);
-    }, 500);
+    // const mockOffers = [
+    //   {
+    //     url: 'https://www.reality.sk/byty/prenajom-penthouse-novostavba-safranova-zahrada-4-izb-byt-s-terasou-2x-garazove-statie/JuUemf05CHR/',
+    //     price: 2000,
+    //     location: 'Bratislava'
+    //   },
+    //   {
+    //     url: 'https://www.reality.sk/byty/luxusny-penthouse-na-prenajom/Ju_3cQtsESZ/',
+    //     price: 1200,
+    //     location: 'Bratislava'
+    //   },
+    //   {
+    //     url: 'https://www.reality.sk/byty/prenajom/JuEaCQ1rVQq/',
+    //     price: 800,
+    //     location: 'Bratislava'
+    //   }
+    //   // Add more mock offers as needed
+    // ];
+    // setTimeout(() => {
+    //   setOffers(mockOffers);
+    //   setTotalPages(Math.ceil(mockOffers.length/OFFERS_PER_PAGE)); // Example: 3 pages
+    //   setLoading(false);
+    // }, 500);
   };
 
   const handleSearch = () => {
     setCurrentPage(1);
     fetchAISearchResults(1);
+    setFiltersDirty(false);
+    setShowFilterInfo(false);
   };
 
   const handlePrevPage = () => {
-    if (currentPage > 1) {
-      const newPage = currentPage - 1;
-      setCurrentPage(newPage);
-      fetchAISearchResults(newPage);
-    }
-  };
+  if (filtersDirty) {
+    setShowFilterInfo(true);
+    return;
+  }
+  if (currentPage > 1) {
+    const newPage = currentPage - 1;
+    setCurrentPage(newPage);
+    fetchAISearchResults(newPage);
+  }
+};
 
   const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      const newPage = currentPage + 1;
-      setCurrentPage(newPage);
-      fetchAISearchResults(newPage);
-    }
-  };
+  if (filtersDirty) {
+    setShowFilterInfo(true);
+    return;
+  }
+  if (currentPage < totalPages) {
+    const newPage = currentPage + 1;
+    setCurrentPage(newPage);
+    fetchAISearchResults(newPage);
+  }
+};
 
   const handleClearChat = () => {
   // Uncomment for real backend:
@@ -418,6 +456,7 @@ setChatSessionId(null);
   }
 
   setChatInput("");
+  setOffersShown(false);
 };
 
   return (
@@ -482,6 +521,7 @@ setChatSessionId(null);
                 value={maxPrice}
                 onChange={handleMaxPriceChange}
                 style={{ accentColor: "#007bff" }}
+                disabled={offers.length === 0}
               />
               <span style={{ color: "#007bff" }}>{maxPrice} €</span>
             </div>
@@ -496,6 +536,7 @@ setChatSessionId(null);
               value={size.from}
               onChange={handleSizeChange}
               style={{ width: "60px", margin: "0 0.5rem" }}
+              disabled={offers.length === 0}
             />
             <input
               type="number"
@@ -504,6 +545,7 @@ setChatSessionId(null);
               value={size.to}
               onChange={handleSizeChange}
               style={{ width: "60px" }}
+              disabled={offers.length === 0}
             />
           </div>
           {/* Property Types as checkboxes */}
@@ -518,6 +560,7 @@ setChatSessionId(null);
                       type="checkbox"
                       checked={selectedTypes.includes(type.key)}
                       onChange={() => handleTypeToggle(type.key)}
+                      disabled={offers.length === 0}
                     />
                     {type.label}
                   </label>
@@ -531,6 +574,7 @@ setChatSessionId(null);
                       type="checkbox"
                       checked={selectedTypes.includes(type.key)}
                       onChange={() => handleTypeToggle(type.key)}
+                      disabled={offers.length === 0}
                     />
                     {type.label}
                   </label>
@@ -546,6 +590,7 @@ setChatSessionId(null);
                   type="checkbox"
                   checked={selectedTypes.includes("house")}
                   onChange={() => handleTypeToggle("house")}
+                  disabled={offers.length === 0}
                 />
                 House
               </label>
@@ -579,7 +624,7 @@ setChatSessionId(null);
       cursor: "pointer",
     }}
     onClick={handleShowOffers}
-    disabled={chatMessages.length === 0 || chatLoading}
+    disabled={chatMessages.length === 0 || chatLoading || offersShown}
   >
     Show offers
   </button>
@@ -632,7 +677,7 @@ setChatSessionId(null);
         >
           <button
             onClick={handlePrevPage}
-            disabled={currentPage === 1}
+            disabled={currentPage === 1 || filtersDirty}
             style={{
               background: "#007bff",
               color: "#fff",
@@ -652,7 +697,7 @@ setChatSessionId(null);
           </span>
           <button
             onClick={handleNextPage}
-            disabled={currentPage === totalPages}
+            disabled={currentPage === totalPages || filtersDirty}
             style={{
               background: "#007bff",
               color: "#fff",

@@ -1,7 +1,7 @@
 from langchain.chat_models import ChatOpenAI
 from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
+from Shared.LLM import LLM
 
-gen_model = "gpt-4o"
 
 llm_langchain = ChatOpenAI(
     temperature=0.2,
@@ -9,4 +9,5 @@ llm_langchain = ChatOpenAI(
     #openai_api_key=
 )
 
-vdb = Vector_DB_Qdrant('rent-bot-index')
+vector_db = Vector_DB_Qdrant('rent-bot-index')
+llm = LLM()
