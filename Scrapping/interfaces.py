@@ -34,6 +34,8 @@ class Property_data_interface(BaseModel):
     description: str | None
     images: List[str] | None
     coordinates: List[float] | None
+    source_url:str
+    source:str
 
 
 property_data_list = List[Property_data_interface]
