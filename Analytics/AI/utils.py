@@ -101,9 +101,14 @@ def prepare_filters_qdrant(processed_dict):
 
 def extract_chat_history_as_dict(memory):
     chat_history = []
-    for message in memory.chat_memory.messages:
-        role = "user" if isinstance(message, HumanMessage) else "assistant"
-        chat_history.append({"role": role, "content": message.content})
+    if isinstance(memory,list):
+        for message in memory:
+            role = "user" if isinstance(message, HumanMessage) else "assistant"
+            chat_history.append({"role": role, "content": message.content})
+    else:
+        for message in memory.chat_memory.messages:
+            role = "user" if isinstance(message, HumanMessage) else "assistant"
+            chat_history.append({"role": role, "content": message.content})
     return chat_history
 
 def format_chat_history(chat_history):
