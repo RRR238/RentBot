@@ -6,7 +6,7 @@ from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
 from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
 from Analytics.AI.Prompts import summarize_chat_history_prompt_v_5, get_key_attributes_prompt
 from Analytics.AI.utils import convert_text_to_dict, processing_dict, prepare_filters_qdrant, prepare_filters_elastic
-from Utils import prepare_chat_history_for_summarization
+from Backend.AI.Utils import prepare_chat_history_for_summarization
 
 
 async def generate_ai_answer(
@@ -93,12 +93,16 @@ async def search_by_summarized_preferences(
     results = await vector_db.filtered_vector_search_async(
         embedding, 50, filter=filters
     )
+    print(f'results from VDB: {results}')
 
     processed_results = [
-        {
+        {   'score':i.score,
             'source_url': i.payload['source_url'],
-            'price': i.payload['price_total'],
-            'location': "Niekde na Slovensku" #i.payload['location']
+            'price_total': i.payload['price_total'],
+            'location': "Niekde na Slovensku", #i.payload['location']
+            'size': i.payload['size'],
+            'property_type': i.payload['property_type'],
+            'rooms':i.payload['rooms']
         }
         for i in results[0].points
     ]

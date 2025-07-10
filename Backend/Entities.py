@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String,BigInteger, DateTime, ForeignKey, Boolean, Text
+from sqlalchemy import Column, Integer, String,BigInteger, DateTime, ForeignKey, Boolean, Text, Float
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -14,7 +14,8 @@ class User(Base):
     username = Column(String, index=True)
     password = Column(String, unique=True, index=True)
 
-    chat_sessions = relationship("Chat_session", back_populates="user")
+    chat_sessions = relationship("Chat_session",
+                                 back_populates="user")
 
     def as_dict(self):
         return {c.key: getattr(self, c.key) for c in class_mapper(self.__class__).columns}
@@ -23,33 +24,59 @@ class User(Base):
 class Chat_session(Base):
     __tablename__ = 'chat_sessions'
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    last_interaction = Column(DateTime(timezone=True),default=datetime.utcnow, server_default=func.now(),nullable=False)
-    user_id = Column(BigInteger, ForeignKey('users.id', ondelete="CASCADE"))
-    is_active = Column(Boolean, default=True, nullable=False)
+    id = Column(BigInteger, primary_key=True,
+                autoincrement=True)
+    created_at = Column(DateTime(timezone=True),
+                        server_default=func.now())
+    last_interaction = Column(DateTime(timezone=True),
+                              default=datetime.utcnow,
+                              server_default=func.now(),nullable=False)
+    user_id = Column(BigInteger, ForeignKey('users.id',
+                                            ondelete="CASCADE"))
+    is_active = Column(Boolean,
+                       default=True,
+                       nullable=False)
 
-    user = relationship("User", back_populates="chat_sessions")
-    chat_history = relationship('Chat_history',back_populates='chat_session')
+    user = relationship("User",
+                        back_populates="chat_sessions")
+    chat_history = relationship('Chat_history',
+                                back_populates='chat_session')
+    cached_vector_search_results = relationship('Cached_vector_search_results',
+                                back_populates='chat_session')
 
 
 class Chat_history(Base):
     __tablename__ = 'chat_histories'
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    session_id = Column(BigInteger, ForeignKey('chat_sessions.id', ondelete="CASCADE"))
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    id = Column(BigInteger, primary_key=True,
+                autoincrement=True)
+    session_id = Column(BigInteger,
+                        ForeignKey('chat_sessions.id',
+                                   ondelete="CASCADE"))
+    created_at = Column(DateTime(timezone=True),
+                        server_default=func.now())
     role = Column(String)
     message = Column(String)
 
-    chat_session = relationship("Chat_session", back_populates="chat_history")
+    chat_session = relationship("Chat_session",
+                                back_populates="chat_history")
 
 
 class Cached_vector_search_results(Base):
     __tablename__ = 'cached_vector_search_results'
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    session_id = Column(BigInteger, ForeignKey('chat_sessions.id', ondelete="CASCADE"))
+    id = Column(BigInteger, primary_key=True,
+                autoincrement=True)
+    session_id = Column(BigInteger,
+                        ForeignKey('chat_sessions.id',
+                                               ondelete="CASCADE"))
     source_url = Column(Text, nullable=True)
     location = Column(Text, nullable=False)
     price_total = Column(Integer, nullable=True)
+    size = Column(Integer, nullable=True)
+    property_type = Column(Text, nullable=False)
+    rooms = Column(Integer, nullable=True)
+    score = Column(Float, nullable=True)
+
+    chat_session = relationship("Chat_session",
+                                back_populates="cached_vector_search_results")

@@ -4,8 +4,9 @@ from fastapi.responses import JSONResponse, Response
 from Repositories.User_repository import User_repository
 from Repositories.Offers_repository import Offers_repository
 from Repositories.Chat_sessions_repository import Chat_session_repository
+from Repositories.Cached_vector_search_results_repository import Cached_vector_search_results_repository
 from Dependency_injection import get_db, endpoint_verification
-from Entities import User, Chat_session, Chat_history
+from Entities import User, Chat_session, Chat_history, Cached_vector_search_results
 from Singletons import security_manager
 from Models import User_model, User_message_model, Chat_session_model
 import uvicorn
@@ -13,8 +14,9 @@ from dotenv import load_dotenv
 import os
 from sqlalchemy.ext.asyncio import AsyncSession
 from AI.Singletons import llm_langchain, llm, vector_db
-from AI.Utils import prepare_chat_memory, prepare_chat_history_for_summarization
+from AI.Utils import prepare_chat_memory
 from AI.Services import generate_ai_answer, search_by_summarized_preferences
+from Utils import process_types_and_rooms_filters
 
 load_dotenv()
 host = os.getenv('HOST')
@@ -117,19 +119,13 @@ async def offers(page:int,
                     db_connection: AsyncSession = Depends(get_db)
                     ):
 
-    types_list = types.split(',') if "," in types else [types]
-    rooms = [int(i[0]) for i in types_list if 'rooms' in i or 'plus' in i]
-    filtered_types = [t for t in types_list if 'rooms' not in t.lower() and 'plus' not in t.lower()]
-
-    # Check if any item was removed (i.e., it matched 'rooms' or 'plus')
-    if len(filtered_types) < len(types_list):
-        filtered_types.append('flat')
+    processed_filters = process_types_and_rooms_filters(types)
     offers_repo = Offers_repository(db_connection)
     rent_offers = await offers_repo.get_filtered_rent_offers(price_max,
                                                              size_min,
                                                              size_max,
-                                                             filtered_types,
-                                                             rooms,
+                                                             processed_filters['types'],
+                                                             processed_filters['rooms'],
                                                              page)
     return JSONResponse(
         status_code=200,
@@ -221,29 +217,79 @@ async def close_session(session: Chat_session_model,
 
 @app.get("/search/find-results/{session_id}")
 async def find_results(session_id:int,
-                        page:int,
-                        limit:int,
-                        price_min:int,
-                        price_max: int,
-                        size_min: int,
-                        size_max:  int,
-                        types: str,
                         jwtTokenPayload: dict = Depends(endpoint_verification),
                         db_connection: AsyncSession = Depends(get_db)
                         ):
     chat_session_repo = Chat_session_repository(db_connection)
+    cached_results_repo = Cached_vector_search_results_repository(db_connection)
     is_active_session = await chat_session_repo.is_session_active_by_session_id(session_id)
+    await cached_results_repo.delete_items_by_session_id(session_id)
     if not is_active_session:
         await chat_session_repo.mark_session_inactive_by_session_id(session_id)
         raise HTTPException(
             status_code=404,
-            detail="Session expired."
+            detail="Session not found."
         )
     chat_history = await chat_session_repo.get_active_chat_history(session_id)
     chat_memory = prepare_chat_memory(chat_history)
     results = await search_by_summarized_preferences(llm,
                                                      vector_db,
                                                      chat_memory)
+    for result in results:
+        new_item = Cached_vector_search_results(
+                                                session_id=session_id,
+                                                source_url=result['source_url'],
+                                                location=result['location'],
+                                                price_total=result['price_total'],
+                                                size=result['size'],
+                                                property_type=result['property_type'],
+                                                rooms=result['rooms'],
+                                                score=result['score']
+                                                )
+        added_item = await cached_results_repo.add_item(new_item)
+
+    filtered_results = [{'source_url':result['source_url'],
+                         'price_total':result['price_total'],
+                         'location':result['location']} for result in results]
+
+    return JSONResponse(status_code=200,
+                        content={'total':len(filtered_results),
+                                 'offers':filtered_results[:20]})
+
+@app.get("/search/fetch-filtered-results/{session_id}")
+async def fetch_filtered_results(session_id:int,
+                                 page:int,
+                                 limit:int,
+                                 price_min:int,
+                                 price_max: int,
+                                 size_min: int,
+                                 size_max:  int,
+                                 types: str,
+                                 jwtTokenPayload: dict = Depends(endpoint_verification),
+                                 db_connection: AsyncSession = Depends(get_db)):
+    cached_results_repo = Cached_vector_search_results_repository(db_connection)
+    chat_session_repo = Chat_session_repository(db_connection)
+    is_active_session = await chat_session_repo.is_session_active_by_session_id(session_id)
+    await cached_results_repo.delete_items_by_session_id(session_id)
+    if not is_active_session:
+        await cached_results_repo.delete_items_by_session_id(session_id)
+        await chat_session_repo.mark_session_inactive_by_session_id(session_id)
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found."
+        )
+    processed_filters = process_types_and_rooms_filters(types)
+    filtered_cached_results = await cached_results_repo.get_filtered_vector_search_results(price_max,
+                                                                                 size_min,
+                                                                                 size_max,
+                                                                                 processed_filters['types'],
+                                                                                 processed_filters['rooms'],
+                                                                                 page)
+
+    return JSONResponse(
+        status_code=200,
+        content=filtered_cached_results
+    )
 
 
 if __name__ == "__main__":
