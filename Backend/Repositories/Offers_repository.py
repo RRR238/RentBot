@@ -56,7 +56,9 @@ class Offers_repository:
             select(
                 Rent_offer_model.source_url,
                 Rent_offer_model.location,
-                Rent_offer_model.price_total
+                Rent_offer_model.price_total,
+                Rent_offer_model.title,
+                Rent_offer_model.description
             )
             .where(*filters)
             .offset(offset)

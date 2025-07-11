@@ -72,7 +72,9 @@ class Cached_vector_search_results_repository:
             select(
                 Cached_vector_search_results.source_url,
                 Cached_vector_search_results.location,
-                Cached_vector_search_results.price_total
+                Cached_vector_search_results.price_total,
+                Cached_vector_search_results.title,
+                Cached_vector_search_results.description
             )
             .where(*filters)
             .offset(offset)
