@@ -2,7 +2,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import create_engine, exists, and_
 from contextlib import contextmanager
 from sqlalchemy.exc import SQLAlchemyError
-from Shared.DB_models import Rent_offer_model, Offer_image_model
+from Shared.DB_models import Rent_offer_model
 
 class Rent_offers_repository:
     def __init__(self,
@@ -80,18 +80,6 @@ class Rent_offers_repository:
                 conditions.append(Rent_offer_model.source_url != url)
 
             return session.query(Rent_offer_model).filter(and_(*conditions)).all()
-
-    def insert_offer_images(self, rent_offer_id: int, image_urls: list[str]):
-        """Inserts multiple image URLs related to a specific rent offer."""
-        if not image_urls:
-            return  # Do nothing if the list is empty
-
-        image_records = [Offer_image_model(image_url=url,
-                                    rent_offer_id=rent_offer_id) for url in image_urls]
-
-        with self.get_session() as session:
-            session.add_all(image_records)
-            session.commit()  # Save changes
 
     def get_all_source_urls(self):
         """Fetch all source_url values from the rent_offers table."""
