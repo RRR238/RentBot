@@ -89,7 +89,7 @@ class Nehnutelnosti_sk_processor:
             other_properties = self.get_other_properties(soup)
             prices = self.get_price(soup)
             description = self.get_description(soup)
-            images= self.get_images(detail_link)
+            preview_image= self.get_preview_image(detail_link)
             coordinates = get_coordinates(location)
             year_of_construction = int(other_properties['Rok výstavby:']) if 'Rok výstavby:' in other_properties.keys() else None
             approval_year = int(other_properties['Rok kolaudácie:']) if 'Rok kolaudácie:' in other_properties.keys() else None
@@ -128,7 +128,7 @@ class Nehnutelnosti_sk_processor:
                     "floor":floor,
                     "positioning":positioning,
                     "description":description,
-                    "images":images,
+                    "preview_image":preview_image,
                     "coordinates":coordinates
                     }
         else:
@@ -333,7 +333,7 @@ class Nehnutelnosti_sk_processor:
 
         return url
 
-    def get_images(self,
+    def get_preview_image(self,
                    detail_link,
                    wait_for_load_page=2,
                    wait_for_load_images=0.5):
@@ -354,22 +354,27 @@ class Nehnutelnosti_sk_processor:
 
         # Find all images
         images = driver.find_elements(By.TAG_NAME, "img")
-        image_urls = set()  # Use set to remove duplicates
+        #image_urls = set()  # Use set to remove duplicates
 
         for img in images:
-            src = img.get_attribute("src") or img.get_attribute("data-src")
-            if src and "static" not in src:  # Filter out non-relevant images
-                image_urls.add(src)
+            try:
+                src = img.get_attribute("src") or img.get_attribute("data-src")
+                if src and "static" not in src and not src.endswith(".png"):
+                    return src
+            except:
+                continue
 
-        images = []
-        # Print the extracted image URLs
-        for url in set(image_urls):
-            if not url.endswith(".png"):
-                images.append(url)
+        return None
 
-        driver.quit()
-
-        return images
+        # images = []
+        # # Print the extracted image URLs
+        # for url in set(image_urls):
+        #     if not url.endswith(".png"):
+        #         images.append(url)
+        #
+        # driver.quit()
+        #
+        # return images
 
     def process_offers_single_page(self,
                                    page_url=None,
@@ -449,7 +454,8 @@ class Nehnutelnosti_sk_processor:
                     "source": self.source,
                     "source_url": results['source_url'],
                     "latitude": results['coordinates'][0] if results['coordinates'] else None,
-                    "longtitude": results['coordinates'][1] if results['coordinates'] else None
+                    "longtitude": results['coordinates'][1] if results['coordinates'] else None,
+                    "preview_image":results['preview_image'] if results['preview_image'] else None
                 })
                 #print(f"writing images to DB...")
                 # self.db_repository.insert_offer_images(new_offer.id,results['images'][:4]
@@ -463,7 +469,8 @@ class Nehnutelnosti_sk_processor:
                                   "floor",
                                   "positioning",
                                     "source",
-                                  'score'}
+                                  "score",
+                                  "preview_image"}
                 filtered_offer = {k: v for k, v in new_offer.__dict__.items() if k not in keys_to_remove}
                 #print(filtered_offer)
                 result = self.vdb.insert_data([{"embedding": embedding,
@@ -598,14 +605,18 @@ class Nehnutelnosti_sk_processor:
                              """
                              ):
 
+        print(prompt.format(
+                                        description=description))
         lt = description.lower().replace(' ', '')
         manually = self.extract_energy_price_by_pattern(lt)
+        print(manually)
         if manually is None:
             generated = self.llm.generate_answer(
                                         prompt=prompt.format(
                                         description=description),
                                         model="gpt-4o"
                                         ).strip()
+            print(generated)
             try:
                 generated = int(re.sub(r'\D', '', generated))
                 if generated >= price_rent:
@@ -687,7 +698,7 @@ class Nehnutelnosti_sk_processor:
 # # page = processor.get_page(nehnutelnosti_base_url)
 # # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
 # # print(links)
-#print(processor.process_detail("https://www.nehnutelnosti.sk/detail/JujZUqLjUT7/2-izbbytl-krasne-prostrediel-klimatizacia"))
+#print(processor.process_detail("https://www.reality.sk/byty/v-centre-skalice-prenajom-2i-mezonetoveho-bytu-s-kancelariou/JuJydiA-FPq/"))
 # print(len(links))
 # print(links[149])
 #processor.process_offers(1,1)
