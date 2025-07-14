@@ -15,6 +15,9 @@ from Rent_offers_repository import Rent_offers_repository
 from Shared.LLM import LLM
 from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
 from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
+import requests
+from lxml import html
+from datetime import datetime
 
 load_dotenv()  # Loads environment variables from .env file
 
@@ -414,6 +417,30 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
         last_page = max(page_numbers) if page_numbers else 1
 
         return last_page
+
+    def is_update_newer(url: str,
+                        reference_time: datetime,
+                        update_xpath='/html/body/div[7]/div[2]/div/div[1]/div[2]/p/span[2]'
+                        ) -> bool:
+        response = requests.get(url)
+        tree = html.fromstring(response.content)
+        element = tree.xpath(update_xpath)
+
+        if element:
+            update = element[0].text_content()
+        else:
+            return False
+        try:
+            # Extract the date part
+            date_part = update.strip().split(':')[1].strip()
+            # Parse into datetime object (assume time 00:00:00)
+            scraped_date = datetime.strptime(date_part, "%d. %m. %Y")
+            # Make reference_time naive for comparison if needed
+            if reference_time.tzinfo:
+                reference_time = reference_time.replace(tzinfo=None)
+            return scraped_date > reference_time
+        except (IndexError, ValueError):
+            return False
 
 
 # processor_reality = Reality_sk_processor(reality_base_url,
