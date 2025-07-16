@@ -398,7 +398,6 @@ class Nehnutelnosti_sk_processor:
                 price_energies = results['prices']['energies'] if results['prices'][
                     'energies'] else self.extract_energy_price(results['description'],
                                                                results['prices']['rent'])
-                print(f'debug: {1}')
                 if self.db_repository.record_exists(link):
                     item = self.db_repository.get_offer_by_id_or_url(link)
                     if item.price_rent != results['prices']['rent'] or item.price_energies != price_energies:

@@ -5,8 +5,6 @@ import os
 from Rent_offers_repository import Rent_offers_repository
 from Shared.LLM import LLM
 from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
-import requests
-import json
 
 load_dotenv()
 
@@ -32,6 +30,6 @@ processor_reality = Reality_sk_processor(reality_base_url,
 
 if __name__ == "__main__":
     #processor_nehnutelnosti.delete_invalid_offers()
-    #processor_nehnutelnosti.process_offers(1,33)
+    processor_nehnutelnosti.process_offers(1,33)
     processor_reality.process_offers(1,240)
 
