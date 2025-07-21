@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from AI.Singletons import llm_langchain, llm, vector_db
 from AI.Utils import prepare_chat_memory
 from AI.Services import generate_ai_answer, search_by_summarized_preferences
-from Utils import process_types_and_rooms_filters
+from Utils import process_types_and_rooms_filters, add_preview_image
 
 load_dotenv()
 host = os.getenv('HOST')
@@ -127,6 +127,9 @@ async def offers(page:int,
                                                              processed_filters['types'],
                                                              processed_filters['rooms'],
                                                              page)
+    valid_offers_w_preview_image = add_preview_image(rent_offers)
+    rent_offers['offers'] = valid_offers_w_preview_image
+
     return JSONResponse(
         status_code=200,
         content=rent_offers
@@ -251,10 +254,12 @@ async def find_results(session_id:int,
     filtered_results = [{'source_url':result['source_url'],
                          'price_total':result['price_total'],
                          'location':result['location']} for result in results]
+    limited_results = filtered_results[:20] if len(filtered_results) >= 20 else filtered_results
+    valid_offers_w_preview_image = add_preview_image(limited_results)
 
     return JSONResponse(status_code=200,
                         content={'total':len(filtered_results),
-                                 'offers':filtered_results[:20]})
+                                 'offers':valid_offers_w_preview_image})
 
 @app.get("/search/fetch-filtered-results/{session_id}")
 async def fetch_filtered_results(session_id:int,
@@ -285,10 +290,11 @@ async def fetch_filtered_results(session_id:int,
                                                                                  processed_filters['types'],
                                                                                  processed_filters['rooms'],
                                                                                  page)
+    valid_offers_w_preview_image = add_preview_image(filtered_cached_results)
 
     return JSONResponse(
         status_code=200,
-        content=filtered_cached_results
+        content=valid_offers_w_preview_image
     )
 
 

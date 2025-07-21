@@ -200,10 +200,9 @@ useEffect(() => {
       limit: OFFERS_PER_PAGE,
       price_min: 0,
       price_max: maxPrice,
-      size_min: size.from,
-      size_max: size.to,
-      types: selectedTypes.join(","),
-      rooms,
+      size_min: size.from === "" ? 0 : size.from,
+      size_max: size.to === "" ? 1000 : size.to,
+      types: selectedTypes.length === 0 ? allTypes.join(",") : selectedTypes.join(","),
     });
    fetch(`http://localhost:5000/search/fetch-filtered-results/${chatSessionId}?${params.toString()}`, {
   method: "GET",

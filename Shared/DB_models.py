@@ -33,12 +33,5 @@ class Rent_offer_model(Base):
     latitude = Column(Float, nullable=True)
     longtitude = Column(Float, nullable=True)
     price_total = Column(Integer, nullable=True)
-    preview_image = Column(Text, nullable=True)
+    preview_image= Column(Text, nullable=True)
 
-class Offer_image_model(Base):
-    __tablename__ = "images"  # Change to actual table name
-
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
-    image_url = Column(Text, nullable=False)
-    rent_offer_id = Column(BigInteger, ForeignKey("rent_offers.id"), nullable=False)
