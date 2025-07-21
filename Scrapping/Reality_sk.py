@@ -15,6 +15,9 @@ from Rent_offers_repository import Rent_offers_repository
 from Shared.LLM import LLM
 from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
 from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
+import requests
+from lxml import html
+from datetime import datetime
 
 load_dotenv()  # Loads environment variables from .env file
 
@@ -208,7 +211,7 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
 
         return None
 
-    def get_images(self,
+    def get_preview_image(self,
                    detail_link,
                    wait_for_load_page=3,
                    wait_for_load_images=2):
@@ -256,42 +259,47 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
         except Exception as e:
             print("⚠️ Cookie button not found or error:", e)
 
+        try:
+            current_image = driver.find_element(By.CSS_SELECTOR,
+                                                ".lg-item.lg-loaded.lg-complete.lg-current img")
+            img_src = current_image.get_attribute("src")
+
+            if img_src:
+                driver.quit()
+                return img_src
+
+
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+
         # Find all images to determine how many times to click
-        images = driver.find_elements(By.CLASS_NAME, "lg-item")
-        image_count = len(images)
-
-        # Locate the previous button
-        prev_button = driver.find_element(By.CLASS_NAME, "lg-next")
-
-        # Store image URLs
-        image_sources = []
-
-        # Loop through each image
-        for _ in range(4): #range(image_count):
-            # Find the currently visible image inside the specific div
-            try:
-                current_image = driver.find_element(By.CSS_SELECTOR,
-                                                    ".lg-item.lg-loaded.lg-complete.lg-current img")
-                img_src = current_image.get_attribute("src")
-
-                if img_src and img_src not in image_sources:
-                    image_sources.append(img_src)
-
-                # Click the previous button to navigate through images
-                prev_button.click()
-                time.sleep(1)  # Allow time for transition (increased wait time for image change)
-
-            except Exception as e:
-                print(f"Error: {e}")
-
-        images = []
-        # Print all extracted image URLs
-        for src in image_sources:
-            images.append(src)
-
-        # Close the driver after finishing
-        driver.quit()
-        return images
+        # images = driver.find_elements(By.CLASS_NAME, "lg-item")
+        # image_count = len(images)
+        #
+        # # Locate the previous button
+        # prev_button = driver.find_element(By.CLASS_NAME, "lg-next")
+        #
+        # # Store image URLs
+        #
+        # # Loop through each image
+        # for _ in range(image_count):
+        #     # Find the currently visible image inside the specific div
+        #     try:
+        #         current_image = driver.find_element(By.CSS_SELECTOR,
+        #                                             ".lg-item.lg-loaded.lg-complete.lg-current img")
+        #         img_src = current_image.get_attribute("src")
+        #
+        #         if img_src:
+        #             driver.quit()
+        #             return img_src
+        #
+        #         # Click the previous button to navigate through images
+        #         prev_button.click()
+        #         time.sleep(1)  # Allow time for transition (increased wait time for image change)
+        #
+        #     except Exception as e:
+        #         print(f"Error: {e}")
 
     def process_detail(self,
                        detail_link):
@@ -305,7 +313,7 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
             other_properties = self.get_other_properties(soup)
             prices = self.get_price(soup)
             description = self.get_description(soup)
-            #images= self.get_images(detail_link)
+            preview_image= self.get_preview_image(detail_link)
             coordinates = get_coordinates(location)
             year_of_construction = int(other_properties['Rok výstavby:']) if 'Rok výstavby:' in other_properties.keys() else None
             approval_year = int(
@@ -373,7 +381,7 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
                     "floor":floor,
                     "positioning":positioning,
                     "description":description,
-                    #"images":images,
+                    "preview_image":preview_image,
                     "coordinates":coordinates
                     }
         else:
@@ -410,6 +418,30 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
 
         return last_page
 
+    def is_update_newer(url: str,
+                        reference_time: datetime,
+                        update_xpath='/html/body/div[7]/div[2]/div/div[1]/div[2]/p/span[2]'
+                        ) -> bool:
+        response = requests.get(url)
+        tree = html.fromstring(response.content)
+        element = tree.xpath(update_xpath)
+
+        if element:
+            update = element[0].text_content()
+        else:
+            return False
+        try:
+            # Extract the date part
+            date_part = update.strip().split(':')[1].strip()
+            # Parse into datetime object (assume time 00:00:00)
+            scraped_date = datetime.strptime(date_part, "%d. %m. %Y")
+            # Make reference_time naive for comparison if needed
+            if reference_time.tzinfo:
+                reference_time = reference_time.replace(tzinfo=None)
+            return scraped_date > reference_time
+        except (IndexError, ValueError):
+            return False
+
 
 # processor_reality = Reality_sk_processor(reality_base_url,
 #                                     auth_token_reality,
@@ -434,4 +466,4 @@ class Reality_sk_processor(Nehnutelnosti_sk_processor):
 # print(imgs[0])
 
 #processor_reality.process_offers(1,1)
-#print(processor_reality.process_detail('https://www.reality.sk/byty/3-izbovy-byt-s-terasou-a-garazou-v-kvalitnej-novostavbe-na-skalickej-ceste-v-tichej-a-vyhladavanej-casti-bratislavy-nove-mesto/JusKB2ec2sw/'))
+#print(processor_reality.process_detail('https://www.reality.sk/byty/3-izbovy-mezonet-na-hradnom-kopci-s-terasou-a-moznostou-parkovania-spacious-3-room-duplex-on-the-castle-hill-with-a-terrace-and-parking/JuaC1Fclv2_/'))

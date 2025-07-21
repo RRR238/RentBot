@@ -1,78 +1,14 @@
 [
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JuNChpBSBSd8/studio---1-izbovy-byt-na-prenajoml-bratislava---stare-mestol-eurovea-od-157",
-        "error": "(psycopg2.OperationalError) server closed the connection unexpectedly\n\tThis probably means the server terminated abnormally\n\tbefore or while processing the request.\nserver closed the connection unexpectedly\n\tThis probably means the server terminated abnormally\n\tbefore or while processing the request.\n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
+        "link": "https://www.nehnutelnosti.sk/detail/developersky-projekt/JuEjbgqeAnS/zahradne-sady-presov---rezidencna-stvrt?p%5Bcategories%5D%5Bids%5D=1.2",
+        "error": "cannot access local variable 'price_rent' where it is not associated with a value"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/JuqpngO7b2I/dizajnovy-bytl-klemensova-u--historicke-centruml-nova-dobova-rekonstrukcial-zariadeny",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
+        "link": "https://www.nehnutelnosti.sk/detail/developersky-projekt/Ju2EtSbV-5z/vila-byty-pri-lesiku?p%5Bcategories%5D%5Bids%5D=1.2",
+        "error": "cannot access local variable 'price_rent' where it is not associated with a value"
     },
     {
-        "link": "https://www.nehnutelnosti.sk/detail/Juwq0AAyrIo/utulna-garsonkal-nam-hraniciarovl-bratislaval-petrzalka",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Jui1YCCZoV-/prenajom-1-izboveho-bytu---gajova-ulica",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JuJwlwuCSK_/na-prenajom-2-izbovy-byt-ivanka-pri-dunaji",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Juc_8X6ALgK7/prenajate-na-prenajom-3-izbovy-byt-pezinok-kucisdorfska-dolina",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju4Ir0RVFIm/na-prenajom-pekny-svetly-zariadeny-byt-ivanka-pri-dunaji",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JuLVAuLW5N_/na-prenajom-1-izbovy-byt-v-rodinnom-dome-modra",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju4JXkSLr_q/rebsk-prenajom-2i-byt-s-parkovanim-v-uzavretom-areali-bratislava-ii",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JuVY0m-CiDJg/prenajom-3i-byt-so-zahradoul-petrzalkal-bratislava",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JubPtH5fAZC/prenajom-izby-v-srdci-stareho-mesta---gundulicova-ull-bratislava",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JuAgJH5rjBv/na-prenajom-3-izbovy-byt-s-krasnym-vyhladom-na-zamok-simak",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju-3Cw6DtNB/na-prenajom-2-izbovy-byt-v-novostavbe-na-terase---volny-ihned",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JuOW1K7pBi_/metropolitan-novy-moderny-3i-byt-s-parkovanim-na-prenajoml-bory",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju9B-7a2weU/prenajoml-2-izb-byt-stefanikova-ulica",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju9RAtC-LzZ/na-prenajom-3-izbovy-byt-bratislava-raca",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Ju1h6QduQHO/exkluzivny-3-izbovy-byt-s-garazoul-2-parkovacimi-miestami-a-spickovym-vybavenim",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/JuXuQji1PjS/unikatny-staromestsky-byt-vo-vile-s-vyhladom-na-hrad-",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
-    },
-    {
-        "link": "https://www.nehnutelnosti.sk/detail/Jur9RBnFRO01/na-prenajom-2-izbovy-byt-s-garazovym-statim-v-novostavbe",
-        "error": "(psycopg2.OperationalError) could not translate host name \"aws-0-eu-central-1.pooler.supabase.com\" to address: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. \n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
+        "link": "https://www.nehnutelnosti.sk/detail/JucfWj5Fyax/dizajnovy-a-plne-zariadeny-byt-v-starom-meste",
+        "error": "unsupported operand type(s) for +: 'NoneType' and 'int'"
     }
 ]

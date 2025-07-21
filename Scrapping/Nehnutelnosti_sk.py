@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from lxml import etree
+from lxml import etree, html
 import Scrapping.DOM_identifiers as DOM_identifiers
 import time
 from selenium import webdriver
@@ -19,6 +19,7 @@ from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
 from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
 from langdetect import detect, DetectorFactory
 import re
+from datetime import datetime
 
 
 
@@ -89,7 +90,7 @@ class Nehnutelnosti_sk_processor:
             other_properties = self.get_other_properties(soup)
             prices = self.get_price(soup)
             description = self.get_description(soup)
-            images= self.get_images(detail_link)
+            preview_image= self.get_preview_image(detail_link)
             coordinates = get_coordinates(location)
             year_of_construction = int(other_properties['Rok výstavby:']) if 'Rok výstavby:' in other_properties.keys() else None
             approval_year = int(other_properties['Rok kolaudácie:']) if 'Rok kolaudácie:' in other_properties.keys() else None
@@ -128,8 +129,8 @@ class Nehnutelnosti_sk_processor:
                     "floor":floor,
                     "positioning":positioning,
                     "description":description,
-                    "images":images,
-                    "coordinates":coordinates
+                    "preview_image":preview_image,
+                    "coordinates":coordinates,
                     }
         else:
             raise Exception(f"Failed to fetch page: {detail_link}, "
@@ -317,7 +318,7 @@ class Nehnutelnosti_sk_processor:
 
         return data_dict
 
-    def get_description(self, soup, id="description-wrapper"):
+    def get_description(self, soup, id="detail-description"):
         desc = soup.find(id=id)
         if desc:
             return desc.text.strip().replace("Čítať ďalej","")
@@ -333,7 +334,7 @@ class Nehnutelnosti_sk_processor:
 
         return url
 
-    def get_images(self,
+    def get_preview_image(self,
                    detail_link,
                    wait_for_load_page=2,
                    wait_for_load_images=0.5):
@@ -354,22 +355,27 @@ class Nehnutelnosti_sk_processor:
 
         # Find all images
         images = driver.find_elements(By.TAG_NAME, "img")
-        image_urls = set()  # Use set to remove duplicates
+        #image_urls = set()  # Use set to remove duplicates
 
         for img in images:
-            src = img.get_attribute("src") or img.get_attribute("data-src")
-            if src and "static" not in src:  # Filter out non-relevant images
-                image_urls.add(src)
+            try:
+                src = img.get_attribute("src") or img.get_attribute("data-src")
+                if src and "static" not in src and not src.endswith(".png"):
+                    return src
+            except:
+                continue
 
-        images = []
-        # Print the extracted image URLs
-        for url in set(image_urls):
-            if not url.endswith(".png"):
-                images.append(url)
+        return None
 
-        driver.quit()
-
-        return images
+        # images = []
+        # # Print the extracted image URLs
+        # for url in set(image_urls):
+        #     if not url.endswith(".png"):
+        #         images.append(url)
+        #
+        # driver.quit()
+        #
+        # return images
 
     def process_offers_single_page(self,
                                    page_url=None,
@@ -380,7 +386,7 @@ class Nehnutelnosti_sk_processor:
         if page_url:
             page = self.get_page(page_url)
             detail_links = self.get_details_links(BeautifulSoup(page.text,'html.parser'))
-        if custom_links:
+        else:
             detail_links=custom_links
 
         process_n = 1
@@ -388,12 +394,21 @@ class Nehnutelnosti_sk_processor:
         for link in detail_links:
             print(f"processing: {process_n}/{len(set(detail_links))} on page: {current_page} from: {self.source}")
             try:
-                if self.db_repository.record_exists(link):
-                    self.processed_offers += 1
-                    process_n += 1
-                    continue
-
                 results = self.process_detail(link)
+                price_energies = results['prices']['energies'] if results['prices'][
+                    'energies'] else self.extract_energy_price(results['description'],
+                                                               results['prices']['rent'])
+                if self.db_repository.record_exists(link):
+                    item = self.db_repository.get_offer_by_id_or_url(link)
+                    if item.price_rent != results['prices']['rent'] or item.price_energies != price_energies:
+                        self.db_repository.update_offer(link,
+                                                        {"price_rent":results['prices']['rent'],
+                                                         "price_energies":price_energies})
+
+                        self.processed_offers += 1
+                        process_n += 1
+                        continue
+
                 if self.db_repository.find_duplicates(price_rent=results['prices']['rent'],
                                                     price_energies = results['prices']['energies'],
                                                     size=results['key_attributes']['size'],
@@ -423,8 +438,6 @@ class Nehnutelnosti_sk_processor:
                                       if results['key_attributes'][key] == True][0]
 
                 print(f"writing rent offer to DB...")
-                price_energies = results['prices']['energies'] if results['prices']['energies'] else self.extract_energy_price(results['description'],
-                                                             results['prices']['rent'])
                 new_offer = self.db_repository.insert_rent_offer({
                     "title": results['title'],
                     "location": results['location'],
@@ -449,7 +462,8 @@ class Nehnutelnosti_sk_processor:
                     "source": self.source,
                     "source_url": results['source_url'],
                     "latitude": results['coordinates'][0] if results['coordinates'] else None,
-                    "longtitude": results['coordinates'][1] if results['coordinates'] else None
+                    "longtitude": results['coordinates'][1] if results['coordinates'] else None,
+                    "preview_image":results['preview_image'] if results['preview_image'] else None
                 })
                 #print(f"writing images to DB...")
                 # self.db_repository.insert_offer_images(new_offer.id,results['images'][:4]
@@ -463,7 +477,8 @@ class Nehnutelnosti_sk_processor:
                                   "floor",
                                   "positioning",
                                     "source",
-                                  'score'}
+                                  "score",
+                                  "preview_image"}
                 filtered_offer = {k: v for k, v in new_offer.__dict__.items() if k not in keys_to_remove}
                 #print(filtered_offer)
                 result = self.vdb.insert_data([{"embedding": embedding,
@@ -641,6 +656,30 @@ class Nehnutelnosti_sk_processor:
                 return match.group(1)
         return None
 
+    def is_update_newer(url: str,
+                        reference_time: datetime,
+                        update_xpath='/html/body/div[7]/div[2]/div/div[1]/div[2]/p/span[2]'
+                        ) -> bool:
+        response = requests.get(url)
+        tree = html.fromstring(response.content)
+        element = tree.xpath(update_xpath)
+
+        if element:
+            update = element[0].text_content()
+        else:
+            return False
+        try:
+            # Extract the date part
+            date_part = update.strip().split(':')[1].strip()
+            # Parse into datetime object (assume time 00:00:00)
+            scraped_date = datetime.strptime(date_part, "%d. %m. %Y")
+            # Make reference_time naive for comparison if needed
+            if reference_time.tzinfo:
+                reference_time = reference_time.replace(tzinfo=None)
+            return scraped_date > reference_time
+        except (IndexError, ValueError):
+            return False
+
     def delete_invalid_offers(self):
         case_nr = 1
         invalid = 0
@@ -687,7 +726,7 @@ class Nehnutelnosti_sk_processor:
 # # page = processor.get_page(nehnutelnosti_base_url)
 # # links = processor.get_details_links(BeautifulSoup(page.text,'html.parser'))
 # # print(links)
-#print(processor.process_detail("https://www.nehnutelnosti.sk/detail/JujZUqLjUT7/2-izbbytl-krasne-prostrediel-klimatizacia"))
+#print(processor.process_detail("https://www.nehnutelnosti.sk/detail/JuixoWmE4gt/stylovy-uplne-novy-2izbl-loggial-klima-v-nuppu-bez-poplatku-rk"))
 # print(len(links))
 # print(links[149])
 #processor.process_offers(1,1)
