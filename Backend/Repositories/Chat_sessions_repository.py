@@ -40,7 +40,8 @@ class Chat_session_repository:
             select(Chat_session.id)
             .where(
                 Chat_session.id == session_id,
-                Chat_session.last_interaction >= one_hour_ago
+                Chat_session.last_interaction >= one_hour_ago,
+                Chat_session.is_active == True
             )
         )
 
@@ -54,7 +55,8 @@ class Chat_session_repository:
             select(Chat_session.id)
             .where(
                 Chat_session.user_id == user_id,
-                Chat_session.last_interaction >= one_hour_ago
+                Chat_session.last_interaction >= one_hour_ago,
+                Chat_session.is_active == True
             )
             .limit(1)
         )

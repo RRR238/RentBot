@@ -44,10 +44,11 @@ async def search_by_summarized_preferences(
 
     try:
         summary_to_embed = response_summary[
-            response_summary.index(', ostatné preferencie') + len(', ostatné preferencie: ')
+            response_summary.index(', ostatné preferencie') + len(', ostatné preferencie: '):
         ]
     except:
         summary_to_embed = default_summary
+
 
     default_key_attributes = {
         'price_rent': None,
@@ -93,16 +94,11 @@ async def search_by_summarized_preferences(
     results = await vector_db.filtered_vector_search_async(
         embedding, 50, filter=filters
     )
-    print(f'results from VDB: {results}')
+    #print(f'results from VDB: {results}')
 
     processed_results = [
         {   'score':i.score,
-            'source_url': i.payload['source_url'],
-            'price_total': i.payload['price_total'],
-            'location': "Niekde na Slovensku", #i.payload['location']
-            'size': i.payload['size'],
-            'property_type': i.payload['property_type'],
-            'rooms':i.payload['rooms']
+            'id':i.payload['id']
         }
         for i in results[0].points
     ]
