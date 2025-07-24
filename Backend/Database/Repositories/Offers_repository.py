@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func,  or_, and_
-from Shared.DB_models import Rent_offer_model
+from Backend.Database.Entity_registration import Rent_offer_model
 
 
 class Offers_repository:
