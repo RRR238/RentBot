@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from Backend.Entities import Chat_session, Chat_history
+from Backend.Database.Entity_registration import Chat_session, Chat_history
 from sqlalchemy import update
 from sqlalchemy.sql import func, select,and_, delete
 from datetime import datetime, timedelta

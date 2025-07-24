@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from Backend.Entities import Cached_vector_search_results
+from Backend.Database.Entity_registration import Cached_vector_search_results
 from sqlalchemy.sql import delete, select, func,  or_, and_
 from Shared.DB_models import Rent_offer_model
 from sqlalchemy.orm import aliased

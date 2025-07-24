@@ -1,22 +1,21 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
-from Repositories.User_repository import User_repository
-from Repositories.Offers_repository import Offers_repository
-from Repositories.Chat_sessions_repository import Chat_session_repository
-from Repositories.Cached_vector_search_results_repository import Cached_vector_search_results_repository
+from Backend.Database.Repositories.User_repository import User_repository
+from Backend.Database.Repositories.Offers_repository import Offers_repository
+from Backend.Database.Repositories.Chat_sessions_repository import Chat_session_repository
+from Backend.Database.Repositories.Cached_vector_search_results_repository import Cached_vector_search_results_repository
 from Dependency_injection import get_db, endpoint_verification
-from Backend.Entities import User, Chat_session, Chat_history, Cached_vector_search_results
-from Singletons import security_manager
-from Models import User_model, User_message_model, Chat_session_model
+from Backend.Database.Backend_entities import User, Chat_session, Chat_history, Cached_vector_search_results
+from Singletons import security_manager, llm_langchain, llm, vector_db
+from Backend.Pydantic_models.Models import User_model, User_message_model, Chat_session_model
 import uvicorn
 from dotenv import load_dotenv
 import os
 from sqlalchemy.ext.asyncio import AsyncSession
-from AI.Singletons import llm_langchain, llm, vector_db
 from AI.Utils import prepare_chat_memory
 from AI.Services import generate_ai_answer, search_by_summarized_preferences
-from Utils import process_types_and_rooms_filters, add_preview_image
+from Utils.Utils import process_types_and_rooms_filters, add_preview_image
 
 load_dotenv()
 host = os.getenv('HOST')
