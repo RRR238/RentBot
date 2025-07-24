@@ -58,7 +58,8 @@ class Offers_repository:
                 Rent_offer_model.location,
                 Rent_offer_model.price_total,
                 Rent_offer_model.title,
-                Rent_offer_model.description
+                Rent_offer_model.description,
+                Rent_offer_model.preview_image
             )
             .where(*filters)
             .offset(offset)

@@ -1,6 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from Backend.Entities import Cached_vector_search_results
 from sqlalchemy.sql import delete, select, func,  or_, and_
+from Shared.DB_models import Rent_offer_model
+from sqlalchemy.orm import aliased
 
 class Cached_vector_search_results_repository:
 
@@ -26,6 +28,7 @@ class Cached_vector_search_results_repository:
 
     async def get_filtered_vector_search_results(
             self,
+            session_id: int,
             max_price: int,
             min_size: int,
             max_size: int,
@@ -36,50 +39,58 @@ class Cached_vector_search_results_repository:
     ):
         offset = (page - 1) * page_size
 
-        # Base filters (common to all)
+        Offer = aliased(Rent_offer_model)
+        Cached = Cached_vector_search_results
+
+        # Base filters on offer attributes
         filters = [
-            Cached_vector_search_results.price_total <= max_price,
-            Cached_vector_search_results.size >= min_size,
-            Cached_vector_search_results.size <= max_size
+            Offer.price_total <= max_price,
+            Offer.size >= min_size,
+            Offer.size <= max_size,
+            Cached.session_id == session_id  # 🔸 Add session filter
         ]
 
-        # Build type-specific filter logic
+        # Conditional room/property type filter
         if rooms and "flat" in property_types:
             filters.append(
                 or_(
-                    # Non-flat types are filtered only by property_type
-                    Cached_vector_search_results.property_type.in_(
-                        [pt for pt in property_types if pt != "flat"]
-                    ),
-                    # Flats are filtered by both type AND rooms
+                    Offer.property_type.in_([pt for pt in property_types if pt != "flat"]),
                     and_(
-                        Cached_vector_search_results.property_type == "flat",
-                        Cached_vector_search_results.rooms.in_(rooms)
+                        Offer.property_type == "flat",
+                        Offer.rooms.in_(rooms)
                     )
                 )
             )
         else:
-            # No room filtering; apply only property_type filter
-            filters.append(Cached_vector_search_results.property_type.in_(property_types))
+            filters.append(Offer.property_type.in_(property_types))
 
-        # Total count query
-        count_stmt = select(func.count()).where(*filters)
+        # Count total results
+        count_stmt = (
+            select(func.count())
+            .select_from(Offer)
+            .join(Cached, Cached.offer_id == Offer.id)
+            .where(*filters)
+        )
         total_result = await self.db.execute(count_stmt)
         total_count = total_result.scalar()
 
-        # Paginated offers query
+        # Query offers with sorting by score DESC
         stmt = (
             select(
-                Cached_vector_search_results.source_url,
-                Cached_vector_search_results.location,
-                Cached_vector_search_results.price_total,
-                Cached_vector_search_results.title,
-                Cached_vector_search_results.description
+                Offer.source_url,
+                Offer.location,
+                Offer.price_total,
+                Offer.title,
+                Offer.preview_image,
+                Cached.score  # Optional: include score in result
             )
+            .join(Cached, Cached.offer_id == Offer.id)
             .where(*filters)
+            .order_by(Cached.score.desc())  # 🔸 Sort by score descending
             .offset(offset)
             .limit(page_size)
         )
+
         result = await self.db.execute(stmt)
         offers = [dict(row._mapping) for row in result.fetchall()]
 

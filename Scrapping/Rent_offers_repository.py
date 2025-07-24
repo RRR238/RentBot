@@ -81,17 +81,31 @@ class Rent_offers_repository:
 
             return session.query(Rent_offer_model).filter(and_(*conditions)).all()
 
+    def get_all_items(self):
+        """Fetch all source_url values from the rent_offers table."""
+        with self.get_session() as session:
+            return [result for result in session.query(
+                                        Rent_offer_model).all()]
+
     def get_all_source_urls(self):
         """Fetch all source_url values from the rent_offers table."""
         with self.get_session() as session:
             return [result[0] for result in session.query(
                                         Rent_offer_model.source_url).all()]
 
-    def delete_by_source_urls(self, source_urls):
+    def delete_by_source_urls(self, source_urls:list[str]):
         """Delete all records where source_url is in the given list."""
         with self.get_session() as session:
             session.query(Rent_offer_model).filter(
                 Rent_offer_model.source_url.in_(source_urls)
+            ).delete(synchronize_session=False)
+            session.commit()
+
+    def delete_by_ids(self, ids:list[int]):
+        """Delete all records where source_url is in the given list."""
+        with self.get_session() as session:
+            session.query(Rent_offer_model).filter(
+                Rent_offer_model.id.in_(ids)
             ).delete(synchronize_session=False)
             session.commit()
 
