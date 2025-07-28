@@ -4,7 +4,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from Shared.Declarative_base import Base
-#from Backend.Entities import Cached_vector_search_results
+#from Backend.Backend_entities import Cached_vector_search_results
 
 #Base = declarative_base()
 
