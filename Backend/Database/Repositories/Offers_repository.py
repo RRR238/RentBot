@@ -15,6 +15,7 @@ class Offers_repository:
             max_size: int,
             property_types: list[str],
             rooms: list[int],
+            coordinates_bounding_box:dict,
             page: int = 1,
             page_size: int = 20
     ):
@@ -24,7 +25,11 @@ class Offers_repository:
         filters = [
             Rent_offer_model.price_total <= max_price,
             Rent_offer_model.size >= min_size,
-            Rent_offer_model.size <= max_size
+            Rent_offer_model.size <= max_size,
+            Rent_offer_model.latitude>=coordinates_bounding_box['south_lat'],
+            Rent_offer_model.latitude <= coordinates_bounding_box['north_lat'],
+            Rent_offer_model.longtitude >= coordinates_bounding_box['west_lon'],
+            Rent_offer_model.longtitude <= coordinates_bounding_box['east_lon']
         ]
 
         # Build type-specific filter logic

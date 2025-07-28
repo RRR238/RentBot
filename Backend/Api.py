@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from AI.Utils import prepare_chat_memory
 from AI.Services import generate_ai_answer, search_by_summarized_preferences
 from Utils.Utils import process_types_and_rooms_filters, add_preview_image
+from Shared.Geolocation import get_coordinates, get_bounding_box_from_location
 
 load_dotenv()
 host = os.getenv('HOST')
@@ -114,18 +115,20 @@ async def offers(page:int,
                    size_min: int,
                    size_max:  int,
                    types: str,
+                   location: str,
                    jwtTokenPayload: dict = Depends(endpoint_verification),
                    db_connection: AsyncSession = Depends(get_db)
                     ):
 
     processed_filters = process_types_and_rooms_filters(types)
-    print(processed_filters)
     offers_repo = Offers_repository(db_connection)
+    coordinates_bounding_box = get_bounding_box_from_location(location)
     rent_offers = await offers_repo.get_filtered_rent_offers(price_max,
                                                              size_min,
                                                              size_max,
                                                              processed_filters['types'],
                                                              processed_filters['rooms'],
+                                                             coordinates_bounding_box,
                                                              page)
 
     return JSONResponse(
