@@ -31,6 +31,9 @@ function OffersPage() {
     }
   }, [navigate]);
 
+
+  
+
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,72 +47,128 @@ function OffersPage() {
   const [size, setSize] = useState({ from: "", to: "" });
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [rooms, setRooms] = useState("");
-  const [location, setLocation] = useState("");
+  const [locations, setLocations] = useState([""]);
 
   const [showFilters, setShowFilters] = useState(false);
 
   const [appliedFilters, setAppliedFilters] = useState({
-  maxPrice: 5000,
-  minPrice: 0,
-  size: { from: "", to: "" },
-  selectedTypes: [],
-  location: ""
-});
+    maxPrice: 5000,
+    minPrice: 0,
+    size: { from: "", to: "" },
+    selectedTypes: [],
+    locations: [""]
+  });
+
+  useEffect(() => {
+  // Only fetch when appliedFilters actually changes (not on initial mount)
+  if (appliedFilters.locations.length > 0) {
+    fetchOffers(currentPage, false);
+  }
+}, [appliedFilters]);
 
   // Fetch offers (with filters and page)
-  const fetchOffers = (page = currentPage) => {
-    setLoading(true);
+  // Replace the fetchOffers function with better error handling:
+const fetchOffers = (page = currentPage, useCurrentFilters = true) => {
+  console.log("fetchOffers called - START");
+  setLoading(true);
 
-    const token = localStorage.getItem("jwtToken");
-    const allTypes = [...flatTypes.map(t => t.key), ...houseTypes.map(t => t.key)];
-
-    const params = new URLSearchParams({
-      page,
-      limit: OFFERS_PER_PAGE,
-      price_min: minPrice,
-      price_max: maxPrice,
-      size_min: size.from === "" ? 0 : size.from,
-      size_max: size.to === "" ? 1000 : size.to,
-      types: selectedTypes.length === 0 ? allTypes.join(",") : selectedTypes.join(","),
-      location: location === "" ? "Slovakia" : location,
-    });
-
-    fetch(`http://localhost:5000/offers?${params.toString()}`, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-      },
-    })
-      .then(res => {
-        if (res.status === 401) {
-          navigate("/login");
-          return null;
-        }
-        return res.json();
-      })
-      .then(data => {
-  if (!data) return;
-  
-  // Handle different response formats
-  let offersArray = [];
-  if (Array.isArray(data)) {
-    offersArray = data;
-  } else if (data.offers && Array.isArray(data.offers)) {
-    offersArray = data.offers;
-  } else if (data.data && Array.isArray(data.data)) {
-    offersArray = data.data;
+  const token = localStorage.getItem("jwtToken");
+  if (!token) {
+    console.log("No token found!");
+    setLoading(false);
+    navigate("/login");
+    return;
   }
+
+  const allTypes = [...flatTypes.map(t => t.key), ...houseTypes.map(t => t.key)];
   
-  setOffers(offersArray);
-  setTotalPages(Math.ceil((data.total || offersArray.length || 0) / OFFERS_PER_PAGE));
-  setLoading(false);
-})
-      .catch(() => setLoading(false));
-  };
+  const filtersToUse = useCurrentFilters ? {
+    maxPrice,
+    minPrice,
+    size,
+    selectedTypes,
+    locations
+  } : appliedFilters;
+  
+  console.log("Filters to use:", filtersToUse);
+  
+  const validLocations = filtersToUse.locations.filter(loc => loc.trim() !== "");
+  const locationString = validLocations.length === 0 ? "Slovakia" : validLocations.join(",");
+
+  const params = new URLSearchParams({
+    page,
+    limit: OFFERS_PER_PAGE,
+    price_min: filtersToUse.minPrice,
+    price_max: filtersToUse.maxPrice,
+    size_min: filtersToUse.size.from === "" ? 0 : filtersToUse.size.from,
+    size_max: filtersToUse.size.to === "" ? 1000 : filtersToUse.size.to,
+    types: filtersToUse.selectedTypes.length === 0 ? allTypes.join(",") : filtersToUse.selectedTypes.join(","),
+    locations: locationString,
+  });
+
+  const url = `http://localhost:5000/offers?${params.toString()}`;
+  console.log("Fetching URL:", url);
+
+  fetch(url, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    },
+  })
+    .then(res => {
+      console.log("Response received:", res.status, res.statusText);
+      
+      if (res.status === 401) {
+        navigate("/login");
+        return null;
+      }
+      
+      if (res.status === 404) {
+        console.log("404 - No offers found");
+        setOffers([]);
+        setTotalPages(1);
+        setLoading(false);
+        return null;
+      }
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+
+      return res.json();
+    })
+    .then(data => {
+      console.log("JSON data:", data);
+      if (!data) {
+        setLoading(false);
+        return;
+      }
+      
+      let offersArray = [];
+      if (Array.isArray(data)) {
+        offersArray = data;
+      } else if (data.offers && Array.isArray(data.offers)) {
+        offersArray = data.offers;
+      } else if (data.data && Array.isArray(data.data)) {
+        offersArray = data.data;
+      }
+      
+      console.log("Final offers:", offersArray);
+      setOffers(offersArray);
+      setTotalPages(Math.ceil((data.total || offersArray.length || 0) / OFFERS_PER_PAGE));
+      setLoading(false);
+    })
+    .catch(error => {
+      console.error("FETCH ERROR:", error);
+      setLoading(false);
+      setOffers([]); // Set empty array so something shows
+    });
+};
 
   // Initial fetch
   useEffect(() => {
-    fetchOffers(1);
+    fetchOffers(1, true); // Use current filters for initial load
     // eslint-disable-next-line
   }, []);
 
@@ -123,12 +182,12 @@ function OffersPage() {
   };
 
   const handleMinPriceChange = (e) => {
-  setMinPrice(Number(e.target.value));
-};
+    setMinPrice(Number(e.target.value));
+  };
 
-const handleMaxPriceChange = (e) => {
-  setMaxPrice(Number(e.target.value));
-};
+  const handleMaxPriceChange = (e) => {
+    setMaxPrice(Number(e.target.value));
+  };
 
   const handleSizeChange = (e) => {
     setSize({ ...size, [e.target.name]: e.target.value });
@@ -137,41 +196,53 @@ const handleMaxPriceChange = (e) => {
   const handleRoomsChange = (e) => setRooms(e.target.value);
 
   const handleSearch = () => {
-  // Save current filter values as applied filters
-  setAppliedFilters({
+  const newAppliedFilters = {
     maxPrice,
     minPrice,
     size,
     selectedTypes,
-    location
-  });
+    locations
+  };
   
+  setAppliedFilters(newAppliedFilters); // This will trigger the useEffect above
   setCurrentPage(1);
-  fetchOffers(1);
-  setShowFilters(false); // Close filters after applying
+  setShowFilters(false);
 };
 
-const handleToggleFilters = () => {
-  if (showFilters) {
-    // Hiding filters - reset to applied values
-    setMaxPrice(appliedFilters.maxPrice);
-    setMinPrice(appliedFilters.minPrice);
-    setSize(appliedFilters.size);
-    setSelectedTypes(appliedFilters.selectedTypes);
-    setLocation(appliedFilters.location);
-  }
-  setShowFilters(!showFilters);
-};
+  const handleToggleFilters = () => {
+    if (showFilters) {
+      // Hiding filters - reset to applied values
+      setMaxPrice(appliedFilters.maxPrice);
+      setMinPrice(appliedFilters.minPrice);
+      setSize(appliedFilters.size);
+      setSelectedTypes(appliedFilters.selectedTypes);
+      setLocations(appliedFilters.locations);
+    }
+    setShowFilters(!showFilters);
+  };
 
-  const handleLocationChange = (e) => {
-  setLocation(e.target.value);
-};
+  const handleLocationChange = (index, value) => {
+    const newLocations = [...locations];
+    newLocations[index] = value;
+    setLocations(newLocations);
+  };
+
+  const handleAddLocation = () => {
+    setLocations([...locations, ""]);
+  };
+
+  const handleRemoveLocation = (index) => {
+    if (locations.length > 1) {
+      const newLocations = locations.filter((_, i) => i !== index);
+      setLocations(newLocations);
+    }
+  };
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
       const newPage = currentPage - 1;
       setCurrentPage(newPage);
-      fetchOffers(newPage);
+      fetchOffers(newPage, false); // Use applied filters for pagination
     }
   };
 
@@ -179,7 +250,7 @@ const handleToggleFilters = () => {
     if (currentPage < totalPages) {
       const newPage = currentPage + 1;
       setCurrentPage(newPage);
-      fetchOffers(newPage);
+      fetchOffers(newPage, false); // Use applied filters for pagination
     }
   };
 
@@ -295,25 +366,65 @@ const handleToggleFilters = () => {
                 />
               </div>
             </div>
-              {/* Location Field */}
-                <div>
-                  <label style={{ fontWeight: "bold" }}>Location:</label>
-                  <div style={{ marginTop: "0.5rem" }}>
+
+            {/* Location Fields */}
+            <div>
+              <label style={{ fontWeight: "bold" }}>Locations:</label>
+              <div style={{ marginTop: "0.5rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                {locations.map((location, index) => (
+                  <div key={index} style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
                     <input
                       type="text"
                       placeholder="Enter location (e.g., Bratislava, Prague...)"
                       value={location}
-                      onChange={handleLocationChange}
+                      onChange={(e) => handleLocationChange(index, e.target.value)}
                       style={{ 
-                        width: "100%", 
+                        flex: 1,
                         padding: "0.5rem", 
                         borderRadius: "4px", 
                         border: "1px solid #ccc",
                         fontSize: "0.95rem"
                       }}
                     />
+                    {locations.length > 1 && (
+                      <button
+                        onClick={() => handleRemoveLocation(index)}
+                        style={{
+                          background: "#dc3545",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "4px",
+                          padding: "0.5rem",
+                          cursor: "pointer",
+                          fontSize: "0.9rem",
+                          minWidth: "30px"
+                        }}
+                        title="Remove location"
+                      >
+                        ✕
+                      </button>
+                    )}
                   </div>
-                </div>
+                ))}
+                <button
+                  onClick={handleAddLocation}
+                  style={{
+                    background: "#28a745",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "4px",
+                    padding: "0.5rem 1rem",
+                    cursor: "pointer",
+                    fontSize: "0.9rem",
+                    alignSelf: "flex-start",
+                    marginTop: "0.5rem"
+                  }}
+                >
+                  + Add Location
+                </button>
+              </div>
+            </div>
+
             {/* Property Types - Flats */}
             <div>
               <label style={{ fontWeight: "bold" }}>Flats:</label>

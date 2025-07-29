@@ -62,9 +62,11 @@ function AISearchPage() {
   const [appliedFilters, setAppliedFilters] = useState({
   maxPrice: 5000,
   size: { from: "", to: "" },
-  selectedTypes: []
+  selectedTypes: [],
+  locations: [""]  // Add this line
 });
-  
+
+const [locations, setLocations] = useState([""]);
 
    useEffect(() => {
     setChatOpen(true);
@@ -121,6 +123,13 @@ useEffect(() => {
     }
   }, [chatMessages, chatOpen]);
 
+  useEffect(() => {
+  // Only fetch when appliedFilters actually changes and we have offers
+  if (appliedFilters.locations.length > 0 && offers.length > 0) {
+    fetchAISearchResults(currentPage);
+  }
+}, [appliedFilters]);
+
   
 
   const handleTypeToggle = (type) => {
@@ -141,6 +150,37 @@ useEffect(() => {
   const handleRoomsChange = (e) => {setRooms(e.target.value);
                                       setFiltersDirty(true);
                                     };
+
+  const handleLocationChange = (index, value) => {
+  const newLocations = [...locations];
+  newLocations[index] = value;
+  setLocations(newLocations);
+  setFiltersDirty(true);
+};
+
+const handleAddLocation = () => {
+  setLocations([...locations, ""]);
+  setFiltersDirty(true);
+};
+
+const handleRemoveLocation = (index) => {
+  if (locations.length > 1) {
+    const newLocations = locations.filter((_, i) => i !== index);
+    setLocations(newLocations);
+    setFiltersDirty(true);
+  }
+};
+
+const filterToggleFunction = () => {
+  if (showFilters) {
+    // Hiding filters - reset to applied values
+    setMaxPrice(appliedFilters.maxPrice);
+    setSize(appliedFilters.size);
+    setSelectedTypes(appliedFilters.selectedTypes);
+    setLocations(appliedFilters.locations || [""]);  // Add fallback
+  }
+  setShowFilters(!showFilters);
+};
 
   const handleShowOffers = () => {
     setLoading(true);
@@ -202,17 +242,22 @@ useEffect(() => {
   const fetchAISearchResults = (page = currentPage) => {
     setLoading(true);
 
-    // Uncomment this block to use real backend fetching:
-    const token = localStorage.getItem("jwtToken");    
-    const params = new URLSearchParams({
-      page,
-      limit: OFFERS_PER_PAGE,
-      price_min: 0,
-      price_max: maxPrice,
-      size_min: size.from === "" ? 0 : size.from,
-      size_max: size.to === "" ? 1000 : size.to,
-      types: selectedTypes.length === 0 ? allTypes.join(",") : selectedTypes.join(","),
-    });
+  const token = localStorage.getItem("jwtToken");
+  
+  // Add locations to params
+  const validLocations = appliedFilters.locations.filter(loc => loc.trim() !== "");
+  const locationString = validLocations.length === 0 ? "Slovakia" : validLocations.join(",");
+  
+  const params = new URLSearchParams({
+    page,
+    limit: OFFERS_PER_PAGE,
+    price_min: 0,
+    price_max: appliedFilters.maxPrice,
+    size_min: appliedFilters.size.from === "" ? 0 : appliedFilters.size.from,
+    size_max: appliedFilters.size.to === "" ? 1000 : appliedFilters.size.to,
+    types: appliedFilters.selectedTypes.length === 0 ? allTypes.join(",") : appliedFilters.selectedTypes.join(","),
+    locations: locationString,  // Add this
+  });
    fetch(`http://localhost:5000/search/fetch-filtered-results/${chatSessionId}?${params.toString()}`, {
   method: "GET",
   headers: {
@@ -270,16 +315,17 @@ useEffect(() => {
   };
 
   const handleSearch = () => {
-  // Save current filter values as applied filters
   setAppliedFilters({
     maxPrice,
     size,
-    selectedTypes
+    selectedTypes,
+    locations  // This will trigger the useEffect above
   });
   
   setCurrentPage(1);
-  // Add your existing search logic here
-  setShowFilters(false); // Close filters after applying
+  // Remove this line: fetchAISearchResults(1);
+  setShowFilters(false);
+  setFiltersDirty(false);
 };
 
   const handlePrevPage = () => {
@@ -609,6 +655,67 @@ setChatSessionId(null);
         />
       </div>
     </div>
+
+    {/* Location Fields */}
+<div>
+  <label style={{ fontWeight: "bold" }}>Locations:</label>
+  <div style={{ marginTop: "0.5rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+    {locations.map((location, index) => (
+      <div key={index} style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+        <input
+          type="text"
+          placeholder="Enter location (e.g., Bratislava, Prague...)"
+          value={location}
+          onChange={(e) => handleLocationChange(index, e.target.value)}
+          style={{ 
+            flex: 1,
+            padding: "0.5rem", 
+            borderRadius: "4px", 
+            border: "1px solid #ccc",
+            fontSize: "0.95rem"
+          }}
+          disabled={offers.length === 0}
+        />
+        {locations.length > 1 && (
+          <button
+            onClick={() => handleRemoveLocation(index)}
+            style={{
+              background: "#dc3545",
+              color: "#fff",
+              border: "none",
+              borderRadius: "4px",
+              padding: "0.5rem",
+              cursor: "pointer",
+              fontSize: "0.9rem",
+              minWidth: "30px"
+            }}
+            title="Remove location"
+            disabled={offers.length === 0}
+          >
+            ✕
+          </button>
+        )}
+      </div>
+    ))}
+    <button
+      onClick={handleAddLocation}
+      style={{
+        background: "#28a745",
+        color: "#fff",
+        border: "none",
+        borderRadius: "4px",
+        padding: "0.5rem 1rem",
+        cursor: "pointer",
+        fontSize: "0.9rem",
+        alignSelf: "flex-start",
+        marginTop: "0.5rem"
+      }}
+      disabled={offers.length === 0}
+    >
+      + Add Location
+    </button>
+  </div>
+</div>
 
     {/* Property Types - Flats */}
     <div>
