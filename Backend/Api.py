@@ -15,8 +15,7 @@ import os
 from sqlalchemy.ext.asyncio import AsyncSession
 from AI.Utils import prepare_chat_memory
 from AI.Services import generate_ai_answer, search_by_summarized_preferences
-from Utils.Utils import process_types_and_rooms_filters, add_preview_image
-from Shared.Geolocation import get_coordinates, get_bounding_box_from_location
+from Utils.Utils import process_types_and_rooms_filters, get_bounding_boxes
 
 load_dotenv()
 host = os.getenv('HOST')
@@ -115,20 +114,26 @@ async def offers(page:int,
                    size_min: int,
                    size_max:  int,
                    types: str,
-                   location: str,
+                   locations: str,
                    jwtTokenPayload: dict = Depends(endpoint_verification),
                    db_connection: AsyncSession = Depends(get_db)
                     ):
 
     processed_filters = process_types_and_rooms_filters(types)
     offers_repo = Offers_repository(db_connection)
-    coordinates_bounding_box = get_bounding_box_from_location(location)
+    try:
+        coordinates_bounding_boxes = get_bounding_boxes(locations)
+    except ValueError:
+        raise HTTPException(
+            status_code=404,
+            detail="Selected locations not found."
+        )
     rent_offers = await offers_repo.get_filtered_rent_offers(price_max,
                                                              size_min,
                                                              size_max,
                                                              processed_filters['types'],
                                                              processed_filters['rooms'],
-                                                             coordinates_bounding_box,
+                                                             coordinates_bounding_boxes,
                                                              page)
 
     return JSONResponse(
@@ -273,6 +278,7 @@ async def fetch_filtered_results(session_id:int,
                                  size_min: int,
                                  size_max:  int,
                                  types: str,
+                                 locations:str,
                                  jwtTokenPayload: dict = Depends(endpoint_verification),
                                  db_connection: AsyncSession = Depends(get_db)):
     cached_results_repo = Cached_vector_search_results_repository(db_connection)
@@ -294,12 +300,12 @@ async def fetch_filtered_results(session_id:int,
                                                                                          processed_filters['types'],
                                                                                          processed_filters['rooms'],
                                                                                          page)
-    valid_offers_w_preview_image = add_preview_image(filtered_cached_results)
-
-    return JSONResponse(
-        status_code=200,
-        content=valid_offers_w_preview_image
-    )
+    # valid_offers_w_preview_image = add_preview_image(filtered_cached_results)
+    #
+    # return JSONResponse(
+    #     status_code=200,
+    #     content=valid_offers_w_preview_image
+    # )
 
 
 if __name__ == "__main__":
