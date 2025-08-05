@@ -2,8 +2,8 @@ from langchain.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from Prompts import get_key_attributes_prompt, agentic_flow_prompt, summarize_chat_history_prompt_v_5
-from utils import extract_chat_history_as_dict, format_chat_history, convert_text_to_dict, processing_dict,prepare_filters_qdrant
+from Prompts import get_key_attributes_prompt, agentic_flow_prompt, summarize_chat_history_prompt_v_5, get_key_attributes_prompt_v_2
+from utils import extract_chat_history_as_dict, format_chat_history, convert_text_to_dict, processing_dict,prepare_filters_qdrant, parse_json_from_markdown, prepare_multiple_filters_qdrant
 from Shared.LLM import LLM
 from Shots import chat_history_summary_few_shots
 import warnings
@@ -11,6 +11,7 @@ from langchain.schema import SystemMessage
 from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
 from langchain.schema import AIMessage
 import json
+import time
 
 warnings.filterwarnings("ignore",
                         category=DeprecationWarning)
@@ -83,38 +84,44 @@ while True:
     print(f"processed summary: {processed_summary}")
     print(f"sumary to embedd: {summary_to_embedd}")
 
-    try:
-        response_key_attr = llm.generate_answer(get_key_attributes_prompt.format(user_prompt=response_summary),
-                                                model=gen_model)
+    #try:
+    response_key_attr = llm.generate_answer(get_key_attributes_prompt_v_2.format(user_prompt=response_summary),
+                                            model=gen_model)
 
-        key_attributes_dict = convert_text_to_dict(response_key_attr)
-        processed_dict = processing_dict(key_attributes_dict)
-        prev_key_attributes_dict = processed_dict
-    except:
-        processed_dict = prev_key_attributes_dict
+    print(response_key_attr)
+    p =parse_json_from_markdown(response_key_attr)
+    print(p)
 
-    if processed_dict['property_type'] in ['loft','garzónka','garzonka','garsónka', 'garsonka']:
-        processed_dict['rooms'] = None
-        processed_dict['rooms_min'] = None
-        processed_dict['rooms_max'] = None
 
-    print(processed_dict)
-    filters = prepare_filters_qdrant(processed_dict)
-
-    embedding = llm.get_embedding(summary_to_embedd, model='text-embedding-3-large')
-    results = vdb.filtered_vector_search(embedding, 10, filter=filters)[0]
+    #     prev_key_attributes_dict = processed_dict
+    # except:
+    #     processed_dict = prev_key_attributes_dict
+    #
+    # if processed_dict['property_type'] in ['loft','garzónka','garzonka','garsónka', 'garsonka']:
+    #     processed_dict['rooms'] = None
+    #     processed_dict['rooms_min'] = None
+    #     processed_dict['rooms_max'] = None
+    #
+    # print(processed_dict)
+    # filters = prepare_filters_qdrant(processed_dict)
+    filters = prepare_multiple_filters_qdrant(p)
+    #
+    #embedding = llm.get_embedding(summary_to_embedd, model='text-embedding-3-large')
+    embedding = llm.get_embedding('pekne byvanie', model='text-embedding-3-large')
+    #results = vdb.filtered_vector_search(embedding, 10, filter=filters)[0]
+    results = vdb.multiple_filtered_vector_search(embedding, 10, filters)[0]
     for i in results.points:
         print(i.payload['source_url'])
-
-    response = agentic_chain.predict(input=query)
-    questions+=1
-
-    if questions >= 10:
-        print(f"🤖: Ďakujem za vaše odpovede. Ak budete chcieť doplniť ďalšie kritériá, neváhajte mi napísať.")
-        memory.chat_memory.messages[-1] = AIMessage(
-            content="Ďakujem za vaše odpovede. Ak budete chcieť doplniť ďalšie kritériá, neváhajte mi napísať."
-        )
-        questions=0
-        continue
-
-    print(f"🤖: {response}")
+    #
+    # response = agentic_chain.predict(input=query)
+    # questions+=1
+    #
+    # if questions >= 10:
+    #     print(f"🤖: Ďakujem za vaše odpovede. Ak budete chcieť doplniť ďalšie kritériá, neváhajte mi napísať.")
+    #     memory.chat_memory.messages[-1] = AIMessage(
+    #         content="Ďakujem za vaše odpovede. Ak budete chcieť doplniť ďalšie kritériá, neváhajte mi napísať."
+    #     )
+    #     questions=0
+    #     continue
+    #
+    # print(f"🤖: {response}")

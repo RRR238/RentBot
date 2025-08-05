@@ -3,6 +3,7 @@ from langchain.schema import HumanMessage, AIMessage
 import math
 import re
 from Shared.Geolocation import get_bounding_box_from_location
+from qdrant_client.http.models import Filter, FieldCondition, Match, Range
 
 def convert_text_to_dict(llm_output):
     final_dict = {}
@@ -16,6 +17,18 @@ def convert_text_to_dict(llm_output):
     final_dict['property_status'] = no_spaces[no_spaces.find('novostavba') + len('novostavba'):no_spaces.find('lokalita')].replace(',','').replace('\n', '').replace(':', '').replace('.', '')
     final_dict['location'] = no_spaces[no_spaces.find('lokalita') + len('lokalita'):].replace(',', '').replace('\n', '').replace(':', '').replace('.', '')
     return final_dict
+
+
+def parse_json_from_markdown(raw: str) -> dict:
+    # Remove code block markers if present
+    cleaned = raw.strip().strip('` \n')
+    if cleaned.lower().startswith('json'):
+        cleaned = cleaned[4:].lstrip()
+
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON content: {e}")
 
 
 def processing_dict(key_attributes_dict):
@@ -44,6 +57,12 @@ def processing_dict(key_attributes_dict):
                 key_attributes_dict[k] = None
 
     return key_attributes_dict
+
+
+# def processing_dict_multiple_filters(key_attributes_dict):
+#     updated_key_attributes = {}
+#     for k, v in key_attributes_dict.items():
+#         if k=
 
 
 def prepare_filters_elastic(processed_dict):
@@ -98,6 +117,94 @@ def prepare_filters_qdrant(processed_dict):
     filter.append({'type': "lte", 'key': "longtitude", 'value': bbox['east_lon']})
 
     return filter
+
+#{'cena': [800, 1000], 'počet izieb': [2, 3], 'rozloha': [50, 60], 'typ nehnuteľnosti': None, 'novostavba': False, 'lokalita': ['Bratislava', 'Senec']}
+def prepare_multiple_filters_qdrant(processed_dict):
+    must_conditions = []
+
+    for k, v in processed_dict.items():
+        if k == 'cena':
+            if v[0] is not None:
+                must_conditions.append(
+                    FieldCondition(key="price_total", range=Range(gte=v[0]))
+                )
+            if v[1] is not None:
+                must_conditions.append(
+                    FieldCondition(key="price_total", range=Range(lte=v[1]))
+                )
+
+        if k == 'počet izieb':
+            if v[0] is not None:
+                must_conditions.append(
+                    FieldCondition(key="rooms", range=Range(gte=v[0]))
+                )
+            if v[1] is not None:
+                must_conditions.append(
+                    FieldCondition(key="rooms", range=Range(lte=v[1]))
+                )
+
+        if k == 'rozloha':
+            if v[0] is not None:
+                must_conditions.append(
+                    FieldCondition(key="size", range=Range(gte=v[0]))
+                )
+            if v[1] is not None:
+                must_conditions.append(
+                    FieldCondition(key="size", range=Range(lte=v[1]))
+                )
+
+        if k == 'property_type':
+            if v:
+                must_conditions.append(
+                    Filter(
+                        should=[
+                            FieldCondition(
+                                key="property_type",
+                                match=Match(value=prop_type)
+                            ) for prop_type in v
+                        ]
+                    )
+                )
+
+        if k == 'novostavba':
+            if v is True:
+                must_conditions.append(
+                    FieldCondition(
+                        key="property_status",
+                        match=Match(value="novostavba")
+                    )
+                )
+
+    # --- LOCATION (multiple bounding boxes) ---
+    should_conditions = []
+
+    locations = processed_dict.get('lokalita') or ['Slovakia']
+
+    for loc in locations:
+        bbox = get_bounding_box_from_location(loc)
+        if bbox is None:
+            continue
+
+        should_conditions.append(
+            Filter(
+                must=[
+                    FieldCondition(
+                        key="latitude",
+                        range=Range(gte=bbox["south_lat"], lte=bbox["north_lat"])
+                    ),
+                    FieldCondition(
+                        key="longtitude",
+                        range=Range(gte=bbox["west_lon"], lte=bbox["east_lon"])
+                    )
+                ]
+            )
+        )
+
+    # Final filter with must + should
+    return Filter(
+        must=must_conditions,
+        should=should_conditions
+    )
 
 def extract_chat_history_as_dict(memory):
     chat_history = []
