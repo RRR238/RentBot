@@ -3,7 +3,17 @@ from langchain.schema import HumanMessage, AIMessage
 import math
 import re
 from Shared.Geolocation import get_bounding_box_from_location
-from qdrant_client.http.models import Filter, FieldCondition, Match, Range
+from qdrant_client.http.models import Filter, FieldCondition, Match, Range, MatchValue
+
+property_type_mappings = {"dom":"house",
+                              "loft":"loft",
+                              "mezonet":"mezonet",
+                              "byt":"flat",
+                              "garzónka":"studio",
+                              "garzonka": "studio",
+                              "garsónka": "studio",
+                              "garsonka": "studio",
+                              "penthouse":"penthouse"}
 
 def convert_text_to_dict(llm_output):
     final_dict = {}
@@ -32,15 +42,7 @@ def parse_json_from_markdown(raw: str) -> dict:
 
 
 def processing_dict(key_attributes_dict):
-    property_type_mappings = {"dom":"house",
-                              "loft":"loft",
-                              "mezonet":"mezonet",
-                              "byt":"flat",
-                              "garzónka":"studio",
-                              "garzonka": "studio",
-                              "garsónka": "studio",
-                              "garsonka": "studio",
-                              "penthouse":"penthouse"}
+    global property_type_mappings
     for k,v in key_attributes_dict.items():
         if v == 'None':
             key_attributes_dict[k] = None
@@ -119,8 +121,9 @@ def prepare_filters_qdrant(processed_dict):
     return filter
 
 #{'cena': [800, 1000], 'počet izieb': [2, 3], 'rozloha': [50, 60], 'typ nehnuteľnosti': None, 'novostavba': False, 'lokalita': ['Bratislava', 'Senec']}
-def prepare_multiple_filters_qdrant(processed_dict):
+def prepare_enriched_filters_qdrant(processed_dict):
     must_conditions = []
+    global property_type_mappings
 
     for k, v in processed_dict.items():
         if k == 'cena':
@@ -153,15 +156,16 @@ def prepare_multiple_filters_qdrant(processed_dict):
                     FieldCondition(key="size", range=Range(lte=v[1]))
                 )
 
-        if k == 'property_type':
+        if k == 'typ nehnuteľnosti':
             if v:
                 must_conditions.append(
                     Filter(
                         should=[
                             FieldCondition(
                                 key="property_type",
-                                match=Match(value=prop_type)
-                            ) for prop_type in v
+                                match=MatchValue(value=property_type_mappings[prop_type])
+                            )
+                            for prop_type in v
                         ]
                     )
                 )
@@ -179,6 +183,8 @@ def prepare_multiple_filters_qdrant(processed_dict):
     should_conditions = []
 
     locations = processed_dict.get('lokalita') or ['Slovakia']
+    if len(locations)==0:
+        locations.append('Slovakia')
 
     for loc in locations:
         bbox = get_bounding_box_from_location(loc)
