@@ -81,7 +81,7 @@ summarize_chat_history_prompt_v_5 = """
 Na základe histórie konverzácie medzi agentom a používateľom nizsie (text medzi symbolmi ```), vytvor sumarizáciu preferencií (text medzi symbomi ''') používateľa ohľadom nehnuteľnosti.
 Tvoja odpoveď musí byť v nasledujúcom formáte:
 
-cena: <tvoja dedukcia>, počet izieb: <tvoja dedukcia>, rozloha: <tvoja dedukcia>, typ nehnuteľnosti: <tvoja dedukcia> (vyber jednu z možností: dom, loft, mezonet, byt, garzónka, penthouse), novostavba: <tvoja dedukcia> (priraď hodnotu True, ak je z promptu bez pochýb jasné, že ide o novostavbu. Inak priraď hodnotu None.), lokalita: <tvoja dedukcia> (Urči iba mesto alebo mestskú časť. Konkrétne body na mape, ako napr. „pri lese“, „pri jazere“, „v centre mesta“, „v pokojnej štvrti“ a podobne zaraď do kategórie ostatné preferencie), ostatné preferencie: <tvoja dedukcia>
+cena: <tvoja dedukcia>, počet izieb: <tvoja dedukcia>, rozloha: <tvoja dedukcia>, typ nehnuteľnosti: <tvoja dedukcia> (vyber všetky hodiace sa z nasledujúcich možností: dom, loft, mezonet, byt, garzónka, penthouse), novostavba: <tvoja dedukcia> (priraď hodnotu True, ak je z promptu bez pochýb jasné, že ide o novostavbu. Inak priraď hodnotu None.), lokalita: <tvoja dedukcia> (Urči iba mesto alebo mestskú časť. Konkrétne body na mape, ako napr. „pri lese“, „pri jazere“, „v centre mesta“, „v pokojnej štvrti“ a podobne zaraď do kategórie ostatné preferencie), ostatné preferencie: <tvoja dedukcia>
 
 Pravidlá:
 

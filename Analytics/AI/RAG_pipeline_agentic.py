@@ -109,7 +109,7 @@ while True:
     #embedding = llm.get_embedding(summary_to_embedd, model='text-embedding-3-large')
     embedding = llm.get_embedding('pekne byvanie', model='text-embedding-3-large')
     #results = vdb.filtered_vector_search(embedding, 10, filter=filters)[0]
-    results = vdb.multiple_filtered_vector_search(embedding, 10, filters)[0]
+    results = vdb.enriched_filtered_vector_search(embedding, 10, filters)[0]
     for i in results.points:
         print(i.payload['source_url'])
     #
