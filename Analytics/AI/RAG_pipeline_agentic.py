@@ -67,41 +67,52 @@ org_summary = (
     "novostavba: None, lokalita: None, ostatné preferencie: None"
 )
 
+SEARCH_TRIGGER = "P"
+
+# Kick off the conversation
+opening = agentic_chain.predict(input="Začni konverzáciu.")
+print(f"🤖: {opening}")
+
 while True:
-    query = input()
+    query = input("You: ").strip()
 
-    # Build message list for summarization: full history + current user message
-    messages_for_summary = memory.chat_memory.messages + [HumanMessage(content=query)]
+    if query == SEARCH_TRIGGER:
+        # --- Step 1: summarize preferences from the full conversation so far ---
+        messages_for_summary = memory.chat_memory.messages
+        summary_response = summarization_chain.invoke({"messages": messages_for_summary})
+        response_summary = summary_response.content
+        print(f"\n[summary]: {response_summary}")
 
-    # --- Step 1: summarize user preferences from the conversation ---
-    summary_response = summarization_chain.invoke({"messages": messages_for_summary})
-    response_summary = summary_response.content
-    print(f"summary: {response_summary}")
+        try:
+            idx = response_summary.index(', ostatné preferencie')
+            processed_summary = response_summary[:idx]
+            summary_to_embedd = response_summary[idx + len(', ostatné preferencie: '):]
+            org_summary = response_summary
+        except ValueError:
+            idx = org_summary.index(', ostatné preferencie')
+            processed_summary = org_summary[:idx]
+            summary_to_embedd = org_summary[idx + len(', ostatné preferencie: '):]
 
-    try:
-        idx = response_summary.index(', ostatné preferencie')
-        processed_summary = response_summary[:idx]
-        summary_to_embedd = response_summary[idx + len(', ostatné preferencie: '):]
-        org_summary = response_summary
-    except ValueError:
-        idx = org_summary.index(', ostatné preferencie')
-        processed_summary = org_summary[:idx]
-        summary_to_embedd = org_summary[idx + len(', ostatné preferencie: '):]
+        print(f"[processed summary]: {processed_summary}")
+        print(f"[summary to embedd]: {summary_to_embedd}")
 
-    print(f"processed summary: {processed_summary}")
-    print(f"summary to embedd: {summary_to_embedd}")
+        # --- Step 2: extract structured key attributes from the summary ---
+        key_attr_response = key_attributes_chain.invoke({"input": response_summary})
+        response_key_attr = key_attr_response.content
+        print(f"[key attributes]: {response_key_attr}")
 
-    # --- Step 2: extract structured key attributes from the summary ---
-    key_attr_response = key_attributes_chain.invoke({"input": response_summary})
-    response_key_attr = key_attr_response.content
-    print(response_key_attr)
+        p = parse_json_from_markdown(response_key_attr)
+        print(f"[parsed]: {p}")
 
-    p = parse_json_from_markdown(response_key_attr)
-    print(p)
+        # --- Step 3: vector search with extracted filters ---
+        filters = prepare_multiple_filters_qdrant(p)
+        embedding = llm.get_embedding(summary_to_embedd, model='text-embedding-3-large')
+        results = vdb.enriched_filtered_vector_search(embedding, 10, filters)[0]
+        print("\n[results]:")
+        for i in results.points:
+            print(i.payload['source_url'])
 
-    # --- Step 3: vector search with extracted filters ---
-    filters = prepare_multiple_filters_qdrant(p)
-    embedding = llm.get_embedding('pekne byvanie', model='text-embedding-3-large')
-    results = vdb.enriched_filtered_vector_search(embedding, 10, filters)[0]
-    for i in results.points:
-        print(i.payload['source_url'])
+    else:
+        # Normal conversation turn — agent asks the next question
+        response = agentic_chain.predict(input=query)
+        print(f"🤖: {response}")
