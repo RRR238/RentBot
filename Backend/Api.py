@@ -1,22 +1,21 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
-from Repositories.User_repository import User_repository
-from Repositories.Offers_repository import Offers_repository
-from Repositories.Chat_sessions_repository import Chat_session_repository
-from Repositories.Cached_vector_search_results_repository import Cached_vector_search_results_repository
+from Backend.Database.Repositories.User_repository import User_repository
+from Backend.Database.Repositories.Offers_repository import Offers_repository
+from Backend.Database.Repositories.Chat_sessions_repository import Chat_session_repository
+from Backend.Database.Repositories.Cached_vector_search_results_repository import Cached_vector_search_results_repository
 from Dependency_injection import get_db, endpoint_verification
-from Entities import User, Chat_session, Chat_history, Cached_vector_search_results
-from Singletons import security_manager
-from Models import User_model, User_message_model, Chat_session_model
+from Backend.Database.Backend_entities import User, Chat_session, Chat_history, Cached_vector_search_results
+from Singletons import security_manager, llm_langchain, llm, vector_db
+from Backend.Pydantic_models.Models import User_model, User_message_model, Chat_session_model
 import uvicorn
 from dotenv import load_dotenv
 import os
 from sqlalchemy.ext.asyncio import AsyncSession
-from AI.Singletons import llm_langchain, llm, vector_db
 from AI.Utils import prepare_chat_memory
 from AI.Services import generate_ai_answer, search_by_summarized_preferences
-from Utils import process_types_and_rooms_filters
+from Utils.Utils import process_types_and_rooms_filters, get_bounding_boxes
 
 load_dotenv()
 host = os.getenv('HOST')
@@ -113,20 +112,30 @@ async def offers(page:int,
                    price_min:int,
                    price_max: int,
                    size_min: int,
-                    size_max:  int,
-                    types: str,
-                    jwtTokenPayload: dict = Depends(endpoint_verification),
-                    db_connection: AsyncSession = Depends(get_db)
+                   size_max:  int,
+                   types: str,
+                   locations: str,
+                   jwtTokenPayload: dict = Depends(endpoint_verification),
+                   db_connection: AsyncSession = Depends(get_db)
                     ):
 
     processed_filters = process_types_and_rooms_filters(types)
     offers_repo = Offers_repository(db_connection)
+    try:
+        coordinates_bounding_boxes = get_bounding_boxes(locations)
+    except ValueError:
+        raise HTTPException(
+            status_code=404,
+            detail="Selected locations not found."
+        )
     rent_offers = await offers_repo.get_filtered_rent_offers(price_max,
                                                              size_min,
                                                              size_max,
                                                              processed_filters['types'],
                                                              processed_filters['rooms'],
+                                                             coordinates_bounding_boxes,
                                                              page)
+
     return JSONResponse(
         status_code=200,
         content=rent_offers
@@ -188,6 +197,7 @@ async def fetch_history(jwtTokenPayload: dict = Depends(endpoint_verification),
     chat_session_repo = Chat_session_repository(db_connection)
     user_id = jwtTokenPayload['userID']
     active_session = await chat_session_repo.get_active_session_by_user_id(user_id)
+    print(active_session)
     if not active_session:
         await chat_session_repo.mark_all_sessions_inactive_by_user(user_id)
         raise HTTPException(
@@ -238,23 +248,26 @@ async def find_results(session_id:int,
     for result in results:
         new_item = Cached_vector_search_results(
                                                 session_id=session_id,
-                                                source_url=result['source_url'],
-                                                location=result['location'],
-                                                price_total=result['price_total'],
-                                                size=result['size'],
-                                                property_type=result['property_type'],
-                                                rooms=result['rooms'],
-                                                score=result['score']
+                                                score=result['score'],
+                                                offer_id = result['id']
                                                 )
         added_item = await cached_results_repo.add_item(new_item)
 
-    filtered_results = [{'source_url':result['source_url'],
-                         'price_total':result['price_total'],
-                         'location':result['location']} for result in results]
+    filtered_cached_results = await cached_results_repo.get_filtered_vector_search_results(session_id=session_id,
+                                                                                           max_price=5000,
+                                                                                           min_size=0,
+                                                                                           max_size=1000,
+                                                                                           property_types =['studio',
+                                                                                                            'mezonet',
+                                                                                                            'penthouse',
+                                                                                                            'loft',
+                                                                                                            'house',
+                                                                                                            'flat'],
+                                                                                           rooms=[1,2,3,4,5],
+                                                                                           page=1)
 
     return JSONResponse(status_code=200,
-                        content={'total':len(filtered_results),
-                                 'offers':filtered_results[:20]})
+                        content=filtered_cached_results)
 
 @app.get("/search/fetch-filtered-results/{session_id}")
 async def fetch_filtered_results(session_id:int,
@@ -265,6 +278,7 @@ async def fetch_filtered_results(session_id:int,
                                  size_min: int,
                                  size_max:  int,
                                  types: str,
+                                 locations:str,
                                  jwtTokenPayload: dict = Depends(endpoint_verification),
                                  db_connection: AsyncSession = Depends(get_db)):
     cached_results_repo = Cached_vector_search_results_repository(db_connection)
@@ -279,17 +293,19 @@ async def fetch_filtered_results(session_id:int,
             detail="Session not found."
         )
     processed_filters = process_types_and_rooms_filters(types)
-    filtered_cached_results = await cached_results_repo.get_filtered_vector_search_results(price_max,
-                                                                                 size_min,
-                                                                                 size_max,
-                                                                                 processed_filters['types'],
-                                                                                 processed_filters['rooms'],
-                                                                                 page)
-
-    return JSONResponse(
-        status_code=200,
-        content=filtered_cached_results
-    )
+    filtered_cached_results = await cached_results_repo.get_filtered_vector_search_results(session_id,
+                                                                                         price_max,
+                                                                                         size_min,
+                                                                                         size_max,
+                                                                                         processed_filters['types'],
+                                                                                         processed_filters['rooms'],
+                                                                                         page)
+    # valid_offers_w_preview_image = add_preview_image(filtered_cached_results)
+    #
+    # return JSONResponse(
+    #     status_code=200,
+    #     content=valid_offers_w_preview_image
+    # )
 
 
 if __name__ == "__main__":

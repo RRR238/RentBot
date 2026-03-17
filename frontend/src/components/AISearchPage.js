@@ -56,7 +56,17 @@ function AISearchPage() {
 
   const [filtersDirty, setFiltersDirty] = useState(false);
   const [showFilterInfo, setShowFilterInfo] = useState(false);
-  
+
+  const [showFilters, setShowFilters] = useState(false);
+
+  const [appliedFilters, setAppliedFilters] = useState({
+  maxPrice: 5000,
+  size: { from: "", to: "" },
+  selectedTypes: [],
+  locations: [""]  // Add this line
+});
+
+const [locations, setLocations] = useState([""]);
 
    useEffect(() => {
     setChatOpen(true);
@@ -113,6 +123,13 @@ useEffect(() => {
     }
   }, [chatMessages, chatOpen]);
 
+  useEffect(() => {
+  // Only fetch when appliedFilters actually changes and we have offers
+  if (appliedFilters.locations.length > 0 && offers.length > 0) {
+    fetchAISearchResults(currentPage);
+  }
+}, [appliedFilters]);
+
   
 
   const handleTypeToggle = (type) => {
@@ -134,18 +151,50 @@ useEffect(() => {
                                       setFiltersDirty(true);
                                     };
 
+  const handleLocationChange = (index, value) => {
+  const newLocations = [...locations];
+  newLocations[index] = value;
+  setLocations(newLocations);
+  setFiltersDirty(true);
+};
+
+const handleAddLocation = () => {
+  setLocations([...locations, ""]);
+  setFiltersDirty(true);
+};
+
+const handleRemoveLocation = (index) => {
+  if (locations.length > 1) {
+    const newLocations = locations.filter((_, i) => i !== index);
+    setLocations(newLocations);
+    setFiltersDirty(true);
+  }
+};
+
+const filterToggleFunction = () => {
+  if (showFilters) {
+    // Hiding filters - reset to applied values
+    setMaxPrice(appliedFilters.maxPrice);
+    setSize(appliedFilters.size);
+    setSelectedTypes(appliedFilters.selectedTypes);
+    setLocations(appliedFilters.locations || [""]);  // Add fallback
+  }
+  setShowFilters(!showFilters);
+};
+
   const handleShowOffers = () => {
     setLoading(true);
+  setShowFilters(false); // Close filter card when showing offers
 
-    // Uncomment this block to use real backend fetching:
-    const token = localStorage.getItem("jwtToken");
-    fetch(`http://localhost:5000/search/find-results/${chatSessionId}`, {
-  method: "GET",
-  headers: {
-    "Authorization": `Bearer ${token}`,
-  },
-  // ...other options...
-})
+  // Uncomment this block to use real backend fetching:
+  const token = localStorage.getItem("jwtToken");
+  fetch(`http://localhost:5000/search/find-results/${chatSessionId}`, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+    // ...other options...
+  })
   .then(res => {
     if (res.status === 401) {
       navigate("/login");
@@ -193,18 +242,22 @@ useEffect(() => {
   const fetchAISearchResults = (page = currentPage) => {
     setLoading(true);
 
-    // Uncomment this block to use real backend fetching:
-    const token = localStorage.getItem("jwtToken");    
-    const params = new URLSearchParams({
-      page,
-      limit: OFFERS_PER_PAGE,
-      price_min: 0,
-      price_max: maxPrice,
-      size_min: size.from,
-      size_max: size.to,
-      types: selectedTypes.join(","),
-      rooms,
-    });
+  const token = localStorage.getItem("jwtToken");
+  
+  // Add locations to params
+  const validLocations = appliedFilters.locations.filter(loc => loc.trim() !== "");
+  const locationString = validLocations.length === 0 ? "Slovakia" : validLocations.join(",");
+  
+  const params = new URLSearchParams({
+    page,
+    limit: OFFERS_PER_PAGE,
+    price_min: 0,
+    price_max: appliedFilters.maxPrice,
+    size_min: appliedFilters.size.from === "" ? 0 : appliedFilters.size.from,
+    size_max: appliedFilters.size.to === "" ? 1000 : appliedFilters.size.to,
+    types: appliedFilters.selectedTypes.length === 0 ? allTypes.join(",") : appliedFilters.selectedTypes.join(","),
+    locations: locationString,  // Add this
+  });
    fetch(`http://localhost:5000/search/fetch-filtered-results/${chatSessionId}?${params.toString()}`, {
   method: "GET",
   headers: {
@@ -262,11 +315,18 @@ useEffect(() => {
   };
 
   const handleSearch = () => {
-    setCurrentPage(1);
-    fetchAISearchResults(1);
-    setFiltersDirty(false);
-    setShowFilterInfo(false);
-  };
+  setAppliedFilters({
+    maxPrice,
+    size,
+    selectedTypes,
+    locations  // This will trigger the useEffect above
+  });
+  
+  setCurrentPage(1);
+  // Remove this line: fetchAISearchResults(1);
+  setShowFilters(false);
+  setFiltersDirty(false);
+};
 
   const handlePrevPage = () => {
   if (filtersDirty) {
@@ -508,111 +568,228 @@ setChatSessionId(null);
         boxSizing: "border-box",
         position: "relative"
       }}>
-        {/* Filters */}
-        <div style={{ marginBottom: "2rem", display: "flex", gap: "2rem", alignItems: "center", flexWrap: "wrap" }}>
-          {/* Price Slider */}
-          <div>
-            <label style={{ color: "#007bff", fontWeight: "bold" }}>Max Price:</label>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <button
+          onClick={() => {
+                        if (showFilters) {
+                          // Hiding filters - reset to applied values
+                          setMaxPrice(appliedFilters.maxPrice);
+                          setSize(appliedFilters.size);
+                          setSelectedTypes(appliedFilters.selectedTypes);
+                        }
+                        setShowFilters(!showFilters);
+                      }}
+          style={{
+                marginBottom: "1rem",
+                background: "#007bff",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+                padding: "0.75rem 1.5rem", // Changed from "0.5rem 1rem"
+                fontWeight: "bold",
+                cursor: "pointer",
+                alignSelf: "flex-start",
+                opacity: (chatMessages.length === 0 || offers.length === 0 || chatLoading) ? 0.6 : 1,
+              }}
+              disabled={chatMessages.length === 0 || offers.length === 0 || chatLoading}
+        >
+          {showFilters ? "Hide Filters" : "Show Filters"}
+          
+        </button>
+       {/* Filters Card */}
+        {showFilters && (
+          <div
+            style={{
+              background: "#f8f9fa",
+              border: "1px solid #ddd",
+              borderRadius: "8px",
+              padding: "1.5rem",
+              marginBottom: "2rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "1.5rem",
+            }}
+          >
+          {/* Price Fields */}
+    <div>
+      <label style={{ fontWeight: "bold" }}>Price (€):</label>
+      <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+        <input
+          type="number"
+          placeholder="Min"
+          value={0}
+          style={{ width: "80px", padding: "0.25rem" }}
+          disabled={offers.length === 0}
+        />
+        <input
+          type="number"
+          placeholder="Max"
+          value={maxPrice}
+          onChange={handleMaxPriceChange}
+          style={{ width: "80px", padding: "0.25rem" }}
+          disabled={offers.length === 0}
+        />
+      </div>
+    </div>
+
+    {/* Size Fields */}
+    <div>
+      <label style={{ fontWeight: "bold" }}>Size (m²):</label>
+      <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+        <input
+          type="number"
+          name="from"
+          placeholder="From"
+          value={size.from}
+          onChange={handleSizeChange}
+          style={{ width: "80px", padding: "0.25rem" }}
+          disabled={offers.length === 0}
+        />
+        <input
+          type="number"
+          name="to"
+          placeholder="To"
+          value={size.to}
+          onChange={handleSizeChange}
+          style={{ width: "80px", padding: "0.25rem" }}
+          disabled={offers.length === 0}
+        />
+      </div>
+    </div>
+
+    {/* Location Fields */}
+<div>
+  <label style={{ fontWeight: "bold" }}>Locations:</label>
+  <div style={{ marginTop: "0.5rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+    {locations.map((location, index) => (
+      <div key={index} style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+        <input
+          type="text"
+          placeholder="Enter location (e.g., Bratislava, Prague...)"
+          value={location}
+          onChange={(e) => handleLocationChange(index, e.target.value)}
+          style={{ 
+            flex: 1,
+            padding: "0.5rem", 
+            borderRadius: "4px", 
+            border: "1px solid #ccc",
+            fontSize: "0.95rem"
+          }}
+          disabled={offers.length === 0}
+        />
+        {locations.length > 1 && (
+          <button
+            onClick={() => handleRemoveLocation(index)}
+            style={{
+              background: "#dc3545",
+              color: "#fff",
+              border: "none",
+              borderRadius: "4px",
+              padding: "0.5rem",
+              cursor: "pointer",
+              fontSize: "0.9rem",
+              minWidth: "30px"
+            }}
+            title="Remove location"
+            disabled={offers.length === 0}
+          >
+            ✕
+          </button>
+        )}
+      </div>
+    ))}
+    <button
+      onClick={handleAddLocation}
+      style={{
+        background: "#28a745",
+        color: "#fff",
+        border: "none",
+        borderRadius: "4px",
+        padding: "0.5rem 1rem",
+        cursor: "pointer",
+        fontSize: "0.9rem",
+        alignSelf: "flex-start",
+        marginTop: "0.5rem"
+      }}
+      disabled={offers.length === 0}
+    >
+      + Add Location
+    </button>
+  </div>
+</div>
+
+    {/* Property Types - Flats */}
+    <div>
+      <label style={{ fontWeight: "bold" }}>Flats:</label>
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.5rem" }}>
+        {/* First row: first 4 categories */}
+        <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
+          {flatTypes.slice(0, 4).map(type => (
+            <label key={type.key} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <input
-                type="range"
-                min={0}
-                max={5000}
-                value={maxPrice}
-                onChange={handleMaxPriceChange}
-                style={{ accentColor: "#007bff" }}
+                type="checkbox"
+                checked={selectedTypes.includes(type.key)}
+                onChange={() => handleTypeToggle(type.key)}
                 disabled={offers.length === 0}
               />
-              <span style={{ color: "#007bff" }}>{maxPrice} €</span>
-            </div>
-          </div>
-          {/* Size Fields */}
-          <div>
-            <label style={{ fontWeight: "bold" }}>Size (m²):</label>
-            <input
-              type="number"
-              name="from"
-              placeholder="From"
-              value={size.from}
-              onChange={handleSizeChange}
-              style={{ width: "60px", margin: "0 0.5rem" }}
-              disabled={offers.length === 0}
-            />
-            <input
-              type="number"
-              name="to"
-              placeholder="To"
-              value={size.to}
-              onChange={handleSizeChange}
-              style={{ width: "60px" }}
-              disabled={offers.length === 0}
-            />
-          </div>
-          {/* Property Types as checkboxes */}
-          <div>
-            <label style={{ fontWeight: "bold" }}>Flats:</label>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-              {/* First row: first 4 categories */}
-              <div style={{ display: "flex", gap: "1.5rem", marginBottom: "0.5rem" }}>
-                {flatTypes.slice(0, 4).map(type => (
-                  <label key={type.key} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <input
-                      type="checkbox"
-                      checked={selectedTypes.includes(type.key)}
-                      onChange={() => handleTypeToggle(type.key)}
-                      disabled={offers.length === 0}
-                    />
-                    {type.label}
-                  </label>
-                ))}
-              </div>
-              {/* Second row: next 5 categories */}
-              <div style={{ display: "flex", gap: "1.5rem" }}>
-                {flatTypes.slice(4).map(type => (
-                  <label key={type.key} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <input
-                      type="checkbox"
-                      checked={selectedTypes.includes(type.key)}
-                      onChange={() => handleTypeToggle(type.key)}
-                      disabled={offers.length === 0}
-                    />
-                    {type.label}
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div>
-            <label style={{ fontWeight: "bold" }}>House:</label>
-            <div>
-              <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <input
-                  type="checkbox"
-                  checked={selectedTypes.includes("house")}
-                  onChange={() => handleTypeToggle("house")}
-                  disabled={offers.length === 0}
-                />
-                House
-              </label>
-            </div>
-          </div>
-          {/* Search & Show Offers Buttons */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-  <button
-    onClick={handleSearch}
-    style={{
-      background: "#007bff",
-      color: "#fff",
-      border: "none",
-      borderRadius: "4px",
-      padding: "0.75rem 1.5rem",
-      fontWeight: "bold",
-      cursor: "pointer",
-    }}
-    disabled={offers.length === 0 || chatLoading}
-  >
-    Filter
-  </button>
+              {type.label}
+            </label>
+          ))}
+        </div>
+        {/* Second row: remaining categories */}
+        <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
+          {flatTypes.slice(4).map(type => (
+            <label key={type.key} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <input
+                type="checkbox"
+                checked={selectedTypes.includes(type.key)}
+                onChange={() => handleTypeToggle(type.key)}
+                disabled={offers.length === 0}
+              />
+              {type.label}
+            </label>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    {/* Property Types - House */}
+    <div>
+      <label style={{ fontWeight: "bold" }}>House:</label>
+      <div style={{ marginTop: "0.5rem" }}>
+        <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <input
+            type="checkbox"
+            checked={selectedTypes.includes("house")}
+            onChange={() => handleTypeToggle("house")}
+            disabled={offers.length === 0}
+          />
+          House
+        </label>
+      </div>
+    </div>
+
+    {/* Buttons */}
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+      <button
+              onClick={handleSearch}
+              style={{
+                background: "#28a745",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+                padding: "0.75rem 1.5rem",
+                fontWeight: "bold",
+                cursor: "pointer",
+                alignSelf: "flex-start",
+              }}
+            >
+              Apply Filters
+            </button>
+    </div>
+  </div>
+)}
+{/* Show offers and Clear results buttons */}
+<div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "2rem" }}>
   <button
     style={{
       background: "#28a745",
@@ -622,6 +799,8 @@ setChatSessionId(null);
       padding: "0.75rem 1.5rem",
       fontWeight: "bold",
       cursor: "pointer",
+      alignSelf: "flex-start",
+      opacity: (chatMessages.length === 0 || chatLoading || offersShown) ? 0.6 : 1,
     }}
     onClick={handleShowOffers}
     disabled={chatMessages.length === 0 || chatLoading || offersShown}
@@ -629,22 +808,28 @@ setChatSessionId(null);
     Show offers
   </button>
   <button
-    style={{
-      background: "#dc3545",
-      color: "#fff",
-      border: "none",
-      borderRadius: "4px",
-      padding: "0.75rem 1.5rem",
-      fontWeight: "bold",
-      cursor: "pointer",
-    }}
-    onClick={() => setOffers([])}
-    //disabled={chatMessages.length === 0 || chatLoading}
-  >
-    Clear results
-  </button>
+  style={{
+    background: "#dc3545",
+    color: "#fff",
+    border: "none",
+    borderRadius: "4px",
+    padding: "0.75rem 1.5rem",
+    fontWeight: "bold",
+    cursor: "pointer",
+    alignSelf: "flex-start",
+    opacity: (offers.length === 0) ? 0.6 : 1,
+  }}
+  onClick={() => {
+    setOffers([]);
+    setOffersShown(false);
+    setShowFilters(false); // Close filter card automatically
+  }}
+  disabled={offers.length === 0}
+>
+  Clear results
+</button>
 </div>
-        </div>
+      
         {/* AI search results */}
         {loading ? (
           <p>Loading offers...</p>

@@ -1,9 +1,12 @@
 from sqlalchemy import Column, BigInteger, Integer, SmallInteger, String, Text, Float, JSON, TIMESTAMP, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
+#from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
+from Shared.Declarative_base import Base
+#from Backend.Backend_entities import Cached_vector_search_results
 
-Base = declarative_base()
+#Base = declarative_base()
 
 class Rent_offer_model(Base):
     __tablename__ = "rent_offers"  # Change to the actual table name
@@ -33,12 +36,8 @@ class Rent_offer_model(Base):
     latitude = Column(Float, nullable=True)
     longtitude = Column(Float, nullable=True)
     price_total = Column(Integer, nullable=True)
-    preview_image = Column(Text, nullable=True)
+    preview_image= Column(Text, nullable=True)
 
-class Offer_image_model(Base):
-    __tablename__ = "images"  # Change to actual table name
+    cached_vector_search_results = relationship('Cached_vector_search_results',
+                                                back_populates='rent_offer')
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
-    image_url = Column(Text, nullable=False)
-    rent_offer_id = Column(BigInteger, ForeignKey("rent_offers.id"), nullable=False)

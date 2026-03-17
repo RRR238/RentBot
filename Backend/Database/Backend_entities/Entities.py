@@ -1,11 +1,12 @@
 from datetime import datetime
-from sqlalchemy.ext.declarative import declarative_base
+#from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String,BigInteger, DateTime, ForeignKey, Boolean, Text, Float
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
+from Shared.Declarative_base import Base
 
-Base = declarative_base()
+#Base = declarative_base()
 
 # User model
 class User(Base):
@@ -70,13 +71,14 @@ class Cached_vector_search_results(Base):
     session_id = Column(BigInteger,
                         ForeignKey('chat_sessions.id',
                                                ondelete="CASCADE"))
-    source_url = Column(Text, nullable=True)
-    location = Column(Text, nullable=False)
-    price_total = Column(Integer, nullable=True)
-    size = Column(Integer, nullable=True)
-    property_type = Column(Text, nullable=False)
-    rooms = Column(Integer, nullable=True)
+    offer_id = Column(BigInteger,
+                        ForeignKey('rent_offers.id',
+                                               ondelete="CASCADE"))
+
     score = Column(Float, nullable=True)
 
     chat_session = relationship("Chat_session",
+                                back_populates="cached_vector_search_results")
+
+    rent_offer = relationship("Rent_offer_model",
                                 back_populates="cached_vector_search_results")

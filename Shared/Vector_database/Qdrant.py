@@ -160,6 +160,61 @@ class Vector_DB_Qdrant(Vector_DB_interface):
 
         return response
 
+    def enriched_filtered_vector_search(self,
+                               vector_query: list,
+                               k: int,
+                               filter_input):
+        # Determine whether the input is already a Filter object
+        if isinstance(filter_input, Filter):
+            filters = filter_input
+        else:
+            # Assume it's a list of dicts with simple filtering
+            filters = []
+            for i in filter_input:
+                if i['type'] == 'term':
+                    filters.append(
+                        FieldCondition(
+                            key=i['key'],
+                            match=MatchValue(value=i['value'])
+                        )
+                    )
+                elif i['type'] == 'gte':
+                    filters.append(
+                        FieldCondition(
+                            key=i['key'],
+                            range=Range(gte=i['value'])
+                        )
+                    )
+                elif i['type'] == 'lte':
+                    filters.append(
+                        FieldCondition(
+                            key=i['key'],
+                            range=Range(lte=i['value'])
+                        )
+                    )
+                else:
+                    raise ValueError(f"Unknown filter type: {i['type']}")
+
+            filters = Filter(must=filters)
+
+        # Prepare the query
+        search_query = [
+            QueryRequest(
+                query=vector_query,
+                filter=filters,
+                limit=k,
+                with_payload=True
+            )
+        ]
+
+        # Perform the search
+        response = self.__client.query_batch_points(
+            collection_name=self.index_name,
+            requests=search_query
+        )
+
+        return response
+
     async def filtered_vector_search_async(self,
                                      vector_query: list,
                                      k: int,
@@ -192,6 +247,61 @@ class Vector_DB_Qdrant(Vector_DB_interface):
             QueryRequest(
                 query=vector_query,
                 filter=Filter(must=filters),
+                limit=k,
+                with_payload=True
+            )
+        ]
+
+        response = await self.__async_client.query_batch_points(
+            collection_name=self.index_name,
+            requests=search_query
+        )
+
+        return response
+
+    from qdrant_client.models import Filter, FieldCondition, MatchValue, Range, QueryRequest
+
+    async def enriched_filtered_vector_search_async(self,
+                                                   vector_query: list,
+                                                   k: int,
+                                                   filter_input):
+        # If already a Filter (i.e., from prepare_multiple_filters_qdrant)
+        if isinstance(filter_input, Filter):
+            filters = filter_input
+        else:
+            # Assume it's a list of dicts
+            filters = []
+            for i in filter_input:
+                if i['type'] == 'term':
+                    filters.append(
+                        FieldCondition(
+                            key=i['key'],
+                            match=MatchValue(value=i['value'])
+                        )
+                    )
+                elif i['type'] == 'gte':
+                    filters.append(
+                        FieldCondition(
+                            key=i['key'],
+                            range=Range(gte=i['value'])
+                        )
+                    )
+                elif i['type'] == 'lte':
+                    filters.append(
+                        FieldCondition(
+                            key=i['key'],
+                            range=Range(lte=i['value'])
+                        )
+                    )
+                else:
+                    raise ValueError(f"Unknown filter type: {i['type']}")
+
+            filters = Filter(must=filters)
+
+        search_query = [
+            QueryRequest(
+                query=vector_query,
+                filter=filters,
                 limit=k,
                 with_payload=True
             )

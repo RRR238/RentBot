@@ -1,7 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from Backend.Entities import User
+#from Backend.Backend_entities import User
 from sqlalchemy.orm import class_mapper
 from sqlalchemy import select, delete
+from Backend.Database.Entity_registration import User
 
 
 class User_repository:

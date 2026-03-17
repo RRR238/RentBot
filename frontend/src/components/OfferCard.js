@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 
 function OfferCard({ offer }) {
-  const [preview, setPreview] = useState(null);
+  // const [preview, setPreview] = useState(null);
+  console.log("OfferCard received:", offer);
 
-  useEffect(() => {
-    fetch(`https://api.microlink.io/?url=${encodeURIComponent(offer.source_url)}`)
-      .then(res => res.json())
-      .then(data => setPreview(data.data));
-  }, [offer.source_url]);
+   useEffect(() => {
+  //   fetch(`https://api.microlink.io/?url=${encodeURIComponent(offer.source_url)}`)
+  //     .then(res => res.json())
+  //     .then(data => setPreview(data.data));
+   }, [offer.source_url]);
 
   return (
     <div
@@ -23,10 +24,10 @@ function OfferCard({ offer }) {
         padding: "1rem",
       }}
     >
-      {preview && preview.image && (
+      {offer && offer.preview_image && (
         <img
-          src={preview.image.url}
-          alt={preview.title}
+          src={offer.preview_image}
+          alt={offer.title}
           style={{ width: "100%", height: "220px", objectFit: "cover", borderRadius: "8px" }}
         />
       )}
@@ -44,13 +45,13 @@ function OfferCard({ offer }) {
           fontSize: "1.1rem",
         }}
       >
-        {preview ? preview.title : offer.source_url}
+        {offer ? offer.title : offer.source_url}
       </a>
-      {preview && preview.description && (
+      {/* {offer && offer.description && (
         <div style={{ color: "#555", fontSize: "0.95rem", marginBottom: "0.5rem", textAlign: "center" }}>
-          {preview.description}
+          {offer.description}
         </div>
-      )}
+      )} */}
       <div style={{ marginTop: "auto", width: "100%", textAlign: "center" }}>
         <div style={{ color: "#333", fontWeight: "bold" }}>{offer.price_total} €</div>
         <div style={{ color: "#666", fontSize: "0.95rem" }}>{offer.location}</div>

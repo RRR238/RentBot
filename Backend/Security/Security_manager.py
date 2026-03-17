@@ -1,7 +1,7 @@
 import jwt
 from datetime import datetime, timedelta
 import bcrypt
-from Security_config import Security_config
+from Backend.Security.Security_config import Security_config
 
 class Security_manager:
 

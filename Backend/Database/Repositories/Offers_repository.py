@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func,  or_, and_
-from Shared.DB_models import Rent_offer_model
+from Backend.Database.Entity_registration import Rent_offer_model
 
 
 class Offers_repository:
@@ -15,16 +15,25 @@ class Offers_repository:
             max_size: int,
             property_types: list[str],
             rooms: list[int],
+            coordinates_bounding_boxes:list[dict],
             page: int = 1,
             page_size: int = 20
     ):
         offset = (page - 1) * page_size
-
+        location_filters = []
+        for box in coordinates_bounding_boxes:  # each box is a dict with north_lat, south_lat, east_lon, west_lon
+            location_filters.append(and_(
+                Rent_offer_model.latitude >= box['south_lat'],
+                Rent_offer_model.latitude <= box['north_lat'],
+                Rent_offer_model.longtitude >= box['west_lon'],
+                Rent_offer_model.longtitude <= box['east_lon']
+            ))
         # Base filters (common to all)
         filters = [
             Rent_offer_model.price_total <= max_price,
             Rent_offer_model.size >= min_size,
-            Rent_offer_model.size <= max_size
+            Rent_offer_model.size <= max_size,
+            or_(*location_filters)
         ]
 
         # Build type-specific filter logic
@@ -56,7 +65,10 @@ class Offers_repository:
             select(
                 Rent_offer_model.source_url,
                 Rent_offer_model.location,
-                Rent_offer_model.price_total
+                Rent_offer_model.price_total,
+                Rent_offer_model.title,
+                Rent_offer_model.description,
+                Rent_offer_model.preview_image
             )
             .where(*filters)
             .offset(offset)
