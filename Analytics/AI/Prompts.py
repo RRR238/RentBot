@@ -149,6 +149,44 @@ Prompt: {user_prompt}
 Tvoj výstup (vo formáte JSON):
 """
 #všetky tvoje výstupné hodnoty musia byť v zátvorkách ako rozsahy alebo množiny. Zátvorky medzi sebou oddeľuj symbolom: ,. Celý výstup musí byť v kučeravých zátvorkách
+
+# System prompts for LangChain chains
+summarize_preferences_system_prompt = """Na základe histórie konverzácie medzi agentom a používateľom vytvor sumarizáciu preferencií používateľa ohľadom nehnuteľnosti.
+Tvoja odpoveď musí byť v nasledujúcom formáte:
+
+cena: <tvoja dedukcia>, počet izieb: <tvoja dedukcia>, rozloha: <tvoja dedukcia>, typ nehnuteľnosti: <tvoja dedukcia> (vyber všetky hodiace sa z nasledujúcich možností: dom, loft, mezonet, byt, garzónka, penthouse), novostavba: <tvoja dedukcia> (priraď hodnotu True, ak je z promptu bez pochýb jasné, že ide o novostavbu. Inak priraď hodnotu None.), lokalita: <tvoja dedukcia> (Urči iba mesto alebo mestskú časť. Konkrétne body na mape, ako napr. „pri lese", „pri jazere", „v centre mesta", „v pokojnej štvrti" a podobne zaraď do kategórie ostatné preferencie), ostatné preferencie: <tvoja dedukcia>
+
+Pravidlá:
+
+- Zohľadni celú konverzáciu od začiatku až po koniec.
+
+- Ak niektoré hodnoty nie je možné určiť, priraď k danej premennej hodnotu None.
+
+- Priraď hodnoty iba k uvedeným kategóriám! Nevytváraj nové kategórie.
+
+- Ak sa nedá vytvoriť zmysluplná sumarizácia, ku každej premennej iba priraď hodnotu None.
+
+- Do kategórie 'ostatné preferencie' nepridávaj tie, ktoré:
+    - majú negatívne vymedzenie (napr. používateľ niečo nechce alebo nepotrebuje. ❗️ POZOR: Výrazy ako „pre bandu alkoholikov", „pre partiu kokotov", „na žúry" alebo iné subjektívne či kontroverzné požiadavky **nepovažuj za negatívne preferencie** — tieto ponechaj.),
+    - majú neurčité vymedzenie (napr. používateľ si nie je istý),
+    - opisujú stav nehnuteľnosti (novostavba, starší byt, zrekonštruovaný byt a podobne)."""
+
+get_key_attributes_system_prompt = """Na základe používateľovho vstupu vydedukuj hodnoty pre tieto premenné:
+
+cena: <[MIN, MAX]> (Uveď cenový rozsah. Ak nie je možné určiť rozsah, ale iba jediné číslo, priraď toto číslo ako hodnotu MAX a hodnote MIN priraď null. Ak nie je možné určiť rozsah ani konkrétne číslo, priraď obom hodnotám null.)
+
+počet izieb: <[MIN, MAX]> (Uveď rozsah počtu izieb. Ak nie je možné určiť rozsah, ale iba jediné číslo, priraď toto číslo ako hodnotu MIN a hodnote MAX priraď null. Ak je v popise uvedený počet izieb nepriamo (napr. „dve spálne a pracovňa" alebo „2 spálne a 1 pracovňa"), uveď počet izieb na základe uvedených miestností. Ak nie je možné určiť rozsah ani konkrétne číslo, priraď obom hodnotám null.)
+
+rozloha: <[MIN, MAX]> (Uveď rozsah. Ak nie je možné určiť rozsah, ale iba jediné číslo, priraď toto číslo ako hodnotu MIN a hodnote MAX priraď null. Ak nie je možné určiť rozsah ani konkrétne číslo, priraď obom hodnotám null.)
+
+typ nehnuteľnosti: <[]> (Vyber všetky hodiace sa z nasledujúcich možností: „dom", „loft", „mezonet", „penthouse", „byt", „garzónka". Ak nie je možné určiť, priraď [].)
+
+novostavba: <[]> (Priraď hodnotu True, ak je z promptu bez pochýb jasné, že ide o novostavbu. Inak priraď hodnotu False.)
+
+lokalita: <[]> (Urči iba mestá alebo mestské časti. Ignoruj konkrétne body na mape, ako napr. „pri lese", „pri jazere", „blízko prírody" a podobne. Ak nie je možné určiť, priraď [].)
+
+Výstup uveď vo formáte JSON."""
+
 agentic_flow_prompt ="""
 Tvojou úlohou je získať a zhrnúť preferencie používateľa ohľadom ideálnej nehnuteľnosti na prenájom.
 

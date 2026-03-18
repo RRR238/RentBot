@@ -1,127 +1,118 @@
-from langchain.chat_models import ChatOpenAI
-from langchain.chains import LLMChain
-from langchain.memory import ConversationBufferMemory
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from Prompts import get_key_attributes_prompt, agentic_flow_prompt, summarize_chat_history_prompt_v_5, get_key_attributes_prompt_v_2
-from utils import extract_chat_history_as_dict, format_chat_history, convert_text_to_dict, processing_dict,prepare_filters_qdrant, parse_json_from_markdown, prepare_multiple_filters_qdrant
-from Shared.LLM import LLM
-from Shots import chat_history_summary_few_shots
 import warnings
-from langchain.schema import SystemMessage
-from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
-from langchain.schema import AIMessage
-import json
-import time
 
-warnings.filterwarnings("ignore",
-                        category=DeprecationWarning)
-warnings.filterwarnings("ignore",
-                        category=UserWarning)
+from langchain.chat_models import ChatOpenAI
+from langchain.memory import ConversationBufferMemory
+from langchain.schema import HumanMessage
+
+from Prompts import (
+    agentic_flow_prompt,
+    get_key_attributes_system_prompt,
+    summarize_preferences_system_prompt,
+)
+from Shared.LLM import LLM
+from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
+from utils import create_chain, parse_json_from_markdown, prepare_multiple_filters_qdrant
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 
 gen_model = "gpt-4o"
 
+# ---------------------------------------------------------------------------
+# Models / services
+# ---------------------------------------------------------------------------
 
 llm_langchain = ChatOpenAI(
     temperature=0.2,
     model_name=gen_model,
-    #openai_api_key=
 )
 llm = LLM()
 vdb = Vector_DB_Qdrant('rent-bot-index')
 
+# ---------------------------------------------------------------------------
+# Chains
+# ---------------------------------------------------------------------------
+
 memory = ConversationBufferMemory(
     memory_key="chat_history",
-    return_messages=True
-)
-system_instruction = SystemMessage(
-    content=agentic_flow_prompt
+    return_messages=True,
 )
 
-agentic_prompt = ChatPromptTemplate.from_messages([
-    system_instruction,
-    MessagesPlaceholder(variable_name="chat_history"),
-    ("human", "{input}")
-])
-
-agentic_chain = LLMChain(
-    llm=llm_langchain,
-    prompt=agentic_prompt,
-    memory=memory
+# Agentic chain — conversational, driven by memory; invoke via .predict(input=query)
+agentic_chain = create_chain(
+    llm_langchain, agentic_flow_prompt,
+    messages_placeholder="chat_history",
+    human_template="{input}",
+    memory=memory,
 )
 
-org_summary = "cena: None, počet izieb: None, rozloha: None, typ nehnuteľnosti: None, novostavba: None, lokalita: None, ostatné preferencie: None"
+# Summarization chain — invoked with {"messages": [HumanMessage, AIMessage, ...]}
+summarization_chain = create_chain(
+    llm_langchain, summarize_preferences_system_prompt,
+    messages_placeholder="messages",
+)
 
-questions = 0
-prev_key_attributes_dict = {'price_rent': None,
-                            'rooms': None,
-                            'rooms_min': None,
-                            'rooms_max': None,
-                            'size': None,
-                            'property_type': None,
-                            'property_status': None,
-                            'location': None}
+# Key-attributes chain — invoked with {"input": "<summary text>"}
+key_attributes_chain = create_chain(
+    llm_langchain, get_key_attributes_system_prompt,
+    human_template="{input}",
+)
+
+# ---------------------------------------------------------------------------
+# Main loop
+# ---------------------------------------------------------------------------
+
+org_summary = (
+    "cena: None, počet izieb: None, rozloha: None, typ nehnuteľnosti: None, "
+    "novostavba: None, lokalita: None, ostatné preferencie: None"
+)
+
+SEARCH_TRIGGER = "P"
+
+# Kick off the conversation
+opening = agentic_chain.predict(input="Začni konverzáciu.")
+print(f"🤖: {opening}")
+
 while True:
-    query = input()
+    query = input("You: ").strip()
 
-    chhd = extract_chat_history_as_dict(memory)
-    formatted_chat_history = format_chat_history(chhd)
-    formatted_chat_history += f"Používateľ: {query}\n"
-    #print(formatted_chat_history)
+    if query == SEARCH_TRIGGER:
+        # --- Step 1: summarize preferences from the full conversation so far ---
+        messages_for_summary = memory.chat_memory.messages
+        summary_response = summarization_chain.invoke({"messages": messages_for_summary})
+        response_summary = summary_response.content
+        print(f"\n[summary]: {response_summary}")
 
+        try:
+            idx = response_summary.index(', ostatné preferencie')
+            processed_summary = response_summary[:idx]
+            summary_to_embedd = response_summary[idx + len(', ostatné preferencie: '):]
+            org_summary = response_summary
+        except ValueError:
+            idx = org_summary.index(', ostatné preferencie')
+            processed_summary = org_summary[:idx]
+            summary_to_embedd = org_summary[idx + len(', ostatné preferencie: '):]
 
-    response_summary = llm.generate_answer(prompt=summarize_chat_history_prompt_v_5.format(conversation_history=formatted_chat_history,
-                                                                                ), model=gen_model)
+        print(f"[processed summary]: {processed_summary}")
+        print(f"[summary to embedd]: {summary_to_embedd}")
 
-    print(f"summary: {response_summary}")
-    try:
-        processed_summary = response_summary[:response_summary.index(', ostatné preferencie')]
-        summary_to_embedd = response_summary[response_summary.index(', ostatné preferencie')+len(', ostatné preferencie: '):]
-        org_summary = response_summary
-    except:
-        processed_summary = org_summary[:response_summary.index(', ostatné preferencie')]
-        summary_to_embedd = org_summary[response_summary.index(', ostatné preferencie')+len(', ostatné preferencie: '):]
+        # --- Step 2: extract structured key attributes from the summary ---
+        key_attr_response = key_attributes_chain.invoke({"input": response_summary})
+        response_key_attr = key_attr_response.content
+        print(f"[key attributes]: {response_key_attr}")
 
-    print(f"processed summary: {processed_summary}")
-    print(f"sumary to embedd: {summary_to_embedd}")
+        p = parse_json_from_markdown(response_key_attr)
+        print(f"[parsed]: {p}")
 
-    #try:
-    response_key_attr = llm.generate_answer(get_key_attributes_prompt_v_2.format(user_prompt=response_summary),
-                                            model=gen_model)
+        # --- Step 3: vector search with extracted filters ---
+        filters = prepare_multiple_filters_qdrant(p)
+        embedding = llm.get_embedding(summary_to_embedd, model='text-embedding-3-large')
+        results = vdb.enriched_filtered_vector_search(embedding, 10, filters)[0]
+        print("\n[results]:")
+        for i in results.points:
+            print(i.payload['source_url'])
 
-    print(response_key_attr)
-    p =parse_json_from_markdown(response_key_attr)
-    print(p)
-
-
-    #     prev_key_attributes_dict = processed_dict
-    # except:
-    #     processed_dict = prev_key_attributes_dict
-    #
-    # if processed_dict['property_type'] in ['loft','garzónka','garzonka','garsónka', 'garsonka']:
-    #     processed_dict['rooms'] = None
-    #     processed_dict['rooms_min'] = None
-    #     processed_dict['rooms_max'] = None
-    #
-    # print(processed_dict)
-    # filters = prepare_filters_qdrant(processed_dict)
-    filters = prepare_multiple_filters_qdrant(p)
-    #
-    #embedding = llm.get_embedding(summary_to_embedd, model='text-embedding-3-large')
-    embedding = llm.get_embedding('pekne byvanie', model='text-embedding-3-large')
-    #results = vdb.filtered_vector_search(embedding, 10, filter=filters)[0]
-    results = vdb.enriched_filtered_vector_search(embedding, 10, filters)[0]
-    for i in results.points:
-        print(i.payload['source_url'])
-    #
-    # response = agentic_chain.predict(input=query)
-    # questions+=1
-    #
-    # if questions >= 10:
-    #     print(f"🤖: Ďakujem za vaše odpovede. Ak budete chcieť doplniť ďalšie kritériá, neváhajte mi napísať.")
-    #     memory.chat_memory.messages[-1] = AIMessage(
-    #         content="Ďakujem za vaše odpovede. Ak budete chcieť doplniť ďalšie kritériá, neváhajte mi napísať."
-    #     )
-    #     questions=0
-    #     continue
-    #
-    # print(f"🤖: {response}")
+    else:
+        # Normal conversation turn — agent asks the next question
+        response = agentic_chain.predict(input=query)
+        print(f"🤖: {response}")
