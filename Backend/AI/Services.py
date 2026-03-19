@@ -1,54 +1,50 @@
-from langchain.chat_models import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain.chains import LLMChain
+from langchain.schema import BaseMessage
+from langchain.schema.runnable import Runnable
+
+from Analytics.AI.utils import (
+    parse_json_from_markdown,
+    prepare_filters_elastic,
+    prepare_filters_qdrant,
+    processing_dict,
+)
 from Shared.LLM import LLM
-from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
 from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
-from Analytics.AI.Prompts import summarize_chat_history_prompt_v_5, get_key_attributes_prompt
-from Analytics.AI.utils import convert_text_to_dict, processing_dict, prepare_filters_qdrant, prepare_filters_elastic
-from Backend.AI.Utils import prepare_chat_history_for_summarization
+from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
 
 
 async def generate_ai_answer(
-        llm:ChatOpenAI,
-        memory:list) -> str:
-
-    prompt = ChatPromptTemplate.from_messages(memory)
-    agentic_chain = LLMChain(llm=llm, prompt=prompt)
-    response = await agentic_chain.apredict()
-
-    return response
+    chain: Runnable,
+    memory: list[BaseMessage],
+) -> str:
+    response = await chain.ainvoke({"chat_history": memory})
+    return response.content
 
 
 async def search_by_summarized_preferences(
+    summarization_chain: Runnable,
+    key_attributes_chain: Runnable,
     llm: LLM,
     vector_db: Vector_DB_interface,
-    memory: list,
-    gen_model: str = "gpt-4o",
+    memory: list[BaseMessage],
     embedding_model: str = "text-embedding-3-large",
-    default_summary: str = "pekne byvanie"
+    default_summary: str = "pekne byvanie",
 ):
-
-    processed_memory = prepare_chat_history_for_summarization(memory[:-1])
-    response_summary = await llm.generate_answer_async(
-        prompt=summarize_chat_history_prompt_v_5.format(
-            conversation_history=processed_memory,
-        ),
-        model=gen_model
-    )
+    # Step 1: summarize conversation into structured preferences
+    # memory[0] is SystemMessage — skip it; pass only the actual conversation messages
+    summary_response = await summarization_chain.ainvoke({"messages": memory})
+    response_summary = summary_response.content
 
     try:
         key_attributes_summary = response_summary[:response_summary.index(', ostatné preferencie')]
-    except:
+    except ValueError:
         key_attributes_summary = None
 
     try:
         summary_to_embed = response_summary[
             response_summary.index(', ostatné preferencie') + len(', ostatné preferencie: '):
         ]
-    except:
+    except ValueError:
         summary_to_embed = default_summary
-
 
     default_key_attributes = {
         'price_rent': None,
@@ -58,27 +54,24 @@ async def search_by_summarized_preferences(
         'size': None,
         'property_type': None,
         'property_status': None,
-        'location': None
+        'location': None,
     }
 
     if key_attributes_summary:
-        response_key_attr = await llm.generate_answer_async(
-            get_key_attributes_prompt.format(user_prompt=key_attributes_summary),
-            model=gen_model
-        )
+        # Step 2: extract structured key attributes from the summary
+        key_attr_response = await key_attributes_chain.ainvoke({"input": key_attributes_summary})
         try:
-            key_attributes_dict = convert_text_to_dict(response_key_attr)
+            key_attributes_dict = parse_json_from_markdown(key_attr_response.content)
             processed_key_attributes_dict = processing_dict(key_attributes_dict)
 
             if processed_key_attributes_dict['property_type'] in [
                 'loft', 'penthouse', 'mezonet',
-                'garzónka', 'garzonka', 'garsónka', 'garsonka'
+                'garzónka', 'garzonka', 'garsónka', 'garsonka',
             ]:
                 processed_key_attributes_dict['rooms'] = None
                 processed_key_attributes_dict['rooms_min'] = None
                 processed_key_attributes_dict['rooms_max'] = None
-
-        except:
+        except Exception:
             processed_key_attributes_dict = default_key_attributes
     else:
         processed_key_attributes_dict = default_key_attributes
@@ -91,23 +84,9 @@ async def search_by_summarized_preferences(
 
     embedding = await llm.get_embedding_async(summary_to_embed, model=embedding_model)
 
-    results = await vector_db.filtered_vector_search_async(
-        embedding, 50, filter=filters
-    )
-    #print(f'results from VDB: {results}')
+    results = await vector_db.filtered_vector_search_async(embedding, 50, filter=filters)
 
-    processed_results = [
-        {   'score':i.score,
-            'id':i.payload['id']
-        }
+    return [
+        {'score': i.score, 'id': i.payload['id']}
         for i in results[0].points
     ]
-
-    return processed_results
-
-
-
-
-
-
-
