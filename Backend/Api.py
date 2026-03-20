@@ -5,19 +5,18 @@ from Backend.Database.Repositories.User_repository import User_repository
 from Backend.Database.Repositories.Offers_repository import Offers_repository
 from Backend.Database.Repositories.Chat_sessions_repository import Chat_session_repository
 from Backend.Database.Repositories.Cached_vector_search_results_repository import Cached_vector_search_results_repository
-from Dependency_injection import get_db, endpoint_verification, get_chat_model
+from Dependency_injection import get_db, endpoint_verification, get_async_openai_client
 from Backend.Database.Backend_entities import User, Chat_session, Chat_history, Cached_vector_search_results
-from Singletons import security_manager, llm, vector_db
-from langchain.chat_models import ChatOpenAI
-from Analytics.AI.Prompts import agentic_flow_prompt, summarize_preferences_system_prompt, get_key_attributes_system_prompt
-from Analytics.AI.utils import create_chain
+from Singletons import security_manager, vector_db
+from openai import AsyncOpenAI
 from Backend.Pydantic_models.Models import User_model, User_message_model, Chat_session_model
 import uvicorn
 from dotenv import load_dotenv
 import os
 from sqlalchemy.ext.asyncio import AsyncSession
-from AI.Utils import prepare_chat_memory
-from AI.Services import generate_ai_answer, search_by_summarized_preferences
+from AI.Services import search_by_summarized_preferences
+from Analytics.AI.Prompts import agentic_flow_prompt
+from Shared.LLM import LLM
 from Utils.Utils import process_types_and_rooms_filters, get_bounding_boxes
 
 load_dotenv()
@@ -163,7 +162,7 @@ async def create_session_id(jwtTokenPayload: dict = Depends(endpoint_verificatio
 async def generate_answer(user_message:User_message_model,
                     jwtTokenPayload: dict = Depends(endpoint_verification),
                     db_connection: AsyncSession = Depends(get_db),
-                    chat_model: ChatOpenAI = Depends(get_chat_model),
+                    async_client: AsyncOpenAI = Depends(get_async_openai_client),
                     ):
     chat_session_repo = Chat_session_repository(db_connection)
     is_active_session = await chat_session_repo.is_session_active_by_session_id(user_message.session_id)
@@ -173,20 +172,21 @@ async def generate_answer(user_message:User_message_model,
             status_code=404,
             detail="Session expired."
         )
-    new_user_message = Chat_history(session_id=user_message.session_id,
-                                    role='Human',
-                                    message=user_message.message)
-    new_user_message_id = await chat_session_repo.add_new_message(new_user_message)
     chat_history = await chat_session_repo.get_active_chat_history(user_message.session_id)
-    chat_memory = prepare_chat_memory(chat_history)
-    chain = create_chain(chat_model,
-                         agentic_flow_prompt,
-                         messages_placeholder="chat_history")
-    generated_answer = await generate_ai_answer(chain, chat_memory)
+    generated_answer = await LLM.generate_answer_static_async(
+        async_client,
+        prompt=user_message.message,
+        system_prompt=agentic_flow_prompt,
+        chat_history=chat_history,
+    )
 
+    new_user_message = Chat_history(session_id=user_message.session_id,
+                                    role='user',
+                                    content=user_message.message)
+    new_user_message_id = await chat_session_repo.add_new_message(new_user_message)
     new_ai_message = Chat_history(session_id=user_message.session_id,
-                                    role='AI',
-                                    message=generated_answer)
+                                    role='assistant',
+                                    content=generated_answer)
 
     new_ai_message_id = await chat_session_repo.add_new_message(new_ai_message)
     await chat_session_repo.update_last_interaction(user_message.session_id)
@@ -235,7 +235,7 @@ async def close_session(session: Chat_session_model,
 async def find_results(session_id:int,
                         jwtTokenPayload: dict = Depends(endpoint_verification),
                         db_connection: AsyncSession = Depends(get_db),
-                        chat_model: ChatOpenAI = Depends(get_chat_model),
+                        async_client: AsyncOpenAI = Depends(get_async_openai_client),
                         ):
     chat_session_repo = Chat_session_repository(db_connection)
     cached_results_repo = Cached_vector_search_results_repository(db_connection)
@@ -248,22 +248,9 @@ async def find_results(session_id:int,
             detail="Session not found."
         )
     chat_history = await chat_session_repo.get_active_chat_history(session_id)
-    chat_memory = prepare_chat_memory(chat_history)
-    summarization_chain = create_chain(
-        chat_model,
-        summarize_preferences_system_prompt,
-        messages_placeholder="messages",
-    )
-    key_attributes_chain = create_chain(
-        chat_model,
-        get_key_attributes_system_prompt,
-        human_template="{input}",
-    )
-    results = await search_by_summarized_preferences(summarization_chain,
-                                                     key_attributes_chain,
-                                                     llm,
+    results = await search_by_summarized_preferences(async_client,
                                                      vector_db,
-                                                     chat_memory)
+                                                     chat_history)
     for result in results:
         new_item = Cached_vector_search_results(
                                                 session_id=session_id,

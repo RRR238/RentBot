@@ -64,18 +64,16 @@ class Chat_session_repository:
         session_id = session_result.scalar_one_or_none()
         return session_id
 
-    async def get_active_chat_history(self, session_id: int)->list[dict]:
-
-        # Fetch chat history for the found session_id
+    async def get_active_chat_history(self, session_id: int) -> list[dict]:
         history_stmt = (
-            select(Chat_history.role, Chat_history.message)
+            select(Chat_history.role, Chat_history.content)
             .where(Chat_history.session_id == session_id)
             .order_by(Chat_history.created_at.asc())
         )
         history_result = await self.db.execute(history_stmt)
         rows = history_result.all()
 
-        return [{"role": role, "message": message} for role, message in rows]
+        return [{"role": role, "content": content} for role, content in rows]
 
     async def delete_chat_session_by_session_id(self, session_id: int):
         # Delete the chat session only

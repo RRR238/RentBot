@@ -1,6 +1,6 @@
-from langchain.schema import BaseMessage
-from langchain.schema.runnable import Runnable
+from openai import AsyncOpenAI
 
+from Analytics.AI.Prompts import get_key_attributes_system_prompt, summarize_preferences_system_prompt
 from Analytics.AI.utils import (
     parse_json_from_markdown,
     prepare_filters_elastic,
@@ -12,27 +12,21 @@ from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
 from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
 
 
-async def generate_ai_answer(
-    chain: Runnable,
-    memory: list[BaseMessage],
-) -> str:
-    response = await chain.ainvoke({"chat_history": memory})
-    return response.content
-
-
 async def search_by_summarized_preferences(
-    summarization_chain: Runnable,
-    key_attributes_chain: Runnable,
-    llm: LLM,
+    async_client: AsyncOpenAI,
     vector_db: Vector_DB_interface,
-    memory: list[BaseMessage],
+    memory: list[dict],
+    model: str = "gpt-4o",
     embedding_model: str = "text-embedding-3-large",
     default_summary: str = "pekne byvanie",
 ):
     # Step 1: summarize conversation into structured preferences
-    # memory[0] is SystemMessage — skip it; pass only the actual conversation messages
-    summary_response = await summarization_chain.ainvoke({"messages": memory})
-    response_summary = summary_response.content
+    response_summary = await LLM.generate_answer_static_async(
+        async_client,
+        model=model,
+        system_prompt=summarize_preferences_system_prompt,
+        chat_history=memory,
+    )
 
     try:
         key_attributes_summary = response_summary[:response_summary.index(', ostatné preferencie')]
@@ -59,9 +53,14 @@ async def search_by_summarized_preferences(
 
     if key_attributes_summary:
         # Step 2: extract structured key attributes from the summary
-        key_attr_response = await key_attributes_chain.ainvoke({"input": key_attributes_summary})
+        key_attr_response = await LLM.generate_answer_static_async(
+            async_client,
+            prompt=key_attributes_summary,
+            model=model,
+            system_prompt=get_key_attributes_system_prompt,
+        )
         try:
-            key_attributes_dict = parse_json_from_markdown(key_attr_response.content)
+            key_attributes_dict = parse_json_from_markdown(key_attr_response)
             processed_key_attributes_dict = processing_dict(key_attributes_dict)
 
             if processed_key_attributes_dict['property_type'] in [
@@ -82,9 +81,13 @@ async def search_by_summarized_preferences(
         else prepare_filters_elastic(processed_key_attributes_dict)
     )
 
-    embedding = await llm.get_embedding_async(summary_to_embed, model=embedding_model)
+    embedding = await LLM.get_embedding_static_async(async_client,
+                                                     summary_to_embed,
+                                                     model=embedding_model)
 
-    results = await vector_db.filtered_vector_search_async(embedding, 50, filter=filters)
+    results = await vector_db.filtered_vector_search_async(embedding,
+                                                           50,
+                                                           filter=filters)
 
     return [
         {'score': i.score, 'id': i.payload['id']}
