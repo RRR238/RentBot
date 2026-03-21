@@ -1,5 +1,3 @@
-from openai import AsyncOpenAI
-
 from Analytics.AI.Prompts import get_key_attributes_system_prompt, summarize_preferences_system_prompt
 from Analytics.AI.utils import (
     parse_json_from_markdown,
@@ -13,7 +11,7 @@ from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
 
 
 async def search_by_summarized_preferences(
-    async_client: AsyncOpenAI,
+    llm: LLM,
     vector_db: Vector_DB_interface,
     memory: list[dict],
     model: str = "gpt-4o",
@@ -21,8 +19,7 @@ async def search_by_summarized_preferences(
     default_summary: str = "pekne byvanie",
 ):
     # Step 1: summarize conversation into structured preferences
-    response_summary = await LLM.generate_answer_static_async(
-        async_client,
+    response_summary = await llm.generate_answer_async(
         model=model,
         system_prompt=summarize_preferences_system_prompt,
         chat_history=memory,
@@ -53,8 +50,7 @@ async def search_by_summarized_preferences(
 
     if key_attributes_summary:
         # Step 2: extract structured key attributes from the summary
-        key_attr_response = await LLM.generate_answer_static_async(
-            async_client,
+        key_attr_response = await llm.generate_answer_async(
             prompt=key_attributes_summary,
             model=model,
             system_prompt=get_key_attributes_system_prompt,
@@ -81,9 +77,8 @@ async def search_by_summarized_preferences(
         else prepare_filters_elastic(processed_key_attributes_dict)
     )
 
-    embedding = await LLM.get_embedding_static_async(async_client,
-                                                     summary_to_embed,
-                                                     model=embedding_model)
+    embedding = await llm.get_embedding_async(summary_to_embed,
+                                              model=embedding_model)
 
     results = await vector_db.filtered_vector_search_async(embedding,
                                                            50,

@@ -1,13 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from Database.Session_config import AsyncSessionLocal
 from Backend.Security.Security_config import Security_config
-from openai import AsyncOpenAI
 import jwt
 from fastapi import Depends, HTTPException
-
-
-def get_async_openai_client() -> AsyncOpenAI:
-    return AsyncOpenAI()
 
 
 async def get_db() -> AsyncSession:
