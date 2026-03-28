@@ -16,8 +16,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from Nehnutelnosti_sk import Nehnutelnosti_sk_processor
-from Rent_offers_repository import Rent_offers_repository
+from Scrapping.Nehnutelnosti_sk import Nehnutelnosti_sk_processor
+from Scrapping.Rent_offers_repository import Rent_offers_repository
 from Scrapping.property_models import KeyAttributes, Prices, PropertyDetail
 from Shared.Geolocation import get_coordinates
 from Shared.LLM import LLM

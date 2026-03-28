@@ -2,8 +2,8 @@ from sqlalchemy import Column, BigInteger, Integer, SmallInteger, String, Text, 
 #from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
 from Shared.Declarative_base import Base
+from sqlalchemy.orm import relationship
 #from Backend.Backend_entities import Cached_vector_search_results
 
 #Base = declarative_base()
@@ -38,6 +38,7 @@ class Rent_offer_model(Base):
     price_total = Column(Integer, nullable=True)
     preview_image= Column(Text, nullable=True)
 
-    cached_vector_search_results = relationship('Cached_vector_search_results',
-                                                back_populates='rent_offer')
+    cached_vector_search_results = relationship("Cached_vector_search_results",
+                              back_populates="rent_offer")
+
 

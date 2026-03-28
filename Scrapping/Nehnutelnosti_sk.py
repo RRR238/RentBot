@@ -347,7 +347,12 @@ class Nehnutelnosti_sk_processor:
     ) -> Optional[str]:
         options = webdriver.ChromeOptions()
         options.add_argument('--headless')
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+        options.add_argument('--log-level=3')
+        options.add_argument('--disable-logging')
+        options.add_argument('--silent')
+        options.add_experimental_option('excludeSwitches', ['enable-logging'])
+        service = Service(ChromeDriverManager().install(), log_output=os.devnull)
+        driver = webdriver.Chrome(service=service, options=options)
 
         driver.get(Nehnutelnosti_sk_processor.get_images_url(detail_link))
         time.sleep(wait_for_load_page)
@@ -418,9 +423,9 @@ class Nehnutelnosti_sk_processor:
                 embedding = self.embedd_rent_offer(self.llm, results.title, results.description)
                 results.source_url = link
 
-                if 'mezonet' in results.title.lower():
+                if results.title and 'mezonet' in results.title.lower():
                     property_type = 'mezonet'
-                elif 'penthouse' in results.title.lower():
+                elif results.title and 'penthouse' in results.title.lower():
                     property_type = 'penthouse'
                 else:
                     property_type = next(
@@ -570,6 +575,8 @@ class Nehnutelnosti_sk_processor:
         description: Optional[str],
         price_rent: Optional[int],
     ) -> Optional[int]:
+        if not description:
+            return price_rent
         lt = description.lower().replace(' ', '')
         manually = self.extract_energy_price_by_pattern(lt)
 

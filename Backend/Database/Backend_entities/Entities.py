@@ -19,8 +19,8 @@ class ChatMessage(BaseModel):
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, index=True)
-    password = Column(String, unique=True, index=True)
+    username = Column(String, index=True, nullable=False)
+    password = Column(String,nullable=False)
 
     chat_sessions = relationship("Chat_session",
                                  back_populates="user")
@@ -39,7 +39,7 @@ class Chat_session(Base):
     last_interaction = Column(DateTime(timezone=True),
                               default=datetime.utcnow,
                               server_default=func.now(),nullable=False)
-    user_id = Column(BigInteger, ForeignKey('users.id',
+    user_id = Column(Integer, ForeignKey('users.id',
                                             ondelete="CASCADE"))
     is_active = Column(Boolean,
                        default=True,
@@ -88,4 +88,4 @@ class Cached_vector_search_results(Base):
                                 back_populates="cached_vector_search_results")
 
     rent_offer = relationship("Rent_offer_model",
-                                back_populates="cached_vector_search_results")
+                              back_populates="Cached_vector_search_results")
