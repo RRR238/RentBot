@@ -25,7 +25,7 @@ if not detail_links:
     print('No detail links found on listing page.')
     exit(1)
 
-detail_url = detail_links[0]
+detail_url = "https://www.nehnutelnosti.sk/detail/JuQMwveZGMi/babony-tre-i-kompletne-zrekonstruovany-4-izbovy-byt-vysehradska-ba-v" #detail_links[0]
 print(f'Fetching detail: {detail_url}')
 
 detail_response = processor.get_page(detail_url)

@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import subprocess
 import time
 from datetime import datetime
 from typing import Optional
@@ -117,21 +118,37 @@ class Nehnutelnosti_sk_processor:
             raise Exception(f'Failed to fetch page: {detail_link}, Status Code: {resp.status_code}')
 
         soup = BeautifulSoup(resp.text, 'html.parser')
-        other_properties = self.get_other_properties(soup)
+        detail_props = self.get_detail_properties(soup)
+        other_props = self.get_other_properties(soup)
+
+        def get_prop(key: str) -> Optional[str]:
+            """Look up key in detail_props first, fall back to other_props, then None."""
+            return detail_props.get(key) or other_props.get(key)
+
+        def get_int_prop(key: str) -> Optional[int]:
+            val = get_prop(key)
+            try:
+                return int(val) if val is not None else None
+            except (ValueError, TypeError):
+                return None
+
         location = self.get_location(soup)
 
-        year_of_construction = int(other_properties['Rok výstavby:']) if 'Rok výstavby:' in other_properties else None
-        approval_year = int(other_properties['Rok kolaudácie:']) if 'Rok kolaudácie:' in other_properties else None
-        last_reconstruction_year = int(other_properties['Rok poslednej rekonštrukcie:']) if 'Rok poslednej rekonštrukcie:' in other_properties else None
-        balconies = int(other_properties['Počet balkónov:']) if 'Počet balkónov:' in other_properties else None
-        ownership = other_properties.get('Vlastníctvo:')
-        floor = int(other_properties['Podlažie:']) if 'Podlažie:' in other_properties else None
-        positioning = other_properties.get('Umiestnenie:')
+        floor_raw = get_prop('Podlažie:')
+        floor = int(floor_raw.split('/')[0].strip()) if floor_raw else None
 
+        year_of_construction = get_int_prop('Rok výstavby:')
+        approval_year = get_int_prop('Rok kolaudácie:')
+        last_reconstruction_year = get_int_prop('Rok poslednej rekonštrukcie:')
+        balconies = int(other_props['Počet balkónov:']) if 'Počet balkónov:' in other_props else None
+        ownership = get_prop('Vlastníctvo:')
+        positioning = get_prop('Umiestnenie:')
+
+        # Remove structured fields that are stored separately — keep other_props clean
         for key in ['Rok výstavby:', 'Rok kolaudácie:', 'Rok poslednej rekonštrukcie:',
                     'Počet balkónov:', 'Vlastníctvo:', 'Podlažie:', 'Umiestnenie:',
                     'Počet izieb / miestností:']:
-            other_properties.pop(key, None)
+            other_props.pop(key, None)
 
         return PropertyDetail.model_validate({
             'title': self.get_title(soup),
@@ -142,11 +159,11 @@ class Nehnutelnosti_sk_processor:
             'last_reconstruction_year': last_reconstruction_year,
             'balconies': balconies,
             'ownership': ownership,
-            'other_properties': other_properties,
-            'prices': self.get_price(soup),
-            'floor': floor,
             'positioning': positioning,
-            'description': self.get_description(soup),
+            'floor': floor,
+            'other_properties': other_props,
+            'prices': self.get_price(soup),
+            'description': self.get_description(detail_link),
             'preview_image': self.get_preview_image(detail_link),
             'coordinates': get_coordinates(location),
         })
@@ -156,8 +173,9 @@ class Nehnutelnosti_sk_processor:
         soup: BeautifulSoup,
         element: str = 'h1',
         element_class: tuple = (
-            'MuiTypography-root MuiTypography-h4 mui-1wj7mln',
-            'MuiTypography-root MuiTypography-h4 mui-hrlyv4',
+            'mui-14p1vzd',
+            'mui-1wj7mln',
+            'mui-hrlyv4',
         ),
     ) -> Optional[str]:
         for cls in element_class:
@@ -172,13 +190,14 @@ class Nehnutelnosti_sk_processor:
         soup: BeautifulSoup,
         element: str = 'p',
         element_class: tuple = (
-            'MuiTypography-root MuiTypography-body2 MuiTypography-noWrap mui-3vjwr4',
-            'MuiTypography-root MuiTypography-body2 MuiTypography-noWrap mui-kri7tw',
+            'mui-1fk55no',
+            'mui-3vjwr4',
+            'mui-kri7tw',
         ),
     ) -> Optional[str]:
-        for i in element_class:
+        for cls in element_class:
             try:
-                return soup.find(element, class_=element_class).text.strip()
+                return soup.find(element, class_=cls).text.strip()
             except:
                 continue
         return None
@@ -192,7 +211,7 @@ class Nehnutelnosti_sk_processor:
         xpaths_2 = DOM_identifiers.nehnutelnosti_xpaths_2
 
         dom = etree.HTML(str(soup))
-        container = soup.find('div', 'MuiBox-root mui-1e434qh')
+        container = soup.find('div', class_='mui-1e434qh')
         paragraphs = container.find_all('p') if container else []
 
         raw = {
@@ -256,32 +275,33 @@ class Nehnutelnosti_sk_processor:
         soup: BeautifulSoup,
         rent_element: str = 'p',
         rent_class: tuple = (
-            'MuiTypography-root MuiTypography-h3 mui-fm8hb4',
-            'MuiTypography-root MuiTypography-h3 mui-9867wo',
+            'mui-tokrpc',
+            'mui-fm8hb4',
+            'mui-9867wo',
         ),
         meter_squared_element: str = 'p',
-        meter_squared_class: str = 'MuiTypography-root MuiTypography-label2 mui-ifbhxp',
+        meter_squared_class: str = 'mui-dqi7hg',
     ) -> Prices:
         raw: dict = {'rent': None, 'energies': None, 'meter_squared': None}
 
         price_rent = None
         for cls in rent_class:
             try:
-                price_rent = soup.find(rent_element, cls).text.strip()
+                price_rent = soup.find(rent_element, class_=cls).text.strip()
                 break
             except:
                 continue
 
         price_energies = None
         try:
-            for p in soup.find_all('p', class_='MuiTypography-root MuiTypography-label2 mui-gsg6ma'):
+            for p in soup.find_all('p', class_='mui-180mgf9'):
                 if '€' in p.text:
                     price_energies = p.text.strip()
                     break
         except:
             pass
 
-        ms_tag = soup.find('p', 'MuiTypography-root MuiTypography-label2 mui-ifbhxp')
+        ms_tag = soup.find('p', class_='mui-dqi7hg')
         price_ms = (
             soup.find(meter_squared_element, meter_squared_class).text.strip()
             if ms_tag and '€' in ms_tag.text.strip()
@@ -311,25 +331,62 @@ class Nehnutelnosti_sk_processor:
         return Prices.model_validate(raw)
 
     @staticmethod
-    def get_other_properties(
-        soup: BeautifulSoup,
-        element: str = 'div',
-        element_class: str = 'MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-1 mui-lgq25d',
-    ) -> dict:
-        container = soup.find(element, element_class)
-        paragraphs = container.find_all('p') if container else []
-        paragraph_texts = [p.get_text(strip=True) for p in paragraphs]
-        return dict(zip(paragraph_texts[::2], paragraph_texts[1::2]))
+    def _parse_property_paragraphs(paragraphs) -> dict:
+        texts = [p.get_text(strip=True) for p in paragraphs]
+        result = {}
+        i = 0
+        while i < len(texts):
+            if texts[i].endswith(':'):
+                if i + 1 < len(texts):
+                    result[texts[i]] = texts[i + 1]
+                    i += 2
+                else:
+                    i += 1
+            else:
+                i += 1
+        return result
+
+    @staticmethod
+    def get_detail_properties(soup: BeautifulSoup) -> dict:
+        container = soup.find('div', class_='MuiGrid-spacing-md-1')
+        paragraphs = container.find_all('p', attrs={'data-test-id': 'text'}) if container else []
+        return Nehnutelnosti_sk_processor._parse_property_paragraphs(paragraphs)
+
+    @staticmethod
+    def get_other_properties(soup: BeautifulSoup) -> dict:
+        heading = soup.find('h3', string=lambda t: t and 'Vlastnosti nehnuteľnosti' in t)
+        container = heading.find_parent('div', class_=lambda c: c and 'MuiStack-root' in c) if heading else None
+        paragraphs = container.find_all('p', attrs={'data-test-id': 'text'}) if container else []
+        return Nehnutelnosti_sk_processor._parse_property_paragraphs(paragraphs)
+
+    @staticmethod
+    def _make_headless_driver() -> webdriver.Chrome:
+        options = webdriver.ChromeOptions()
+        options.add_argument('--headless')
+        options.add_argument('--log-level=3')
+        options.add_argument('--disable-logging')
+        options.add_argument('--silent')
+        options.add_experimental_option('excludeSwitches', ['enable-logging'])
+        service = Service(ChromeDriverManager().install(), log_output=subprocess.DEVNULL)
+        return webdriver.Chrome(service=service, options=options)
 
     @staticmethod
     def get_description(
-        soup: BeautifulSoup,
-        id: str = 'detail-description',
+        detail_link: str,
+        wait_for_load: float = 2,
     ) -> Optional[str]:
-        desc = soup.find(id=id)
+        driver = Nehnutelnosti_sk_processor._make_headless_driver()
+        try:
+            driver.get(detail_link)
+            time.sleep(wait_for_load)
+            page_source = driver.page_source
+        finally:
+            driver.quit()
+
+        soup = BeautifulSoup(page_source, 'html.parser')
+        desc = soup.find(id='detail-description')
         if desc:
-            return desc.text.strip().replace('Čítať ďalej', '')
-        print('Element not found')
+            return desc.get_text(strip=True).replace('Čítať ďalej', '')
         return None
 
     @staticmethod
@@ -345,14 +402,7 @@ class Nehnutelnosti_sk_processor:
         wait_for_load_page: float = 2,
         wait_for_load_images: float = 0.5,
     ) -> Optional[str]:
-        options = webdriver.ChromeOptions()
-        options.add_argument('--headless')
-        options.add_argument('--log-level=3')
-        options.add_argument('--disable-logging')
-        options.add_argument('--silent')
-        options.add_experimental_option('excludeSwitches', ['enable-logging'])
-        service = Service(ChromeDriverManager().install(), log_output=os.devnull)
-        driver = webdriver.Chrome(service=service, options=options)
+        driver = Nehnutelnosti_sk_processor._make_headless_driver()
 
         driver.get(Nehnutelnosti_sk_processor.get_images_url(detail_link))
         time.sleep(wait_for_load_page)
