@@ -87,5 +87,4 @@ class Cached_vector_search_results(Base):
     chat_session = relationship("Chat_session",
                                 back_populates="cached_vector_search_results")
 
-    rent_offer = relationship("Rent_offer_model",
-                              back_populates="Cached_vector_search_results")
+    rent_offer = relationship("Rent_offer_model")

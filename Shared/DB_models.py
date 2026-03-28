@@ -38,7 +38,5 @@ class Rent_offer_model(Base):
     price_total = Column(Integer, nullable=True)
     preview_image= Column(Text, nullable=True)
 
-    cached_vector_search_results = relationship("Cached_vector_search_results",
-                              back_populates="rent_offer")
 
 
