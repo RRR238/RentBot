@@ -1,7 +1,10 @@
-from sqlalchemy.orm import sessionmaker, scoped_session
-from sqlalchemy import create_engine, exists, and_
 from contextlib import contextmanager
+
+from sqlalchemy import and_, create_engine, exists
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+from Scrapping.property_models import PriceUpdate, RentOfferInsert
 from Shared.DB_models import Rent_offer_model
 
 class Rent_offers_repository:
@@ -23,11 +26,11 @@ class Rent_offers_repository:
         finally:
             session.close()
 
-    def insert_rent_offer(self, rent_offer_model_data):
+    def insert_rent_offer(self, rent_offer_model_data: RentOfferInsert):
 
         with self.get_session() as session:
             try:
-                new_property = Rent_offer_model(**rent_offer_model_data)
+                new_property = Rent_offer_model(**rent_offer_model_data.model_dump())
                 session.add(new_property)
                 session.commit()  # Ensure data is written to the DB
                 session.refresh(new_property)  # Load generated fields (e.g., ID)

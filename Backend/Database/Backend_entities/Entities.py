@@ -1,10 +1,17 @@
 from datetime import datetime
+from typing import Literal
 #from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String,BigInteger, DateTime, ForeignKey, Boolean, Text, Float
+from sqlalchemy import Column, Integer, String, BigInteger, DateTime, ForeignKey, Boolean, Text, Float
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
+from pydantic import BaseModel
 from Shared.Declarative_base import Base
+
+
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
 
 #Base = declarative_base()
 
@@ -12,8 +19,8 @@ from Shared.Declarative_base import Base
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, index=True)
-    password = Column(String, unique=True, index=True)
+    username = Column(String, index=True, nullable=False)
+    password = Column(String,nullable=False)
 
     chat_sessions = relationship("Chat_session",
                                  back_populates="user")
@@ -32,7 +39,7 @@ class Chat_session(Base):
     last_interaction = Column(DateTime(timezone=True),
                               default=datetime.utcnow,
                               server_default=func.now(),nullable=False)
-    user_id = Column(BigInteger, ForeignKey('users.id',
+    user_id = Column(Integer, ForeignKey('users.id',
                                             ondelete="CASCADE"))
     is_active = Column(Boolean,
                        default=True,
@@ -57,7 +64,7 @@ class Chat_history(Base):
     created_at = Column(DateTime(timezone=True),
                         server_default=func.now())
     role = Column(String)
-    message = Column(String)
+    content = Column(String)
 
     chat_session = relationship("Chat_session",
                                 back_populates="chat_history")
@@ -80,5 +87,4 @@ class Cached_vector_search_results(Base):
     chat_session = relationship("Chat_session",
                                 back_populates="cached_vector_search_results")
 
-    rent_offer = relationship("Rent_offer_model",
-                                back_populates="cached_vector_search_results")
+    rent_offer = relationship("Rent_offer_model")

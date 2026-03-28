@@ -1,8 +1,8 @@
-from Nehnutelnosti_sk import Nehnutelnosti_sk_processor
-from Reality_sk import Reality_sk_processor
+from Scrapping.Nehnutelnosti_sk import Nehnutelnosti_sk_processor
+from Scrapping.Reality_sk import Reality_sk_processor
 from dotenv import load_dotenv
 import os
-from Rent_offers_repository import Rent_offers_repository
+from Scrapping.Rent_offers_repository import Rent_offers_repository
 from Shared.LLM import LLM
 from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
 

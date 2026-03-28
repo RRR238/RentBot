@@ -20,45 +20,7 @@ def create_chain(
     human_template: Optional[str] = None,
     memory: Optional[ConversationBufferMemory] = None,
 ) -> Union[LLMChain, object]:
-    """Factory for LangChain chain objects.
 
-    Args:
-        llm: ChatOpenAI instance to use for the chain.
-        system_prompt: System-level instruction string.
-        messages_placeholder: If provided, inserts a MessagesPlaceholder with
-            this variable name after the system message (e.g. "messages" for
-            summarization chains, "chat_history" for agentic chains).
-        human_template: If provided, appends a human turn with this template
-            string (e.g. "{input}"). Omit for chains invoked purely via a
-            messages list.
-        memory: If provided, wraps the chain in an LLMChain with memory
-            (required for conversational agentic chains). Without memory the
-            chain is returned as an LCEL pipeline (prompt | llm).
-
-    Returns:
-        LLMChain when memory is given, otherwise a Runnable LCEL chain.
-
-    Examples:
-        # Summarization — invoked with {"messages": [...]}
-        summarization_chain = create_chain(
-            llm, summarize_preferences_system_prompt,
-            messages_placeholder="messages",
-        )
-
-        # Key-attributes — invoked with {"input": "..."}
-        key_attributes_chain = create_chain(
-            llm, get_key_attributes_system_prompt,
-            human_template="{input}",
-        )
-
-        # Agentic with memory — invoked with agentic_chain.predict(input=query)
-        agentic_chain = create_chain(
-            llm, agentic_flow_prompt,
-            messages_placeholder="chat_history",
-            human_template="{input}",
-            memory=memory,
-        )
-    """
     message_templates = [("system", system_prompt)]
 
     if messages_placeholder is not None:
