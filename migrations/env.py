@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 project_root = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, project_root)
 
-load_dotenv(os.path.join(project_root, "Shared", ".env"))
+load_dotenv(os.path.join(project_root, ".env"))
 
 # import all models so Alembic can detect them for autogenerate
 import Shared.DB_models  # noqa: F401

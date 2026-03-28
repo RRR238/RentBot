@@ -1,13 +1,15 @@
 import os
 import re
 import time
+from dotenv import load_dotenv
+
+load_dotenv()
 from datetime import datetime
 from typing import Optional
 from urllib.parse import urlparse, urlunparse
 
 import requests
 from bs4 import BeautifulSoup
-from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 from lxml import html
 from selenium import webdriver
@@ -22,8 +24,6 @@ from Scrapping.property_models import KeyAttributes, Prices, PropertyDetail
 from Shared.Geolocation import get_coordinates
 from Shared.LLM import LLM
 from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
-
-load_dotenv()
 
 reality_base_url = os.getenv('reality_base_url')
 auth_token_reality = os.getenv('auth_token_reality')

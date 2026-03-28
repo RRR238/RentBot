@@ -1,12 +1,12 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from Scrapping.Nehnutelnosti_sk import Nehnutelnosti_sk_processor
 from Scrapping.Reality_sk import Reality_sk_processor
-from dotenv import load_dotenv
 import os
 from Scrapping.Rent_offers_repository import Rent_offers_repository
 from Shared.LLM import LLM
 from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
-
-load_dotenv()
 
 nehnutelnosti_base_url = os.getenv('nehnutelnosti_base_url')
 auth_token_nehnutelnosti = os.getenv('auth_token_nehnutelnosti')

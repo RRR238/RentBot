@@ -1,13 +1,13 @@
 import os
 from dotenv import load_dotenv
 from qdrant_client import QdrantClient, AsyncQdrantClient
+
+load_dotenv()
 from qdrant_client.models import Distance, VectorParams
 from qdrant_client.http.models import PointStruct
 import uuid
 from qdrant_client.http.models import Filter, FieldCondition, MatchValue, FilterSelector, SearchParams, Range, QueryRequest
 from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
-
-load_dotenv()
 
 class Vector_DB_Qdrant(Vector_DB_interface):
     def __init__(self,

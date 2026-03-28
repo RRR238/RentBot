@@ -3,13 +3,15 @@ import os
 import re
 import subprocess
 import time
+from dotenv import load_dotenv
+
+load_dotenv()
 from datetime import datetime
 from typing import Optional
 from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
-from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 from langdetect import detect
 from lxml import etree, html
@@ -33,8 +35,6 @@ from Scrapping.property_models import (
 from Shared.Geolocation import get_coordinates
 from Shared.LLM import LLM
 from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
-
-load_dotenv()
 
 nehnutelnosti_base_url = os.getenv('nehnutelnosti_base_url')
 auth_token_nehnutelnosti = os.getenv('auth_token_nehnutelnosti')
