@@ -1,12 +1,9 @@
 from Analytics.AI.Prompts import get_key_attributes_system_prompt, summarize_preferences_system_prompt
 from Analytics.AI.utils import (
     parse_json_from_markdown,
-    prepare_filters_elastic,
-    prepare_filters_qdrant,
-    processing_dict,
+    prepare_enriched_filters_qdrant,
 )
 from Shared.LLM import LLM
-from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
 from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
 
 
@@ -38,14 +35,12 @@ async def search_by_summarized_preferences(
         summary_to_embed = default_summary
 
     default_key_attributes = {
-        'price_rent': None,
-        'rooms': None,
-        'rooms_min': None,
-        'rooms_max': None,
-        'size': None,
-        'property_type': None,
-        'property_status': None,
-        'location': None,
+        'cena': [None, None],
+        'počet izieb': [None, None],
+        'rozloha': [None, None],
+        'typ nehnuteľnosti': [],
+        'novostavba': False,
+        'lokalita': [],
     }
 
     if key_attributes_summary:
@@ -57,32 +52,23 @@ async def search_by_summarized_preferences(
         )
         try:
             key_attributes_dict = parse_json_from_markdown(key_attr_response)
-            processed_key_attributes_dict = processing_dict(key_attributes_dict)
-
-            if processed_key_attributes_dict['property_type'] in [
-                'loft', 'penthouse', 'mezonet',
-                'garzónka', 'garzonka', 'garsónka', 'garsonka',
-            ]:
-                processed_key_attributes_dict['rooms'] = None
-                processed_key_attributes_dict['rooms_min'] = None
-                processed_key_attributes_dict['rooms_max'] = None
+            # Ensure list fields are always lists (guard against unexpected LLM output)
+            for key in ('cena', 'počet izieb', 'rozloha', 'typ nehnuteľnosti', 'lokalita'):
+                if key not in key_attributes_dict or not isinstance(key_attributes_dict[key], list):
+                    key_attributes_dict[key] = default_key_attributes[key]
         except Exception:
-            processed_key_attributes_dict = default_key_attributes
+            key_attributes_dict = default_key_attributes
     else:
-        processed_key_attributes_dict = default_key_attributes
+        key_attributes_dict = default_key_attributes
 
-    filters = (
-        prepare_filters_qdrant(processed_key_attributes_dict)
-        if isinstance(vector_db, Vector_DB_Qdrant)
-        else prepare_filters_elastic(processed_key_attributes_dict)
-    )
+    filters = prepare_enriched_filters_qdrant(key_attributes_dict)
 
     embedding = await llm.get_embedding_async(summary_to_embed,
                                               model=embedding_model)
 
-    results = await vector_db.filtered_vector_search_async(embedding,
-                                                           50,
-                                                           filter=filters)
+    results = await vector_db.enriched_filtered_vector_search_async(embedding,
+                                                                    50,
+                                                                    filter_input=filters)
 
     return [
         {'score': i.score, 'id': i.payload['id']}
