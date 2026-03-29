@@ -199,7 +199,7 @@ class TestGetPrice:
     def test_parses_energies(self):
         html = """
         <p class="MuiTypography-root MuiTypography-h3 mui-fm8hb4">850\xa0€</p>
-        <p class="MuiTypography-root MuiTypography-label2 mui-gsg6ma">+ 150 €/mes.</p>
+        <p class="MuiTypography-root MuiTypography-label2 mui-180mgf9">+ 150 €/mes.</p>
         """
         prices = Nehnutelnosti_sk_processor.get_price(make_soup(html))
         assert prices.energies == 150
@@ -207,7 +207,7 @@ class TestGetPrice:
     def test_parses_meter_squared(self):
         html = """
         <p class="MuiTypography-root MuiTypography-h3 mui-fm8hb4">850\xa0€</p>
-        <p class="MuiTypography-root MuiTypography-label2 mui-ifbhxp">8,50\xa0€/m²</p>
+        <p class="MuiTypography-root MuiTypography-label2 mui-dqi7hg">8,50\xa0€/m²</p>
         """
         prices = Nehnutelnosti_sk_processor.get_price(make_soup(html))
         assert prices.meter_squared == 8.50
