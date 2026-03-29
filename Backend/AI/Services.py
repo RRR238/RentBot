@@ -56,6 +56,11 @@ async def search_by_summarized_preferences(
             for key in ('cena', 'počet izieb', 'rozloha', 'typ nehnuteľnosti', 'lokalita'):
                 if key not in key_attributes_dict or not isinstance(key_attributes_dict[key], list):
                     key_attributes_dict[key] = default_key_attributes[key]
+            # Types without numbered rooms — clear the room filter
+            roomless_types = {'loft', 'penthouse', 'mezonet', 'garzónka', 'garzonka', 'garsónka', 'garsonka'}
+            selected_types = set(key_attributes_dict.get('typ nehnuteľnosti') or [])
+            if selected_types and selected_types.issubset(roomless_types):
+                key_attributes_dict['počet izieb'] = [None, None]
         except Exception:
             key_attributes_dict = default_key_attributes
     else:
