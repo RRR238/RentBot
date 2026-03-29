@@ -2,9 +2,9 @@ from elasticsearch import Elasticsearch
 import os
 from dotenv import load_dotenv
 from elasticsearch.helpers import bulk
-from Vector_DB_interface import Vector_DB_interface
 
 load_dotenv()
+from Vector_DB_interface import Vector_DB_interface
 
 class Vector_DB_Elasticsearch(Vector_DB_interface):
     def __init__(self,

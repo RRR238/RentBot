@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
@@ -5,28 +8,25 @@ from Backend.Database.Repositories.User_repository import User_repository
 from Backend.Database.Repositories.Offers_repository import Offers_repository
 from Backend.Database.Repositories.Chat_sessions_repository import Chat_session_repository
 from Backend.Database.Repositories.Cached_vector_search_results_repository import Cached_vector_search_results_repository
-from Dependency_injection import get_db, endpoint_verification
+from Backend.Dependency_injection import get_db, endpoint_verification
 from Backend.Database.Backend_entities import User, Chat_session, Chat_history, Cached_vector_search_results
-from Singletons import security_manager, vector_db, llm
+from Backend.Singletons import security_manager, vector_db, llm
 from Backend.Pydantic_models.Models import User_model, User_message_model, Chat_session_model
 import uvicorn
-from dotenv import load_dotenv
 import os
 from sqlalchemy.ext.asyncio import AsyncSession
-from AI.Services import search_by_summarized_preferences
+from Backend.AI.Services import search_by_summarized_preferences
 from Analytics.AI.Prompts import agentic_flow_prompt
-from Utils.Utils import process_types_and_rooms_filters, get_bounding_boxes
-
-load_dotenv()
-host = os.getenv('HOST')
-port = int(os.getenv('PORT'))
+from Backend.Utils.Utils import process_types_and_rooms_filters, get_bounding_boxes
+host = os.getenv('HOST', '0.0.0.0')
+port = int(os.getenv('PORT', '5000'))
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

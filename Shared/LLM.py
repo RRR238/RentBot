@@ -29,7 +29,7 @@ class LLM:
 
     async def generate_answer_async(
         self,
-        prompt: str,
+        prompt: Optional[str] = None,
         model: str = 'gpt-3.5-turbo',
         temperature: float = 0.0,
         system_prompt: Optional[str] = None,
