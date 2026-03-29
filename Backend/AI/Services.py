@@ -1,5 +1,6 @@
 from Analytics.AI.Prompts import get_key_attributes_system_prompt, summarize_preferences_system_prompt
 from Analytics.AI.utils import (
+    format_chat_history,
     parse_json_from_markdown,
     prepare_enriched_filters_qdrant,
 )
@@ -14,18 +15,25 @@ async def search_by_summarized_preferences(
     model: str = "gpt-4o",
     embedding_model: str = "text-embedding-3-large",
     default_summary: str = "pekne byvanie",
+    verbose: bool = False,
 ):
+    if verbose:
+        print(f"memory length: {len(memory)}, content: {memory}")
     # Step 1: summarize conversation into structured preferences
     response_summary = await llm.generate_answer_async(
         model=model,
         system_prompt=summarize_preferences_system_prompt,
-        chat_history=memory,
+        prompt=format_chat_history(memory),
     )
+    if verbose:
+        print(f"Response summary: {repr(response_summary)}")
 
     try:
         key_attributes_summary = response_summary[:response_summary.index(', ostatné preferencie')]
     except ValueError:
         key_attributes_summary = None
+    if verbose:
+        print(f"Key attributes summary: {key_attributes_summary}")
 
     try:
         summary_to_embed = response_summary[
@@ -50,12 +58,20 @@ async def search_by_summarized_preferences(
             model=model,
             system_prompt=get_key_attributes_system_prompt,
         )
+        if verbose:
+            print(f"Key attributes: {key_attr_response}")
         try:
             key_attributes_dict = parse_json_from_markdown(key_attr_response)
+            if verbose:
+                print(f"Key attributes dict: {key_attributes_dict}")
             # Ensure list fields are always lists (guard against unexpected LLM output)
             for key in ('cena', 'počet izieb', 'rozloha', 'typ nehnuteľnosti', 'lokalita'):
                 if key not in key_attributes_dict or not isinstance(key_attributes_dict[key], list):
                     key_attributes_dict[key] = default_key_attributes[key]
+            # If model set min == max for price, treat it as max-only (user said "up to X")
+            cena = key_attributes_dict['cena']
+            if len(cena) == 2 and cena[0] is not None and cena[0] == cena[1]:
+                key_attributes_dict['cena'] = [None, cena[1]]
             # Types without numbered rooms — clear the room filter
             roomless_types = {'loft', 'penthouse', 'mezonet', 'garzónka', 'garzonka', 'garsónka', 'garsonka'}
             selected_types = set(key_attributes_dict.get('typ nehnuteľnosti') or [])
@@ -67,6 +83,8 @@ async def search_by_summarized_preferences(
         key_attributes_dict = default_key_attributes
 
     filters = prepare_enriched_filters_qdrant(key_attributes_dict)
+    if verbose:
+        print(f"Filters: {filters}")
 
     embedding = await llm.get_embedding_async(summary_to_embed,
                                               model=embedding_model)

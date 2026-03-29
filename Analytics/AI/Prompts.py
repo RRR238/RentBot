@@ -173,7 +173,7 @@ Pravidlá:
 
 get_key_attributes_system_prompt = """Na základe používateľovho vstupu vydedukuj hodnoty pre tieto premenné:
 
-cena: <[MIN, MAX]> (Uveď cenový rozsah. Ak nie je možné určiť rozsah, ale iba jediné číslo, priraď toto číslo ako hodnotu MAX a hodnote MIN priraď null. Ak nie je možné určiť rozsah ani konkrétne číslo, priraď obom hodnotám null.)
+cena: <[MIN, MAX]> (Uveď cenový rozsah. Ak používateľ uvedie jediné číslo bez spodnej hranice (napr. „700 eur", „do 800"), priraď ho ako MAX a MIN nastav na null — NIKDY nepriraďuj rovnakú hodnotu obom. Ak nie je možné určiť žiadne číslo, priraď obom hodnotám null.)
 
 počet izieb: <[MIN, MAX]> (Uveď rozsah počtu izieb. Ak nie je možné určiť rozsah, ale iba jediné číslo, priraď toto číslo ako hodnotu MIN a hodnote MAX priraď null. Ak je v popise uvedený počet izieb nepriamo (napr. „dve spálne a pracovňa" alebo „2 spálne a 1 pracovňa"), uveď počet izieb na základe uvedených miestností. Ak nie je možné určiť rozsah ani konkrétne číslo, priraď obom hodnotám null.)
 
