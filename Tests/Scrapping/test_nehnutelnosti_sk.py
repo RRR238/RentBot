@@ -55,33 +55,81 @@ class TestGetLocation:
 
 
 # ---------------------------------------------------------------------------
+# _parse_property_paragraphs
+# ---------------------------------------------------------------------------
+
+class TestParsePropertyParagraphs:
+    def _make_paragraphs(self, texts):
+        from bs4 import BeautifulSoup
+        html = "".join(f"<p>{t}</p>" for t in texts)
+        return BeautifulSoup(html, "html.parser").find_all("p")
+
+    def test_builds_key_value_dict(self):
+        result = Nehnutelnosti_sk_processor._parse_property_paragraphs(
+            self._make_paragraphs(["Rok výstavby:", "2005", "Vlastníctvo:", "osobné"])
+        )
+        assert result == {"Rok výstavby:": "2005", "Vlastníctvo:": "osobné"}
+
+    def test_ignores_standalone_value_without_key(self):
+        result = Nehnutelnosti_sk_processor._parse_property_paragraphs(
+            self._make_paragraphs(["Kľúč:", "hodnota", "Orphan"])
+        )
+        assert result == {"Kľúč:": "hodnota"}
+
+    def test_returns_empty_dict_for_empty_input(self):
+        assert Nehnutelnosti_sk_processor._parse_property_paragraphs([]) == {}
+
+
+# ---------------------------------------------------------------------------
+# get_detail_properties
+# ---------------------------------------------------------------------------
+
+class TestGetDetailProperties:
+    def test_builds_dict_from_stable_container(self):
+        html = """
+        <div class="MuiGrid-spacing-md-1">
+          <p data-test-id="text">Podlažie:</p>
+          <p data-test-id="text">3/8</p>
+          <p data-test-id="text">Rok výstavby:</p>
+          <p data-test-id="text">2010</p>
+        </div>
+        """
+        result = Nehnutelnosti_sk_processor.get_detail_properties(make_soup(html))
+        assert result == {"Podlažie:": "3/8", "Rok výstavby:": "2010"}
+
+    def test_returns_empty_dict_when_container_absent(self):
+        assert Nehnutelnosti_sk_processor.get_detail_properties(make_soup("<div>nothing</div>")) == {}
+
+
+# ---------------------------------------------------------------------------
 # get_other_properties
 # ---------------------------------------------------------------------------
 
 class TestGetOtherProperties:
+    def _make_section(self, pairs):
+        items = ""
+        for key, val in pairs:
+            items += f"""
+            <div class="MuiStack-root mui-inner">
+              <p data-test-id="text">{key}</p>
+              <p data-test-id="text">{val}</p>
+            </div>"""
+        return f"""
+        <div class="MuiStack-root mui-outer">
+          <h3>Vlastnosti nehnuteľnosti</h3>
+          {items}
+        </div>"""
+
     def test_builds_key_value_dict(self):
-        html = """
-        <div class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row
-                    MuiGrid2-spacing-xs-1 mui-lgq25d">
-          <p>Rok výstavby:</p><p>2005</p>
-          <p>Vlastníctvo:</p><p>osobné</p>
-        </div>
-        """
+        html = self._make_section([("Vybavenie:", "Výťah"), ("Počet loggí:", "1")])
         result = Nehnutelnosti_sk_processor.get_other_properties(make_soup(html))
-        assert result == {"Rok výstavby:": "2005", "Vlastníctvo:": "osobné"}
+        assert result == {"Vybavenie:": "Výťah", "Počet loggí:": "1"}
 
-    def test_returns_empty_dict_when_container_absent(self):
-        result = Nehnutelnosti_sk_processor.get_other_properties(make_soup("<div>nothing</div>"))
-        assert result == {}
+    def test_returns_empty_dict_when_heading_absent(self):
+        assert Nehnutelnosti_sk_processor.get_other_properties(make_soup("<div>nothing</div>")) == {}
 
-    def test_ignores_odd_paragraph_without_pair(self):
-        html = """
-        <div class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row
-                    MuiGrid2-spacing-xs-1 mui-lgq25d">
-          <p>Kľúč:</p><p>hodnota</p>
-          <p>Orphan</p>
-        </div>
-        """
+    def test_ignores_standalone_paragraph_without_pair(self):
+        html = self._make_section([("Kľúč:", "hodnota")]) + "<p data-test-id='text'>Orphan</p>"
         result = Nehnutelnosti_sk_processor.get_other_properties(make_soup(html))
         assert result == {"Kľúč:": "hodnota"}
 
@@ -91,17 +139,30 @@ class TestGetOtherProperties:
 # ---------------------------------------------------------------------------
 
 class TestGetDescription:
+    def _mock_driver(self, page_source: str):
+        driver = MagicMock()
+        driver.page_source = page_source
+        return driver
+
     def test_returns_stripped_text(self):
-        html = '<div id="detail-description">  Krásny byt v centre.  </div>'
-        assert Nehnutelnosti_sk_processor.get_description(make_soup(html)) == "Krásny byt v centre."
+        html = '<p id="detail-description">  Krásny byt v centre.  </p>'
+        with patch.object(Nehnutelnosti_sk_processor, '_make_headless_driver',
+                          return_value=self._mock_driver(html)):
+            result = Nehnutelnosti_sk_processor.get_description("https://example.com/detail/123")
+        assert result == "Krásny byt v centre."
 
     def test_strips_citat_dalej(self):
-        html = '<div id="detail-description">Krásny byt. Čítať ďalej</div>'
-        result = Nehnutelnosti_sk_processor.get_description(make_soup(html))
+        html = '<p id="detail-description">Krásny byt. Čítať ďalej</p>'
+        with patch.object(Nehnutelnosti_sk_processor, '_make_headless_driver',
+                          return_value=self._mock_driver(html)):
+            result = Nehnutelnosti_sk_processor.get_description("https://example.com/detail/123")
         assert "Čítať ďalej" not in result
 
     def test_returns_none_when_element_absent(self):
-        assert Nehnutelnosti_sk_processor.get_description(make_soup("<div>nothing</div>")) is None
+        with patch.object(Nehnutelnosti_sk_processor, '_make_headless_driver',
+                          return_value=self._mock_driver("<div>nothing</div>")):
+            result = Nehnutelnosti_sk_processor.get_description("https://example.com/detail/123")
+        assert result is None
 
 
 # ---------------------------------------------------------------------------
