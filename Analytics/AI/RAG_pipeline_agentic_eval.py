@@ -7,7 +7,7 @@ from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.prompts import ChatPromptTemplate
 
 from .Prompts import (
-    agentic_flow_prompt,
+    agentic_flow_prompt_v2 as agentic_flow_prompt,
     get_key_attributes_structured_prompt,
     summarize_preferences_system_prompt,
 )
@@ -32,7 +32,7 @@ gen_model = "gpt-4o"
 # Models / services
 # ---------------------------------------------------------------------------
 
-llm_langchain = ChatOpenAI(temperature=0.7, model=gen_model)
+llm_langchain = ChatOpenAI(temperature=0.9, model=gen_model)
 llm_langchain_deterministic = ChatOpenAI(temperature=0.0, model=gen_model)
 llm = LLM()
 vdb = Vector_DB_Qdrant('rent-bot-index')
