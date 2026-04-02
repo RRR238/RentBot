@@ -3,24 +3,19 @@ import math
 import re
 from typing import Optional, Union
 
-from langchain.chains import LLMChain
-from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationBufferMemory
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.schema import AIMessage, HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from Shared.Geolocation import get_bounding_box_from_location
 from qdrant_client.http.models import Filter, FieldCondition, Match, Range, MatchValue
 
 
 def create_chain(
-    llm: ChatOpenAI,
+    llm,
     system_prompt: str,
     *,
     messages_placeholder: Optional[str] = None,
     human_template: Optional[str] = None,
-    memory: Optional[ConversationBufferMemory] = None,
-) -> Union[LLMChain, object]:
-
+):
     message_templates = [("system", system_prompt)]
 
     if messages_placeholder is not None:
@@ -30,9 +25,6 @@ def create_chain(
         message_templates.append(("human", human_template))
 
     prompt = ChatPromptTemplate.from_messages(message_templates)
-
-    if memory is not None:
-        return LLMChain(llm=llm, prompt=prompt, memory=memory)
 
     return prompt | llm
 
@@ -248,6 +240,64 @@ def prepare_enriched_filters_qdrant(processed_dict):
         must=must_conditions,
         should=should_conditions
     )
+
+def prepare_enriched_filters_from_key_attributes(key_attributes) -> Filter:
+    """Build a Qdrant Filter from a KeyAttributes Pydantic object."""
+    must_conditions = []
+    roomless_mapped = {'loft', 'penthouse', 'mezonet', 'studio'}
+
+    # Price
+    if key_attributes.cena.min is not None:
+        must_conditions.append(FieldCondition(key="price_total", range=Range(gte=key_attributes.cena.min)))
+    if key_attributes.cena.max is not None:
+        must_conditions.append(FieldCondition(key="price_total", range=Range(lte=key_attributes.cena.max)))
+
+    # Property type — needed before rooms to check roomless
+    mapped_types = [
+        property_type_mappings[t]
+        for t in key_attributes.typ_nehnutelnosti
+        if t in property_type_mappings
+    ]
+    if mapped_types:
+        must_conditions.append(
+            Filter(should=[
+                FieldCondition(key="property_type", match=MatchValue(value=t))
+                for t in mapped_types
+            ])
+        )
+
+    # Rooms (skip if all selected types are roomless)
+    is_all_roomless = bool(mapped_types) and set(mapped_types).issubset(roomless_mapped)
+    if not is_all_roomless:
+        if key_attributes.pocet_izieb.min is not None:
+            must_conditions.append(FieldCondition(key="rooms", range=Range(gte=key_attributes.pocet_izieb.min)))
+        if key_attributes.pocet_izieb.max is not None:
+            must_conditions.append(FieldCondition(key="rooms", range=Range(lte=key_attributes.pocet_izieb.max)))
+
+    # Size
+    if key_attributes.rozloha.min is not None:
+        must_conditions.append(FieldCondition(key="size", range=Range(gte=key_attributes.rozloha.min)))
+    if key_attributes.rozloha.max is not None:
+        must_conditions.append(FieldCondition(key="size", range=Range(lte=key_attributes.rozloha.max)))
+
+    # New build
+    if key_attributes.novostavba:
+        must_conditions.append(FieldCondition(key="property_status", match=MatchValue(value="novostavba")))
+
+    # Location — multiple bounding boxes in should (OR logic)
+    should_conditions = []
+    locations = key_attributes.lokalita or ['Slovakia']
+    for loc in locations:
+        bbox = get_bounding_box_from_location(loc)
+        if bbox is None:
+            continue
+        should_conditions.append(Filter(must=[
+            FieldCondition(key="latitude", range=Range(gte=bbox["south_lat"], lte=bbox["north_lat"])),
+            FieldCondition(key="longtitude", range=Range(gte=bbox["west_lon"], lte=bbox["east_lon"])),
+        ]))
+
+    return Filter(must=must_conditions, should=should_conditions)
+
 
 def extract_chat_history_as_dict(memory):
     chat_history = []

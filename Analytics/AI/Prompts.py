@@ -187,6 +187,8 @@ lokalita: <[]> (Urči iba mestá alebo mestské časti. Ignoruj konkrétne body 
 
 Výstup uveď vo formáte JSON."""
 
+get_key_attributes_structured_prompt = """Na základe používateľovho vstupu vydedukuj hodnoty pre dané premenné. Pokyny pre každú premennú sú uvedené v jej popise. Ak niektorú hodnotu nie je možné určiť, použi predvolenú hodnotu (null alebo prázdny zoznam)."""
+
 agentic_flow_prompt ="""
 Tvojou úlohou je získať a zhrnúť preferencie používateľa ohľadom ideálnej nehnuteľnosti na prenájom.
 
