@@ -285,9 +285,7 @@ async def fetch_filtered_results(session_id:int,
     cached_results_repo = Cached_vector_search_results_repository(db_connection)
     chat_session_repo = Chat_session_repository(db_connection)
     is_active_session = await chat_session_repo.is_session_active_by_session_id(session_id)
-    await cached_results_repo.delete_items_by_session_id(session_id)
     if not is_active_session:
-        await cached_results_repo.delete_items_by_session_id(session_id)
         await chat_session_repo.mark_session_inactive_by_session_id(session_id)
         raise HTTPException(
             status_code=404,
@@ -301,12 +299,7 @@ async def fetch_filtered_results(session_id:int,
                                                                                          processed_filters['types'],
                                                                                          processed_filters['rooms'],
                                                                                          page)
-    # valid_offers_w_preview_image = add_preview_image(filtered_cached_results)
-    #
-    # return JSONResponse(
-    #     status_code=200,
-    #     content=valid_offers_w_preview_image
-    # )
+    return JSONResponse(status_code=200, content=filtered_cached_results)
 
 
 if __name__ == "__main__":

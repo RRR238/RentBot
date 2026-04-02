@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from qdrant_client import QdrantClient, AsyncQdrantClient
 
 load_dotenv()
-from qdrant_client.models import Distance, VectorParams
+from qdrant_client.models import Distance, VectorParams, PayloadSchemaType
 from qdrant_client.http.models import PointStruct
 import uuid
 from qdrant_client.http.models import Filter, FieldCondition, MatchValue, FilterSelector, SearchParams, Range, QueryRequest
@@ -32,6 +32,14 @@ class Vector_DB_Qdrant(Vector_DB_interface):
                 collection_name=self.index_name,
                 vectors_config=VectorParams(size=vector_dimension,
                                             distance=Distance.COSINE)
+            )
+
+    def create_payload_indexes(self, indexes: list[tuple[str, PayloadSchemaType]]) -> None:
+        for field_name, schema in indexes:
+            self.__client.create_payload_index(
+                collection_name=self.index_name,
+                field_name=field_name,
+                field_schema=schema,
             )
 
     def insert_data(self, documents: list[dict]):

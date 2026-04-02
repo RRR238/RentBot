@@ -101,8 +101,8 @@ useEffect(() => {
   } else if (Array.isArray(data.history)) {
     setChatMessages(
       data.history.map(msg => ({
-        sender: msg.role === "Human" ? "user" : "bot",
-        text: msg.message
+        sender: msg.role === "user" ? "user" : "bot",
+        text: msg.content
       }))
     );
     setChatSessionId(data.session_id || null);
@@ -447,8 +447,8 @@ setChatSessionId(null);
     if (Array.isArray(data)) {
       setChatMessages(
         data.map(msg => ({
-          sender: msg.role === "Human" ? "user" : "bot",
-          text: msg.message
+          sender: msg.role === "user" ? "user" : "bot",
+          text: msg.content
         }))
       );
     } else if (data.reply) {

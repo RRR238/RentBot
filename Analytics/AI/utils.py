@@ -189,24 +189,30 @@ def prepare_enriched_filters_qdrant(processed_dict):
 
         if k == 'typ nehnuteľnosti':
             if v:
-                must_conditions.append(
-                    Filter(
-                        should=[
-                            FieldCondition(
-                                key="property_type",
-                                match=MatchValue(value=property_type_mappings[prop_type])
-                            )
-                            for prop_type in v
-                        ]
+                mapped = [
+                    property_type_mappings[prop_type]
+                    for prop_type in v
+                    if prop_type in property_type_mappings
+                ]
+                if mapped:
+                    must_conditions.append(
+                        Filter(
+                            should=[
+                                FieldCondition(
+                                    key="property_type",
+                                    match=MatchValue(value=mapped_type)
+                                )
+                                for mapped_type in mapped
+                            ]
+                        )
                     )
-                )
 
         if k == 'novostavba':
             if v is True:
                 must_conditions.append(
                     FieldCondition(
                         key="property_status",
-                        match=Match(value="novostavba")
+                        match=MatchValue(value="novostavba")
                     )
                 )
 
