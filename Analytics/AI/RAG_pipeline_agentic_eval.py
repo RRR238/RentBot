@@ -4,16 +4,16 @@ from datetime import datetime
 
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, AIMessage
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 from .Prompts import (
     agentic_flow_prompt_v2 as agentic_flow_prompt,
-    get_key_attributes_structured_prompt,
-    summarize_preferences_system_prompt,
+    extract_preferences_from_conversation_prompt,
 )
 from .Schemas import KeyAttributes
 from .utils import (
     create_chain,
+    normalize_key_attributes,
     prepare_enriched_filters_from_key_attributes,
     extract_chat_history_as_dict,
     format_chat_history,
@@ -48,32 +48,22 @@ agentic_chain = create_chain(
     human_template="{input}",
 )
 
-summarization_chain = create_chain(
-    llm_langchain_deterministic, summarize_preferences_system_prompt,
-    messages_placeholder="messages",
-    human_template="Zhrň preferencie používateľa z vyššie uvedenej konverzácie podľa inštrukcií v systémovej správe.",
-)
-
-_key_attributes_prompt = ChatPromptTemplate.from_messages([
-    ("system", get_key_attributes_structured_prompt),
-    ("human", "{input}"),
+_extract_prompt = ChatPromptTemplate.from_messages([
+    ("system", extract_preferences_from_conversation_prompt),
+    MessagesPlaceholder(variable_name="messages"),
+    ("human", "Extrahuj preferencie používateľa z vyššie uvedenej konverzácie."),
 ])
-key_attributes_chain = _key_attributes_prompt | llm_langchain_deterministic.with_structured_output(KeyAttributes)
+extract_chain = _extract_prompt | llm_langchain_deterministic.with_structured_output(KeyAttributes)
 
 # ---------------------------------------------------------------------------
 # Main loop
 # ---------------------------------------------------------------------------
 
-org_summary = (
-    "cena: None, počet izieb: None, rozloha: None, typ nehnuteľnosti: None, "
-    "novostavba: None, lokalita: None, ostatné preferencie: None"
-)
-
 SEARCH_TRIGGER = "P"
 SAVE_TRIGGER = "S"
 
-chat_history = []
-eval_records = []
+chat_history: list = []
+eval_records: list = []
 
 opening = agentic_chain.invoke({"chat_history": chat_history, "input": "Začni konverzáciu."})
 print(f"🤖: {opening.content}")
@@ -84,31 +74,14 @@ while True:
     query = input("You: ").strip()
 
     if query == SEARCH_TRIGGER:
-        # --- Step 1: summarize preferences ---
-        summary_response = summarization_chain.invoke({"messages": chat_history})
-        response_summary = summary_response.content
-        print(f"\n[summary]: {response_summary}")
+        # --- Step 1: extract structured preferences directly from conversation ---
+        key_attributes: KeyAttributes = extract_chain.invoke({"messages": chat_history})
+        key_attributes = normalize_key_attributes(key_attributes)
+        print(f"\n[key attributes]: {key_attributes}")
 
-        try:
-            idx = response_summary.index(', ostatné preferencie')
-            processed_summary = response_summary[:idx]
-            summary_to_embedd = response_summary[idx + len(', ostatné preferencie: '):]
-            org_summary = response_summary
-        except ValueError:
-            idx = org_summary.index(', ostatné preferencie')
-            processed_summary = org_summary[:idx]
-            summary_to_embedd = org_summary[idx + len(', ostatné preferencie: '):]
-
-        print(f"[processed summary]: {processed_summary}")
-        print(f"[summary to embedd]: {summary_to_embedd}")
-
-        # --- Step 2: extract structured key attributes ---
-        key_attributes: KeyAttributes = key_attributes_chain.invoke({"input": processed_summary})
-        print(f"[key attributes]: {key_attributes}")
-
-        # --- Step 3: vector search ---
+        # --- Step 2: vector search ---
         filters = prepare_enriched_filters_from_key_attributes(key_attributes)
-        embedding = llm.get_embedding(summary_to_embedd, model='text-embedding-3-large')
+        embedding = llm.get_embedding(key_attributes.ostatne_preferencie or "bývanie", model='text-embedding-3-large')
         results = vdb.enriched_filtered_vector_search(embedding, 10, filters)[0]
 
         print("\n[results]:")
@@ -132,9 +105,6 @@ while True:
 
         eval_records.append({
             "chat_history": formatted_history,
-            "summary": response_summary,
-            "processed_summary": processed_summary,
-            "summary_to_embedd": summary_to_embedd,
             "key_attributes": key_attributes,
             "results": result_entries,
         })

@@ -241,6 +241,22 @@ def prepare_enriched_filters_qdrant(processed_dict):
         should=should_conditions
     )
 
+def normalize_key_attributes(ka):
+    """Post-process extracted KeyAttributes:
+    - cena:   if max - min <= 200  → keep only MAX (narrow price band = treat as upper bound)
+    - rozloha: if max - min <= 20  → keep only MIN (narrow size band = treat as lower bound)
+    """
+    c = ka.cena
+    if c.min is not None and c.max is not None and (c.max - c.min) <= 200:
+        ka.cena.min = None
+
+    r = ka.rozloha
+    if r.min is not None and r.max is not None and (r.max - r.min) <= 20:
+        ka.rozloha.max = None
+
+    return ka
+
+
 def prepare_enriched_filters_from_key_attributes(key_attributes) -> Filter:
     """Build a Qdrant Filter from a KeyAttributes Pydantic object."""
     must_conditions = []
