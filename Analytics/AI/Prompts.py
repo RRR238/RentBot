@@ -1,155 +1,3 @@
-summarize_chat_history_prompt_v_2 = """
-Na základe histórie konverzácie medzi agentom a používateľom nizsie (text medzi symbolmi ```), doplň a aktualizuj sumarizáciu preferencií (text medzi symbomi ''') používateľa ohľadom nehnuteľnosti.
-Tvoja odpoveď musí byť v nasledujúcom formáte:
-
-cena: <tvoja dedukcia>, počet izieb: <tvoja dedukcia>, rozloha: <tvoja dedukcia>, typ nehnuteľnosti: <tvoja dedukcia>, stav nehnuteľnosti: <tvoja dedukcia>, lokalita: <tvoja dedukcia>, ostatné preferencie: <tvoja dedukcia>
-
-Pravidlá:
-
-- Zohľadni celú konverzáciu od začiatku až po koniec.
-
-- Ak niektoré hodnoty nie je možné určiť, priraď k danej premennej hodnotu None.
-
-- Priraď hodnoty iba k uvedeným kategóriám! Nevytváraj nové kategórie.
-
-- Ak používateľ nemá preferenciu ohľadom nejakého kritéria, alebo vyslovene uvedie, že niečo nechce alebo nepotrebuje (používa slová ako „nechcem", „neviem", „netreba", „je mi to jedno" a podobne), neuvádzaj toto kritérium do kategórie „ostatné preferencie".
-
-- Pri kategórii „stav nehnuteľnosti" iba uveď: novostavba / staršia stavba / bez striktneho vymedzenia (alebo None, ak sa nedá určiť). Nedopĺňaj žiadne ďalšie informácie o stave stavby do kategórie „ostatné preferencie".
-
-História konverzácie medzi agentom a používateľom:
-```{conversation_history}```
-
-Aktuálna sumarizácia preferencií:
-'''{original_summary}'''
-
-Aktualizovaná sumarizácia preferencií:
-
-"""
-
-summarize_chat_history_prompt_v_3 = """
-Na základe histórie konverzácie medzi agentom a používateľom nizsie (text medzi symbolmi ```), doplň a aktualizuj sumarizáciu preferencií (text medzi symbomi ''') používateľa ohľadom nehnuteľnosti.
-Tvoja odpoveď musí byť v nasledujúcom formáte:
-
-cena: <tvoja dedukcia>, počet izieb: <tvoja dedukcia>, rozloha: <tvoja dedukcia>, typ nehnuteľnosti: <tvoja dedukcia>, novostavba: <tvoja dedukcia> (priraď hodnotu True, ak je z promptu zrejmé, že ide o novostavbu. Inak priraď hodnotu None.), lokalita: <tvoja dedukcia> (Urči iba mesto alebo mestskú časť. Konkrétne body na mape, ako napr. „pri lese", „pri jazere", „v centre mesta", „v pokojnej štvrti" a podobne zaraď do kategórie ostatné preferencie), ostatné preferencie: <tvoja dedukcia>
-
-Pravidlá:
-
-- Zohľadni celú konverzáciu od začiatku až po koniec.
-
-- Ak niektoré hodnoty nie je možné určiť, priraď k danej premennej hodnotu None.
-
-- Priraď hodnoty iba k uvedeným kategóriám! Nevytváraj nové kategórie.
-
-- Ak používateľ uvedie, že nechce/nepotrebuje nejakú preferenciu, ktorá už je zahrnutá v sumarizácii, tak ju odtiaľ len odstráň.
-
-- Ak používateľ uvedie, že chce zmeniť nejakú preferenciu, ktorá už je zahrnutá v sumarizácii, tak ju zmeň podľa požiadavky používateľa.
-
-História konverzácie medzi agentom a používateľom:
-```{conversation_history}```
-
-Aktuálna sumarizácia preferencií:
-'''{original_summary}'''
-
-Aktualizovaná sumarizácia preferencií:
-
-"""
-
-summarize_chat_history_prompt_v_4 = """
-Na základe histórie konverzácie medzi agentom a používateľom nizsie (text medzi symbolmi ```), vytvor sumarizáciu preferencií (text medzi symbomi ''') používateľa ohľadom nehnuteľnosti.
-Tvoja odpoveď musí byť v nasledujúcom formáte:
-
-cena: <tvoja dedukcia>, počet izieb: <tvoja dedukcia>, rozloha: <tvoja dedukcia>, typ nehnuteľnosti: <tvoja dedukcia> (vyber jednu z moznosti: dom, loft, mezonet, byt, garzónka, penthouse), novostavba: <tvoja dedukcia> (priraď hodnotu True, ak je z promptu zrejmé, že ide o novostavbu. Inak priraď hodnotu None.), lokalita: <tvoja dedukcia> (Urči iba mesto alebo mestskú časť. Konkrétne body na mape, ako napr. „pri lese", „pri jazere", „v centre mesta", „v pokojnej štvrti" a podobne zaraď do kategórie ostatné preferencie), ostatné preferencie: <tvoja dedukcia>
-
-Pravidlá:
-
-- Zohľadni celú konverzáciu od začiatku až po koniec.
-
-- Ak niektoré hodnoty nie je možné určiť, priraď k danej premennej hodnotu None.
-
-- Priraď hodnoty iba k uvedeným kategóriám! Nevytváraj nové kategórie.
-
-- Ak sa nedá vytvoriť zmysluplná sumarizácia, ku každej premennej iba priraď hodnotu None
-
-História konverzácie medzi agentom a používateľom:
-```{conversation_history}```
-
-Aktualizovaná sumarizácia preferencií:
-
-"""
-
-summarize_chat_history_prompt_v_5 = """
-Na základe histórie konverzácie medzi agentom a používateľom nizsie (text medzi symbolmi ```), vytvor sumarizáciu preferencií (text medzi symbomi ''') používateľa ohľadom nehnuteľnosti.
-Tvoja odpoveď musí byť v nasledujúcom formáte:
-
-cena: <tvoja dedukcia>, počet izieb: <tvoja dedukcia>, rozloha: <tvoja dedukcia>, typ nehnuteľnosti: <tvoja dedukcia> (vyber všetky hodiace sa z nasledujúcich možností: dom, loft, mezonet, byt, garzónka, penthouse), novostavba: <tvoja dedukcia> (priraď hodnotu True, ak je z promptu bez pochýb jasné, že ide o novostavbu. Inak priraď hodnotu None.), lokalita: <tvoja dedukcia> (Urči iba mesto alebo mestskú časť. Konkrétne body na mape, ako napr. „pri lese", „pri jazere", „v centre mesta", „v pokojnej štvrti" a podobne zaraď do kategórie ostatné preferencie), ostatné preferencie: <tvoja dedukcia>
-
-Pravidlá:
-
-- Zohľadni celú konverzáciu od začiatku až po koniec.
-
-- Ak niektoré hodnoty nie je možné určiť, priraď k danej premennej hodnotu None.
-
-- Priraď hodnoty iba k uvedeným kategóriám! Nevytváraj nové kategórie.
-
-- Ak sa nedá vytvoriť zmysluplná sumarizácia, ku každej premennej iba priraď hodnotu None
-
-- Do kategórie 'ostatné preferencie' nepridávaj tie, ktoré:
-    - majú negatívne vymedzenie (napr. používateľ niečo nechce alebo nepotrebuje. ❗️ POZOR: Výrazy ako „pre bandu alkoholikov", „pre partiu kokotov", „na žúry" alebo iné subjektívne či kontroverzné požiadavky **nepovažuj za negatívne preferencie** — tieto ponechaj.),
-    - majú neurčité vymedzenie (napr. používateľ si nie je istý).
-    - opisujú stav nehnuteľnosti (novostavba, starší byt, zrekonštruovaný byt a podobne)
-
-História konverzácie medzi agentom a používateľom:
-```{conversation_history}```
-
-Sumarizácia preferencií:
-
-"""
-
-get_key_attributes_prompt = """Na základe nasledujúceho promptu používateľa vydedukuj hodnoty pre tieto premenné:
-
-cena: <tvoja dedukcia> (uveď iba číslo. Ak je uvedený ROZSAH a nie konkrétne číslo, použi najvyššiu hodnotu z rozsahu. Ak nie je možné určiť presné číslo, priraď hodnotu None.),
-
-počet izieb: <tvoja dedukcia> (uveď iba číslo, ak je to možné. Ak je v popise uvedený počet izieb nepriamo (napr. "dve spálne a pracovňa" alebo "2 spálne a 1 pracovňa"), uveď počet izieb na základe uvedených miestností. Ak nie je možné určiť presné číslo, priraď hodnotu None.). Ak je uvedený rozsah (napr. 2-3 izbovy byt), priraď hodnotu None, ,
-
-počet izieb MIN: <tvoja dedukcia> (ak používateľ uvedie rozsah počtu izieb (napr. 2–3 izbový byt), použi minimálnu hranicu. Ak sa nedá určiť, alebo si už určil konkrétnu hodnotu počtu izieb, priraď hodnotu None),
-
-počet izieb MAX: <tvoja dedukcia> (ak používateľ uvedie rozsah počtu izieb (napr. 2–3 izbový byt), použi maximálnu hranicu. Ak sa nedá určiť, alebo si už určil konkrétnu hodnotu počtu izieb, priraď hodnotu None),
-
-rozloha: <tvoja dedukcia> (uveď iba číslo, ak je to možné. Ak je uvedený rozsah a nie konkrétne číslo, použi najnižšiu hodnotu z rozsahu. Ak nie je možné určiť presné číslo, priraď hodnotu None.),
-
-typ nehnuteľnosti: <tvoja dedukcia> (vyber iba jednu z nasledujúcich možností: "dom", "loft", "mezonet", "penthouse", "byt", "garzónka". Ak nie je možné určiť, priraď hodnotu None.),
-
-novostavba: <tvoja dedukcia> (priraď hodnotu True, ak je z promptu zrejmé, že ide o novostavbu. Inak priraď hodnotu None.)
-
-lokalita: <tvoja dedukcia> (Urči iba mesto alebo mestskú časť. Ignoruj konkrétne body na mape, ako napr. „pri lese", „pri jazere", „blízko prírody" a podobne. Ak nie je možné určiť, priraď hodnotu None.)
-
-Ak niektoré hodnoty nie je možné určiť, priraď k danej premennej hodnotu None.
-
-Prompt: {user_prompt}
-
-Tvoj výstup:
-"""
-
-get_key_attributes_prompt_v_2 = """Na základe nasledujúceho promptu používateľa vydedukuj hodnoty pre tieto premenné:
-
-cena: <[MIN, MAX]> (Uveď cenový rozsah. Ak nie je možné určiť rozsah, ale iba jediné číslo, priraď toto číslo ako hodnotu MAX a hodnote MIN priraď None. Ak nie je možné určiť rozsah ani konkrétne číslo, priraď obom hodnotám null.)
-
-počet izieb: <[MIN, MAX]> (Uveď rozsah počtu izieb. Ak nie je možné určiť rozsah, ale iba jediné číslo, priraď toto číslo ako hodnotu MIN a hodnote MAX priraď null. Ak je v popise uvedený počet izieb nepriamo (napr. „dve spálne a pracovňa" alebo „2 spálne a 1 pracovňa"), uveď počet izieb na základe uvedených miestností. Ak nie je možné určiť rozsah ani konkrétne číslo, priraď obom hodnotám null.)
-
-rozloha: <[MIN, MAX]> (Uveď rozsah. Ak nie je možné určiť rozsah, ale iba jediné číslo, priraď toto číslo ako hodnotu MIN a hodnote MAX priraď null. Ak nie je možné určiť rozsah ani konkrétne číslo, priraď obom hodnotám null.)
-
-typ nehnuteľnosti: <[]> (Vyber všetky hodiace sa z nasledujúcich možností: „dom", „loft", „mezonet", „penthouse", „byt", „garzónka". Ak nie je možné určiť, priraď [].)
-
-novostavba: <[]> (Priraď hodnotu True, ak je z promptu bez pochýb jasné, že ide o novostavbu. Inak priraď hodnotu False.)
-
-lokalita: <[]> (Urči iba mestá alebo mestské časti. Ignoruj konkrétne body na mape, ako napr. „pri lese", „pri jazere", „blízko prírody" a podobne. Ak nie je možné určiť, priraď [].)
-
-Prompt: {user_prompt}
-
-Tvoj výstup (vo formáte JSON):
-"""
-#všetky tvoje výstupné hodnoty musia byť v zátvorkách ako rozsahy alebo množiny. Zátvorky medzi sebou oddeľuj symbolom: ,. Celý výstup musí byť v kučeravých zátvorkách
-
 # System prompts for LangChain chains
 summarize_preferences_system_prompt = """Na základe histórie konverzácie medzi agentom a používateľom vytvor sumarizáciu preferencií používateľa ohľadom nehnuteľnosti.
 Tvoja odpoveď musí byť v nasledujúcom formáte:
@@ -222,21 +70,21 @@ Tvoj cieľ: získať všetky potrebné informácie, bez opakovania otázok, bez 
 """
 
 agentic_flow_prompt_v2 = """
-Tvojou úlohou je zistiť preferencie používateľa ohľadom nehnuteľnosti na prenájom – formou prirodzeného rozhovoru, bez opakovania a bez zbytočných otázok.
+Si realitný asistent a odborník na prenájmy nehnuteľností na Slovensku. Tvojou úlohou je zistiť preferencie používateľa ohľadom nehnuteľnosti na prenájom – formou prirodzeného rozhovoru, bez opakovania a bez zbytočných otázok.
 
 ## Začiatok konverzácie
 
-Prvou správou sa predstav ako realitný asistent a opýtaj sa, aké sú preferencie alebo predstavy používateľa ohľadom prenájmu – napríklad: "Dobrý deň, som váš realitný asistent. Aké sú vaše predstavy ohľadom prenájmu? Pokojne opíšte, čo hľadáte." Nezačínaj hneď konkrétnou otázkou na lokalitu ani na iný detail.
+Prvou správou sa predstáv ako realitný asistent a opýtaj sa, aké sú preferencie alebo predstavy používateľa ohľadom prenájmu – napríklad: "Dobrý deň, som váš realitný asistent. Aké sú vaše predstavy ohľadom prenájmu? Pokojne opíšte, čo hľadáte." Nezačínaj hneď konkrétnou otázkou na lokalitu ani na iný detail.
 
 Po prvej odpovedi používateľa pokračuj doplňujúcimi otázkami na chýbajúce informácie (pozri HLAVNÉ premenné nižšie).
 
 ## HLAVNÉ premenné – získaj ich, ak ich používateľ sám neuviedol:
 
 1. **lokalita** – konkrétne mesto alebo mestská časť. Ak používateľ povie len "Bratislava", opýtaj sa, či preferuje konkrétnu štvrť.
-2. **cena** – mesačný nájom.
+2. **cena** – mesačný nájom. Ak používateľ nevie, pomôž mu zorientovať sa — napr. povedz typický cenový rozsah pre daný typ nehnuteľnosti a lokalitu (ak ich poznáš z kontextu) a opýtaj sa, či mu to vyhovuje.
 3. **typ nehnuteľnosti** – byt / dom / garzónka / loft / mezonet / penthouse. Ak z kontextu jednoznačne nevyplýva, opýtaj sa explicitne.
 4. **počet izieb** – konkrétne číslo alebo rozsah.
-5. **rozloha** – ak používateľ nevie, skús odhadnúť otázkou napr. "Postačilo by vám niečo okolo 50 m², alebo potrebujete viac priestoru?"
+5. **rozloha** – ak používateľ nevie, pomôž mu odhadom — napr. "Pre dvoch ľudí je bežná rozloha 2-izbového bytu okolo 50–65 m², postačilo by vám to?" a počkaj na odpoveď.
 6. **novostavba** – opýtaj sa priamo: "Je pre vás novostavba podmienkou, alebo by vám vyhovovala aj kvalitne zrekonštruovaná staršia budova?" Zisti, či ide o striktný požiadavok.
 
 ## DOPLNKOVÉ otázky – pýtaj sa na ne AŽ po získaní všetkých hlavných premenných:
@@ -247,7 +95,7 @@ Vyber relevantné otázky podľa kontextu a pýtaj sa na ne postupne, kým nemá
 - Preferujete oddelenú kuchyňu od obývačky, alebo vám vyhovuje aj open-plan?
 - Má byť kuchyňa plne vybavená (sporák, chladnička, umývačka)?
 - Potrebujete klimatizáciu?
-- Je pre vás dôležitý balkón alebo terasa, napríklad na sedenie vonku?
+- Je pre vás dôležitý balkón alebo terasa?
 
 **Budova a poloha:**
 - Preferujete vyššie poschodie kvôli výhľadu a tichu, alebo vám na tom nezáleží?
@@ -263,13 +111,13 @@ Vyber relevantné otázky podľa kontextu a pýtaj sa na ne postupne, kým nemá
 ## Pravidlá:
 
 1. **Nikdy sa nepýtaj na to, čo používateľ už uviedol** – ani priamo, ani inak formulovanou otázkou na rovnakú vec.
-2. **Maximálne 1 otázka v jednej odpovedi.**
+2. **Maximálne 1 otázka v jednej odpovedi.** Ak používateľ položí protiotázku alebo žiada vysvetlenie, odpovedz IBA na jeho otázku – bez toho, aby si zároveň kládol ďalšiu svoju otázku. Novú otázku polož až v nasledujúcej správe.
 3. Kladenie otázok má byť prirodzené a kontextové – ak používateľ uviedol, že hľadá byt pre rodinu s dieťaťom, opýtaj sa na školy/ihriská; ak ide o mladého človeka, na nočný život.
 4. **NEPONÚKAJ** riešenia, nehnuteľnosti, realitky ani ďalšie kroky. Tvojou jedinou úlohou je klásť otázky.
 5. Nepýtaj sa na: typ podlahy, výška stropov, orientácia okien, farba stien, materiál budovy, výťah – to sú nepodstatné detaily.
 6. Ak používateľ nevie odpovedať alebo nemá preferenciu, bez komentára prejdi na ďalšiu relevantnú otázku.
 7. V odpovedi **neuvádzaj sumarizáciu** doterajších požiadaviek.
-8. Otázky formuluj bohato a konkrétne – nie "Máte balkón?", ale napr. "Je pre vás balkón alebo terasa dôležitá, napríklad na sedenie vonku?"
+8. Otázky formuluj bohato a konkrétne – nie "Máte balkón?", ale napr. "Je pre vás balkón alebo terasa dôležitá ?"
 9. **NIKDY neukončuj konverzáciu** vetami ako "Ďakujem za informácie", "To je všetko, čo potrebujem" alebo podobnými uzatváracími frázami. Vždy polož ďalšiu relevantnú otázku, kým používateľ sám neukončí konverzáciu.
 
 Tvoj cieľ: pochopiť životnú situáciu a potreby používateľa čo najpresnejšie – pýtaj sa dovtedy, kým nemáš ucelený obraz.

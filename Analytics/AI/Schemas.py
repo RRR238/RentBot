@@ -51,12 +51,13 @@ class KeyAttributes(BaseModel):
         default_factory=list,
         description=(
             "Zoznam lokalít: mestá alebo mestské časti. "
-            "Ak používateľ uviedol konkrétne mestské časti (napr. 'Petržalka', 'Ružinov'), "
-            "uveď IBA tie — nie nadradené mesto (teda nie 'Bratislava', ak sú časti known). "
-            "Ak uviedol iba mesto bez konkrétnych častí, uveď mesto. "
-            "Ak uviedol mesto aj časti, uveď iba časti. "
-            "Ignoruj konkrétne body na mape ako 'pri jazere', 'pri lese', 'blízko centra', 'v tichej štvrti' — tie nepatria sem. "
-            "Prázdny zoznam ak lokalita nie je určená."
+            "Pravidlá v poradí priority: "
+            "(1) Ak používateľ uviedol konkrétne pomenované mestské časti (napr. 'Petržalka', 'Ružinov', 'Karlova Ves'), uveď IBA tie. "
+            "(2) Ak uviedol iba mesto (napr. 'Bratislava', 'Košice'), uveď mesto. "
+            "(3) Ak uviedol mesto aj pomenované časti, uveď iba časti. "
+            "POZOR: opisné frázy ako 'moderná štvrť', 'nový downtown', 'blízko centra', 'pri lese', 'tichá štvrť' NIE SÚ názvy lokalít — ignoruj ich tu (patria do ostatne_preferencie). "
+            "Ak opisná fráza doprevádza konkrétne mesto (napr. 'v Bratislave, v modernej štvrti'), uveď mesto. "
+            "Prázdny zoznam len ak lokalita nie je vôbec určená."
         ),
     )
     ostatne_preferencie: str = Field(
