@@ -26,14 +26,12 @@ from Analytics.config import CONN_STRING
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
-gen_model = "gpt-4o"
-
 # ---------------------------------------------------------------------------
 # Models / services
 # ---------------------------------------------------------------------------
 
-llm_langchain = ChatOpenAI(temperature=0.9, model=gen_model)
-llm_langchain_deterministic = ChatOpenAI(temperature=0.0, model=gen_model)
+llm_langchain = ChatOpenAI(temperature=0.9, model="gpt-4.1")
+llm_langchain_deterministic = ChatOpenAI(model="o3-mini")
 llm = LLM()
 vdb = Vector_DB_Qdrant('rent-bot-index')
 repository = Rent_offers_repository(CONN_STRING)
