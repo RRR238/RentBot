@@ -8,3 +8,4 @@ slowapi
 pytest
 jsonschema
 python-dotenv
+sentence-transformers
