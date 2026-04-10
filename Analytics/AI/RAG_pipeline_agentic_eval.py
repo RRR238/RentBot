@@ -92,14 +92,17 @@ while True:
         # --- Step 3: vector search ---
         filters = prepare_enriched_filters_from_key_attributes(key_attributes)
         embedding = llm.get_embedding(synthetic_listing, model='text-embedding-3-large')
-        results = vdb.enriched_filtered_vector_search(embedding, 10, filters)[0]
+        results = vdb.enriched_filtered_vector_search(embedding,
+                                                      1000,
+                                                      filters,
+                                                      score_threshold=0.6)[0]
 
         print("\n[results]:")
         formatted_history = format_chat_history(extract_chat_history_as_dict(chat_history))
 
         result_entries = []
-        for point in results.points:
-            print(point.payload['source_url'])
+        for i, point in enumerate(results.points, 1):
+            print(f"{i:2}. [{point.score:.4f}] {point.payload['source_url']}")
 
             db_id = point.payload.get('id')
             description = None

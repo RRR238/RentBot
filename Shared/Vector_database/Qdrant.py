@@ -171,7 +171,8 @@ class Vector_DB_Qdrant(Vector_DB_interface):
     def enriched_filtered_vector_search(self,
                                vector_query: list,
                                k: int,
-                               filter_input):
+                               filter_input,
+                               score_threshold: float = None):
         # Determine whether the input is already a Filter object
         if isinstance(filter_input, Filter):
             filters = filter_input
@@ -211,7 +212,8 @@ class Vector_DB_Qdrant(Vector_DB_interface):
                 query=vector_query,
                 filter=filters,
                 limit=k,
-                with_payload=True
+                with_payload=True,
+                score_threshold=score_threshold,
             )
         ]
 
