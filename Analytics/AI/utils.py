@@ -235,10 +235,10 @@ def prepare_enriched_filters_qdrant(processed_dict):
             )
         )
 
-    # Final filter with must + should
+    # If no bbox resolved, omit should entirely — empty should=[] in Qdrant = zero results
     return Filter(
         must=must_conditions,
-        should=should_conditions
+        should=should_conditions if should_conditions else None
     )
 
 def normalize_key_attributes(ka):
@@ -301,18 +301,30 @@ def prepare_enriched_filters_from_key_attributes(key_attributes) -> Filter:
         must_conditions.append(FieldCondition(key="property_status", match=MatchValue(value="novostavba")))
 
     # Location — multiple bounding boxes in should (OR logic)
+    MIN_BBOX_SIZE = 0.01  # ~1km — smaller bboxes are POIs/buildings, expand them
+    EXPAND_DEGREES = 0.018  # ~2km padding on each side
     should_conditions = []
     locations = key_attributes.lokalita or ['Slovakia']
     for loc in locations:
         bbox = get_bounding_box_from_location(loc)
         if bbox is None:
             continue
+        lat_range = bbox["north_lat"] - bbox["south_lat"]
+        lon_range = bbox["east_lon"] - bbox["west_lon"]
+        if lat_range < MIN_BBOX_SIZE or lon_range < MIN_BBOX_SIZE:
+            bbox = {
+                "south_lat": bbox["south_lat"] - EXPAND_DEGREES,
+                "north_lat": bbox["north_lat"] + EXPAND_DEGREES,
+                "west_lon":  bbox["west_lon"]  - EXPAND_DEGREES,
+                "east_lon":  bbox["east_lon"]  + EXPAND_DEGREES,
+            }
         should_conditions.append(Filter(must=[
             FieldCondition(key="latitude", range=Range(gte=bbox["south_lat"], lte=bbox["north_lat"])),
             FieldCondition(key="longtitude", range=Range(gte=bbox["west_lon"], lte=bbox["east_lon"])),
         ]))
 
-    return Filter(must=must_conditions, should=should_conditions)
+    # If no bbox resolved, omit should entirely — empty should=[] in Qdrant = zero results
+    return Filter(must=must_conditions, should=should_conditions if should_conditions else None)
 
 
 def extract_chat_history_as_dict(memory):

@@ -35,7 +35,9 @@ class KeyAttributes(BaseModel):
         description=(
             "Rozsah rozlohy v m². "
             "Ak používateľ uvedie jediné číslo alebo spodnú hranicu (napr. 'aspoň 60 m²', 'min 50'), priraď ho ako MIN a MAX nastav na null. "
-            "Ak používateľ uvedie rozsah (napr. '50-70 m²', 'okolo 50-60'), priraď nižšie číslo ako MIN a vyššie ako MAX. "
+            "Ak používateľ uvedie vlastný rozsah s jasným vymedzením oboch hraníc (napr. 'od 50 do 70 m²'), priraď nižšie ako MIN a vyššie ako MAX. "
+            "Ak rozsah navrhol agent a používateľ ho len neurčito potvrdil (napr. 'hej', 'môže byť', 'tak nejako', 'pre dvoch ľudí'), "
+            "priraď IBA nižšie číslo ako MIN a MAX nastav na null — používateľ nevyjadril pevnú hornú hranicu. "
             "NIKDY nepriraďuj rovnakú hodnotu obom. Ak nie je možné určiť žiadne číslo, priraď obom null."
         ),
     )
@@ -50,14 +52,16 @@ class KeyAttributes(BaseModel):
     lokalita: list[str] = Field(
         default_factory=list,
         description=(
-            "Zoznam lokalít: mestá alebo mestské časti. "
+            "Zoznam lokalít: iba mestá alebo mestské časti (administratívne obvody). "
             "Pravidlá v poradí priority: "
-            "(1) Ak používateľ uviedol konkrétne pomenované mestské časti (napr. 'Petržalka', 'Ružinov', 'Karlova Ves'), uveď IBA tie. "
+            "(1) Ak používateľ uviedol konkrétne pomenované mestské časti (napr. 'Petržalka', 'Ružinov', 'Karlova Ves', 'Dúbravka'), uveď IBA tie. "
             "(2) Ak uviedol iba mesto (napr. 'Bratislava', 'Košice'), uveď mesto. "
             "(3) Ak uviedol mesto aj pomenované časti, uveď iba časti. "
-            "POZOR: opisné frázy ako 'moderná štvrť', 'nový downtown', 'blízko centra', 'pri lese', 'tichá štvrť' NIE SÚ názvy lokalít — ignoruj ich tu (patria do ostatne_preferencie). "
-            "Ak opisná fráza doprevádza konkrétne mesto (napr. 'v Bratislave, v modernej štvrti'), uveď mesto. "
-            "Prázdny zoznam len ak lokalita nie je vôbec určená."
+            "POZOR — toto NIE SÚ mestské časti a NEPATRIA sem: jazerá, parky, námestia, ulice, rekreačné oblasti, obchodné centrá ani iné body záujmu (napr. 'Draždiak', 'Štrkovec', 'Sad Janka Kráľa', 'Eurovea'). "
+            "Ak používateľ uviedol takýto bod záujmu, urči mestskú časť, v ktorej sa nachádza (napr. Draždiak → Petržalka, Štrkovec → Ružinov), a uveď tú. "
+            "Opisné frázy ako 'moderná štvrť', 'nový downtown', 'blízko centra', 'pri lese' takisto nepatria sem — daj ich do ostatne_preferencie. "
+            "Prázdny zoznam len ak lokalita nie je vôbec určená. "
+            "NIKDY nevyvodzuj mesto z opisných pojmov ako 'downtown', 'centrum', 'mrakodrap' — mesto musí byť explicitne pomenované."
         ),
     )
     ostatne_preferencie: str = Field(

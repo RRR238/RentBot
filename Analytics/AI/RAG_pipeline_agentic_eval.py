@@ -9,6 +9,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from .Prompts import (
     agentic_flow_prompt_v2 as agentic_flow_prompt,
     extract_preferences_from_conversation_prompt,
+    generate_synthetic_listing_prompt,
 )
 from .Schemas import KeyAttributes
 from .utils import (
@@ -31,7 +32,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 # ---------------------------------------------------------------------------
 
 llm_langchain = ChatOpenAI(temperature=0.9, model="gpt-4.1")
-llm_langchain_deterministic = ChatOpenAI(model="o3-mini")
+llm_langchain_deterministic = ChatOpenAI(model="gpt-4o")
 llm = LLM()
 vdb = Vector_DB_Qdrant('rent-bot-index')
 repository = Rent_offers_repository(CONN_STRING)
@@ -52,6 +53,11 @@ _extract_prompt = ChatPromptTemplate.from_messages([
     ("human", "Extrahuj preferencie používateľa z vyššie uvedenej konverzácie."),
 ])
 extract_chain = _extract_prompt | llm_langchain_deterministic.with_structured_output(KeyAttributes)
+
+synthetic_listing_chain = create_chain(
+    llm_langchain_deterministic, generate_synthetic_listing_prompt,
+    human_template="{key_attributes}",
+)
 
 # ---------------------------------------------------------------------------
 # Main loop
@@ -77,9 +83,15 @@ while True:
         key_attributes = normalize_key_attributes(key_attributes)
         print(f"\n[key attributes]: {key_attributes}")
 
-        # --- Step 2: vector search ---
+        # --- Step 2: generate synthetic listing for embedding (HyDE) ---
+        synthetic_listing = synthetic_listing_chain.invoke(
+            {"key_attributes": key_attributes.ostatne_preferencie or ""}
+        ).content
+        print(f"[synthetic listing]: {synthetic_listing}")
+
+        # --- Step 3: vector search ---
         filters = prepare_enriched_filters_from_key_attributes(key_attributes)
-        embedding = llm.get_embedding(key_attributes.ostatne_preferencie or "bývanie", model='text-embedding-3-large')
+        embedding = llm.get_embedding(synthetic_listing, model='text-embedding-3-large')
         results = vdb.enriched_filtered_vector_search(embedding, 10, filters)[0]
 
         print("\n[results]:")
@@ -104,6 +116,7 @@ while True:
         eval_records.append({
             "chat_history": formatted_history,
             "key_attributes": key_attributes,
+            "synthetic_listing": synthetic_listing,
             "results": result_entries,
         })
 

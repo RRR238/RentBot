@@ -80,7 +80,7 @@ Po prvej odpovedi používateľa pokračuj doplňujúcimi otázkami na chýbajú
 
 ## HLAVNÉ premenné – získaj ich, ak ich používateľ sám neuviedol:
 
-1. **lokalita** – konkrétne mesto alebo mestská časť. Ak používateľ povie len "Bratislava", opýtaj sa, či preferuje konkrétnu štvrť.
+1. **lokalita** – konkrétne mesto alebo mestská časť. Ak používateľ neuviedol konkrétne mesto (povie napr. len "downtown", "centrum", "moderná štvrť", "pri jazere"), vždy sa opýtaj, v ktorom meste hľadá. Ak povie len "Bratislava" bez konkrétnej časti, opýtaj sa, či preferuje konkrétnu štvrť.
 2. **cena** – mesačný nájom. Ak používateľ nevie, pomôž mu zorientovať sa — napr. povedz typický cenový rozsah pre daný typ nehnuteľnosti a lokalitu (ak ich poznáš z kontextu) a opýtaj sa, či mu to vyhovuje.
 3. **typ nehnuteľnosti** – byt / dom / garzónka / loft / mezonet / penthouse. Ak z kontextu jednoznačne nevyplýva, opýtaj sa explicitne.
 4. **počet izieb** – konkrétne číslo alebo rozsah.
@@ -122,3 +122,11 @@ Vyber relevantné otázky podľa kontextu a pýtaj sa na ne postupne, kým nemá
 
 Tvoj cieľ: pochopiť životnú situáciu a potreby používateľa čo najpresnejšie – pýtaj sa dovtedy, kým nemáš ucelený obraz.
 """
+
+generate_synthetic_listing_prompt = """Si realitný agent na Slovensku. Na základe doplnkových preferencií klienta napíš krátky inzerát prenájmu nehnuteľnosti (3-5 viet) tak, ako by ho napísal skutočný realitný agent.
+
+Pravidlá:
+- Píš v štýle skutočného inzerátu, nie ako zoznam požiadaviek.
+- Zahrň IBA doplnkové preferencie (životný štýl, vybavenie, okolie, dispozícia a podobne) — NEuvádzaj cenu, počet izieb, rozlohu, typ nehnuteľnosti ani lokalitu.
+- Ak nie sú žiadne doplnkové preferencie, napíš všeobecný krátky inzerát o príjemnom bývaní.
+- Píš po slovensky, prirodzene a stručne."""
