@@ -3,6 +3,8 @@ import math
 import re
 from typing import Optional, Union
 
+from sentence_transformers import CrossEncoder
+
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from Shared.Geolocation import get_bounding_box_from_location
@@ -347,3 +349,21 @@ def format_chat_history(chat_history):
         elif message["role"] == "assistant":
             formatted_history += f"Asistent: {message['content']}\n"
     return formatted_history
+
+
+def rerank(query: str, points: list, model: CrossEncoder) -> list:
+    """Rerank Qdrant result points by relevance using a cross-encoder.
+
+    Args:
+        query: the synthetic listing text used as query
+        points: list of Qdrant ScoredPoint objects
+        model: a loaded CrossEncoder instance
+
+    Returns:
+        points reordered from most to least relevant
+    """
+    descriptions = [p.payload.get("description") or "" for p in points]
+    pairs = [(query, desc) for desc in descriptions]
+    scores = model.predict(pairs)
+    reranked = sorted(zip(scores, points), key=lambda x: x[0], reverse=True)
+    return [point for _, point in reranked]

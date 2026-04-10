@@ -1,4 +1,5 @@
 import json
+import time
 import warnings
 from datetime import datetime
 
@@ -12,10 +13,13 @@ from .Prompts import (
     generate_synthetic_listing_prompt,
 )
 from .Schemas import KeyAttributes
+from sentence_transformers import CrossEncoder
+
 from .utils import (
     create_chain,
     normalize_key_attributes,
     prepare_enriched_filters_from_key_attributes,
+    rerank,
     extract_chat_history_as_dict,
     format_chat_history,
 )
@@ -31,8 +35,11 @@ warnings.filterwarnings("ignore", category=UserWarning)
 # Models / services
 # ---------------------------------------------------------------------------
 
-llm_langchain = ChatOpenAI(temperature=0.9, model="gpt-4.1")
-llm_langchain_deterministic = ChatOpenAI(model="gpt-4o")
+llm_langchain = ChatOpenAI(temperature=0.9,
+                           model="gpt-4.1")
+llm_langchain_deterministic = ChatOpenAI(temperature=0.0,
+                                         model="gpt-4o")
+reranker = CrossEncoder("BAAI/bge-reranker-v2-m3")
 llm = LLM()
 vdb = Vector_DB_Qdrant('rent-bot-index')
 repository = Rent_offers_repository(CONN_STRING)
@@ -78,6 +85,8 @@ while True:
     query = input("You: ").strip()
 
     if query == SEARCH_TRIGGER:
+        t_start = time.time()
+
         # --- Step 1: extract structured preferences directly from conversation ---
         key_attributes: KeyAttributes = extract_chain.invoke({"messages": chat_history})
         key_attributes = normalize_key_attributes(key_attributes)
@@ -97,13 +106,15 @@ while True:
                                                       filters,
                                                       score_threshold=0.6)[0]
 
-        print("\n[results]:")
+        reranked_points = rerank(synthetic_listing, results.points, reranker)
+
+        t_total = time.time() - t_start
+        print(f"\n[results] ({len(reranked_points)} total, {t_total:.1f}s):")
         formatted_history = format_chat_history(extract_chat_history_as_dict(chat_history))
 
         result_entries = []
-        for i, point in enumerate(results.points, 1):
+        for i, point in enumerate(reranked_points, 1):
             print(f"{i:2}. [{point.score:.4f}] {point.payload['source_url']}")
-
             db_id = point.payload.get('id')
             description = None
             if db_id is not None:
