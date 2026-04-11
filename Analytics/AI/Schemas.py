@@ -23,6 +23,8 @@ class KeyAttributes(BaseModel):
             "Cenový rozsah mesačného nájmu. "
             "Ak používateľ uvedie jediné číslo alebo hornú hranicu (napr. '700 eur', 'do 800', 'max 900'), priraď ho ako MAX a MIN nastav na null. "
             "Ak používateľ uvedie rozsah (napr. '600-800', 'okolo 600-700'), priraď nižšie číslo ako MIN a vyššie ako MAX. "
+            "Ak rozsah navrhol agent a používateľ ho len neurčito potvrdil (napr. 'hej', 'môže byť', 'tak nejako', 'dobre'), "
+            "priraď IBA vyššie číslo ako MAX a MIN nastav na null — používateľ nevyjadril pevnú dolnú hranicu. "
             "NIKDY nepriraďuj rovnakú hodnotu obom. Ak nie je možné určiť žiadne číslo, priraď obom null."
         ),
     )
@@ -60,8 +62,12 @@ class KeyAttributes(BaseModel):
             "POZOR — toto NIE SÚ mestské časti a NEPATRIA sem: jazerá, parky, námestia, ulice, rekreačné oblasti, obchodné centrá ani iné body záujmu (napr. 'Draždiak', 'Štrkovec', 'Sad Janka Kráľa', 'Eurovea'). "
             "Ak používateľ uviedol takýto bod záujmu, urči mestskú časť, v ktorej sa nachádza (napr. Draždiak → Petržalka, Štrkovec → Ružinov), a uveď tú. "
             "Opisné frázy ako 'moderná štvrť', 'nový downtown', 'blízko centra', 'pri lese' takisto nepatria sem — daj ich do ostatne_preferencie. "
+            "MÄKKÁ PREFERENCIA MESTSKEJ ČASTI: Ak agent položil otázku o preferovanej mestskej časti a používateľ odpovedal jazykom mäkkej preferencie (napr. 'ideálne', 'najradšej', 'prípadne', 'keby mohlo byť', 'skôr'), "
+            "znamená to, že mestská časť NIE JE tvrdá podmienka — daj do lokalita IBA mesto (napr. 'Bratislava') a konkrétnu mestskú časť zahrň do ostatne_preferencie. "
+            "VÝNIMKA: Ak používateľ sám od seba (nie v odpovedi na agentovu otázku) uvedie mestskú časť bez mesta, považuj ju za tvrdú podmienku a daj ju do lokalita. "
             "Prázdny zoznam len ak lokalita nie je vôbec určená. "
-            "NIKDY nevyvodzuj mesto z opisných pojmov ako 'downtown', 'centrum', 'mrakodrap' — mesto musí byť explicitne pomenované."
+            "NIKDY nevyvodzuj mesto z opisných pojmov ako 'downtown', 'centrum', 'mrakodrap' — mesto musí byť explicitne pomenované. "
+            "NIKDY nepreberaj názvy lokalít z otázok agenta — ber IBA hodnoty ktoré používateľ sám potvrdil alebo uviedol."
         ),
     )
     ostatne_preferencie: str = Field(

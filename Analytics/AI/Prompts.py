@@ -43,7 +43,17 @@ Pokyny pre jednotlivé polia sú uvedené v ich popise. Všeobecné pravidlá:
 - Zohľadni celú konverzáciu.
 - Ak niektorú hodnotu nie je možné určiť, použi predvolenú hodnotu (null alebo prázdny zoznam alebo prázdny reťazec).
 - Do poľa 'ostatne_preferencie' nezaraďuj preferencie s neurčitým vymedzením (napr. "neviem", "je mi to jedno") ani negatívne vymedzenia (napr. "nechcem", "nepotrebujem") — okrem prípadov ako "nočný život", "bary v okolí" a podobné, kde ide o pozitívnu preferenciu životného štýlu.
-- Do poľa 'ostatne_preferencie' nezaraďuj cenu, počet izieb, rozlohu, typ nehnuteľnosti, novostavbu ani lokalitu."""
+- Do poľa 'ostatne_preferencie' nezaraďuj cenu, počet izieb, rozlohu, typ nehnuteľnosti, novostavbu ani lokalitu.
+
+DÔLEŽITÉ pravidlo pre cenu a rozlohu:
+Ak agent navrhol cenový alebo rozlohový rozsah (napr. "500–750 eur", "30–40 m²") a používateľ ho len neurčito potvrdil (napr. "hej", "môže byť", "dobre", "tak nejako") — používateľ nevyjadril pevné ohraničenie z oboch strán.
+Pre CENU: priraď IBA vyššie číslo ako MAX, MIN nastav na null.
+Pre ROZLOHU: priraď IBA nižšie číslo ako MIN, MAX nastav na null.
+
+DÔLEŽITÉ pravidlo pre lokalitu:
+Ak agent položil otázku o preferovanej mestskej časti a používateľ odpovedal jazykom MÄKKEJ preferencie — teda použil slová ako "ideálne", "najradšej", "prípadne", "keby mohlo byť", "skôr" — mestská časť NIE JE tvrdá podmienka.
+V takom prípade: do 'lokalita' daj IBA mesto (napr. ["Bratislava"]) a mestskú časť zahrň do 'ostatne_preferencie' (napr. "ideálne Ružinov").
+VÝNIMKA: Ak používateľ sám od seba (nie v odpovedi na agentovu otázku) uviedol mestskú časť bez mesta, ide o tvrdú podmienku — daj ju do 'lokalita'."""
 
 agentic_flow_prompt ="""
 Tvojou úlohou je získať a zhrnúť preferencie používateľa ohľadom ideálnej nehnuteľnosti na prenájom.

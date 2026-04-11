@@ -245,8 +245,9 @@ def prepare_enriched_filters_qdrant(processed_dict):
 
 def normalize_key_attributes(ka):
     """Post-process extracted KeyAttributes:
-    - cena:   if max - min <= 200  → keep only MAX (narrow price band = treat as upper bound)
-    - rozloha: if max - min <= 20  → keep only MIN (narrow size band = treat as lower bound)
+    - cena:       if max - min <= 200  → keep only MAX (narrow price band = treat as upper bound)
+    - rozloha:    if max - min <= 20   → keep only MIN (narrow size band = treat as lower bound)
+    - pocet_izieb: if min == max       → keep only MIN (single value, not a range)
     """
     c = ka.cena
     if c.min is not None and c.max is not None and (c.max - c.min) <= 200:
@@ -255,6 +256,10 @@ def normalize_key_attributes(ka):
     r = ka.rozloha
     if r.min is not None and r.max is not None and (r.max - r.min) <= 20:
         ka.rozloha.max = None
+
+    p = ka.pocet_izieb
+    if p.min is not None and p.max is not None and p.min == p.max:
+        ka.pocet_izieb.max = None
 
     return ka
 

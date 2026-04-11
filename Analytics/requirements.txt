@@ -5,3 +5,4 @@ langchain
 langchain-openai
 langchain_community
 sentence-transformers
+einops

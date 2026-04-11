@@ -39,7 +39,7 @@ llm_langchain = ChatOpenAI(temperature=0.9,
                            model="gpt-4.1")
 llm_langchain_deterministic = ChatOpenAI(temperature=0.0,
                                          model="gpt-4o")
-reranker = CrossEncoder("BAAI/bge-reranker-v2-m3")
+reranker = CrossEncoder("cross-encoder/mmarco-mMiniLMv2-L12-H384-v1",)
 llm = LLM()
 vdb = Vector_DB_Qdrant('rent-bot-index')
 repository = Rent_offers_repository(CONN_STRING)
@@ -62,7 +62,8 @@ _extract_prompt = ChatPromptTemplate.from_messages([
 extract_chain = _extract_prompt | llm_langchain_deterministic.with_structured_output(KeyAttributes)
 
 synthetic_listing_chain = create_chain(
-    llm_langchain_deterministic, generate_synthetic_listing_prompt,
+    llm_langchain_deterministic,
+    generate_synthetic_listing_prompt,
     human_template="{key_attributes}",
 )
 
@@ -102,7 +103,7 @@ while True:
         filters = prepare_enriched_filters_from_key_attributes(key_attributes)
         embedding = llm.get_embedding(synthetic_listing, model='text-embedding-3-large')
         results = vdb.enriched_filtered_vector_search(embedding,
-                                                      1000,
+                                                      50,
                                                       filters,
                                                       score_threshold=0.6)[0]
 
