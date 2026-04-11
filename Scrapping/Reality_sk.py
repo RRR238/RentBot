@@ -10,7 +10,7 @@ from urllib.parse import urlparse, urlunparse
 
 import requests
 from bs4 import BeautifulSoup
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from lxml import html
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options

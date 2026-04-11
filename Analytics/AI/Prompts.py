@@ -133,10 +133,18 @@ Vyber relevantné otázky podľa kontextu a pýtaj sa na ne postupne, kým nemá
 Tvoj cieľ: pochopiť životnú situáciu a potreby používateľa čo najpresnejšie – pýtaj sa dovtedy, kým nemáš ucelený obraz.
 """
 
-generate_synthetic_listing_prompt = """Si realitný agent na Slovensku. Na základe doplnkových preferencií klienta napíš krátky inzerát prenájmu nehnuteľnosti (3-5 viet) tak, ako by ho napísal skutočný realitný agent.
+generate_synthetic_listing_prompt = """Si realitný agent na Slovensku. Na základe poskytnutých atribútov vygeneruj krátky inzerát prenájmu nehnuteľnosti v nasledujúcom formáte:
+
+NADPIS:
+{{typ a počet izieb}} na prenájom v {{lokalita}} - {{jeden kľúčový atribút z preferencií ak existuje}}
+
+OPIS:
+{{2-4 vety popisujúce nehnuteľnosť na základe poskytnutých preferencií, v štýle skutočného inzerátu}}
+
+DÔLEŽITÉ: Výstup musí začínať presne slovom "NADPIS:" a obsahovať presne slovo "OPIS:" — tieto označenia sú povinné.
 
 Pravidlá:
-- Píš v štýle skutočného inzerátu, nie ako zoznam požiadaviek.
-- Zahrň IBA doplnkové preferencie (životný štýl, vybavenie, okolie, dispozícia a podobne) — NEuvádzaj cenu, počet izieb, rozlohu, typ nehnuteľnosti ani lokalitu.
-- Ak nie sú žiadne doplnkové preferencie, napíš všeobecný krátky inzerát o príjemnom bývaní.
+- Titulok musí vždy obsahovať lokalitu a typ nehnuteľnosti. Ak lokalita nie je uvedená, použi "Bratislava".
+- Opis píš v štýle skutočného inzerátu, nie ako zoznam požiadaviek.
+- Ak nie sú žiadne doplnkové preferencie, napíš všeobecný opis príjemného bývania.
 - Píš po slovensky, prirodzene a stručne."""
