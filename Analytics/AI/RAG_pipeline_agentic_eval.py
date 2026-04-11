@@ -13,6 +13,8 @@ from .Prompts import (
     generate_synthetic_listing_prompt,
 )
 from .Schemas import KeyAttributes
+from fastembed import SparseTextEmbedding
+from qdrant_client.models import SparseVector
 from sentence_transformers import CrossEncoder
 
 from .utils import (
@@ -40,6 +42,7 @@ llm_langchain = ChatOpenAI(temperature=0.9,
 llm_langchain_deterministic = ChatOpenAI(temperature=0.0,
                                          model="gpt-4o")
 reranker = CrossEncoder("cross-encoder/mmarco-mMiniLMv2-L12-H384-v1",)
+sparse_model = SparseTextEmbedding(model_name="Qdrant/bm42-all-minilm-l6-v2-attentions")
 llm = LLM()
 vdb = Vector_DB_Qdrant('rent-bot-index')
 repository = Rent_offers_repository(CONN_STRING)
@@ -99,12 +102,21 @@ while True:
         ).content
         print(f"[synthetic listing]: {synthetic_listing}")
 
-        # --- Step 3: vector search ---
+        # --- Step 3: vector search (hybrid: dense + BM42 sparse) ---
         filters = prepare_enriched_filters_from_key_attributes(key_attributes)
         embedding = llm.get_embedding(synthetic_listing, model='text-embedding-3-large')
-        results = vdb.enriched_filtered_vector_search(embedding,
-                                                      50,
-                                                      filters)[0]
+        sparse_result = list(sparse_model.embed([synthetic_listing]))[0]
+        sparse_vec = SparseVector(
+            indices=sparse_result.indices.tolist(),
+            values=sparse_result.values.tolist(),
+        )
+        results = vdb.enriched_filtered_vector_search(
+            embedding,
+            50,
+            filters,
+            use_hybrid=True,
+            sparse_vector=sparse_vec,
+        )[0]
 
         reranked_points = rerank(synthetic_listing, results.points, reranker)
 
