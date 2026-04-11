@@ -1,4 +1,5 @@
 import os
+import qdrant_client.models
 from dotenv import load_dotenv
 from qdrant_client import QdrantClient, AsyncQdrantClient
 
@@ -373,6 +374,12 @@ class Vector_DB_Qdrant(Vector_DB_interface):
         )
         return True
 
+    def delete_by_qdrant_id(self, qdrant_id: str) -> None:
+        self.__client.delete(
+            collection_name=self.index_name,
+            points_selector=qdrant_client.models.PointIdsList(points=[qdrant_id]),
+        )
+
     def get_all_metadata(self,
                          batch_size: int = 100):
         all_payloads = []
@@ -392,7 +399,7 @@ class Vector_DB_Qdrant(Vector_DB_interface):
 
             points_batch, scroll_offset = response
             for point in points_batch:
-                all_payloads.append(point.payload)
+                all_payloads.append({"qdrant_id": point.id, **point.payload})
 
             if scroll_offset is None:
                 break
