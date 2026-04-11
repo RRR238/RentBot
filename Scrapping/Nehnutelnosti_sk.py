@@ -455,7 +455,7 @@ class Nehnutelnosti_sk_processor:
                             },
                         )
                         self.processed_offers += 1
-                        continue
+                    continue
 
                 if self.db_repository.find_duplicates(
                     price_rent=results.prices.rent,

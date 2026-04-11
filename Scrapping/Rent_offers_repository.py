@@ -60,11 +60,14 @@ class Rent_offers_repository:
                         precision_coordinates:float=0.001,
                         precision_size:float=1):
         with self.get_session() as session:
+            def eq_or_null(col, val):
+                return col.is_(None) if val is None else col == val
+
             conditions = [
                 Rent_offer_model.price_rent == price_rent,
-                Rent_offer_model.price_energies == price_energies,
-                Rent_offer_model.rooms == rooms,
-                Rent_offer_model.ownership == ownership,
+                eq_or_null(Rent_offer_model.price_energies, price_energies),
+                eq_or_null(Rent_offer_model.rooms, rooms),
+                eq_or_null(Rent_offer_model.ownership, ownership),
             ]
 
             if size is not None:

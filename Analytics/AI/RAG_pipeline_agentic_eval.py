@@ -94,17 +94,10 @@ while True:
         print(f"\n[key attributes]: {key_attributes}")
 
         # --- Step 2: generate synthetic listing for embedding (HyDE) ---
-        lokalita_str = ", ".join(key_attributes.lokalita) if key_attributes.lokalita else "Bratislava"
-        typ_str = ", ".join(key_attributes.typ_nehnutelnosti) if key_attributes.typ_nehnutelnosti else "byt"
-        izby_min = key_attributes.pocet_izieb.min
-        izby_str = f"{int(izby_min)}-izbový" if izby_min else ""
-        hyde_input = (
-            f"Lokalita: {lokalita_str}\n"
-            f"Typ: {izby_str} {typ_str}\n"
-            f"Preferencie: {key_attributes.ostatne_preferencie or ''}"
-        )
-        synthetic_listing = synthetic_listing_chain.invoke({"key_attributes": hyde_input}).content
-        print(f"[synthetic listing]:\n{synthetic_listing}")
+        synthetic_listing = synthetic_listing_chain.invoke(
+            {"key_attributes": key_attributes.ostatne_preferencie or ""}
+        ).content
+        print(f"[synthetic listing]: {synthetic_listing}")
 
         # --- Step 3: vector search ---
         filters = prepare_enriched_filters_from_key_attributes(key_attributes)
