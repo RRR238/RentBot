@@ -19,6 +19,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance, VectorParams,
     SparseVector, SparseVectorParams, SparseIndexParams,
+    PayloadSchemaType,
     PointStruct,
 )
 from Scrapping.Rent_offers_repository import Rent_offers_repository
@@ -62,6 +63,27 @@ def scroll_all_points_with_vectors(client: QdrantClient) -> list[dict]:
         if offset is None:
             break
     return all_points
+
+
+PAYLOAD_INDEXES = [
+    ("price_total",    PayloadSchemaType.FLOAT),
+    ("rooms",          PayloadSchemaType.INTEGER),
+    ("size",           PayloadSchemaType.FLOAT),
+    ("latitude",       PayloadSchemaType.FLOAT),
+    ("longtitude",     PayloadSchemaType.FLOAT),
+    ("property_type",  PayloadSchemaType.KEYWORD),
+    ("property_status",PayloadSchemaType.KEYWORD),
+]
+
+
+def create_payload_indexes(client: QdrantClient) -> None:
+    for field_name, schema in PAYLOAD_INDEXES:
+        client.create_payload_index(
+            collection_name=COLLECTION_NAME,
+            field_name=field_name,
+            field_schema=schema,
+        )
+    print(f"Created {len(PAYLOAD_INDEXES)} payload indexes.")
 
 
 def build_text(title: str | None, description: str | None) -> str:
@@ -146,6 +168,7 @@ def main():
         },
     )
     print("Collection recreated.")
+    create_payload_indexes(client)
 
     # ------------------------------------------------------------------ #
     # 4. Re-insert all points

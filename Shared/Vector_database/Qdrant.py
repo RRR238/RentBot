@@ -6,7 +6,7 @@ from qdrant_client import QdrantClient, AsyncQdrantClient
 load_dotenv()
 from qdrant_client.models import (
     Distance, VectorParams, PayloadSchemaType,
-    SparseVector, NamedVector, NamedSparseVector,
+    SparseVector,
     Prefetch, FusionQuery, Fusion,
 )
 from qdrant_client.http.models import PointStruct
@@ -225,7 +225,7 @@ class Vector_DB_Qdrant(Vector_DB_interface):
                     limit=k * 2,
                 ),
                 Prefetch(
-                    query=NamedSparseVector(name=SPARSE_VECTOR_NAME, vector=sparse_vector),
+                    query=sparse_vector,
                     using=SPARSE_VECTOR_NAME,
                     filter=filters,
                     limit=k * 2,
@@ -351,7 +351,7 @@ class Vector_DB_Qdrant(Vector_DB_interface):
                     limit=k * 2,
                 ),
                 Prefetch(
-                    query=NamedSparseVector(name=SPARSE_VECTOR_NAME, vector=sparse_vector),
+                    query=sparse_vector,
                     using=SPARSE_VECTOR_NAME,
                     filter=filters,
                     limit=k * 2,

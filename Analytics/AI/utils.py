@@ -356,18 +356,19 @@ def format_chat_history(chat_history):
     return formatted_history
 
 
-def rerank(query: str, points: list, model: CrossEncoder) -> list:
+def rerank(query: str, points: list, model: CrossEncoder, field: str = "description") -> list:
     """Rerank Qdrant result points by relevance using a cross-encoder.
 
     Args:
-        query: the synthetic listing text used as query
+        query: the query text
         points: list of Qdrant ScoredPoint objects
         model: a loaded CrossEncoder instance
+        field: payload field to compare against (default: "description")
 
     Returns:
         points reordered from most to least relevant
     """
-    descriptions = [p.payload.get("description") or "" for p in points]
+    descriptions = [p.payload.get(field) or "" for p in points]
     pairs = [(query, desc) for desc in descriptions]
     scores = model.predict(pairs)
     reranked = sorted(zip(scores, points), key=lambda x: x[0], reverse=True)

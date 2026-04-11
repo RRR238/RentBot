@@ -96,16 +96,14 @@ while True:
         key_attributes = normalize_key_attributes(key_attributes)
         print(f"\n[key attributes]: {key_attributes}")
 
-        # --- Step 2: generate synthetic listing for embedding (HyDE) ---
-        synthetic_listing = synthetic_listing_chain.invoke(
-            {"key_attributes": key_attributes.ostatne_preferencie or ""}
-        ).content
-        print(f"[synthetic listing]: {synthetic_listing}")
+        # --- Step 2: query text (HyDE disabled — embed preferences directly) ---
+        query_text = key_attributes.ostatne_preferencie or ""
+        print(f"[query text]: {query_text}")
 
         # --- Step 3: vector search (hybrid: dense + BM42 sparse) ---
         filters = prepare_enriched_filters_from_key_attributes(key_attributes)
-        embedding = llm.get_embedding(synthetic_listing, model='text-embedding-3-large')
-        sparse_result = list(sparse_model.embed([synthetic_listing]))[0]
+        embedding = llm.get_embedding(query_text, model='text-embedding-3-large')
+        sparse_result = list(sparse_model.embed([query_text]))[0]
         sparse_vec = SparseVector(
             indices=sparse_result.indices.tolist(),
             values=sparse_result.values.tolist(),
@@ -118,7 +116,7 @@ while True:
             sparse_vector=sparse_vec,
         )[0]
 
-        reranked_points = rerank(synthetic_listing, results.points, reranker)
+        reranked_points = rerank(query_text, results.points, reranker, field="title")
 
         t_total = time.time() - t_start
         print(f"\n[results] ({len(reranked_points)} total, {t_total:.1f}s):")
@@ -141,7 +139,7 @@ while True:
         eval_records.append({
             "chat_history": formatted_history,
             "key_attributes": key_attributes,
-            "synthetic_listing": synthetic_listing,
+            "query_text": query_text,
             "results": result_entries,
         })
 
