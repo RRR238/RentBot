@@ -1,0 +1,94 @@
+[
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/Ju_UZDT0hQN/bosen-2kk-byt-v-novostavbe-premiere-stare-mesto",
+        "error": "invalid literal for int() with base 10: '7 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/JuGXZNKh521/dom-realit-ihned-vollny-zariadeny-velka-pivnica-parkovacie-statie",
+        "error": "invalid literal for int() with base 10: '2 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/JuUJiFYxp0j/prenajom-blizkosti-auparku-v-kosiciach",
+        "error": "invalid literal for int() with base 10: '8 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/JutFciNTn5l/slnecny-a-priestranny-2i-byt-klimatizacia-balkon-pivnica-garaz",
+        "error": "invalid literal for int() with base 10: '7 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/JuND6ANYwHJ/hladam-byt-pre-3and45clennu-rodinu",
+        "error": "unsupported operand type(s) for +: 'NoneType' and 'int'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/JuJdD7Ye6dY/exkluzivny-4-izbovy-byt-s-loggiou-a-sukromnou-zahradou-na-lukrativnej-adrese-pod-vtacnikom",
+        "error": "invalid literal for int() with base 10: '1 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/Jupf4XrIZ5B/bosen-2-izbovy-stylovy-zariadeny-byt-ovocne-sady",
+        "error": "invalid literal for int() with base 10: '3 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/JukFvlNgC77/bosen-2-izbovy-priestranny-zariadeny-byt-ovocne-sady",
+        "error": "invalid literal for int() with base 10: '1 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/JubRRkrXI_w/bosen-4-izbovy-priestranny-byt-bratislava-vinohrady",
+        "error": "invalid literal for int() with base 10: '1 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/JuEMlI9Wfvg/1-izbovy-byt-so-samostatnou-kuchynou-nove-mesto-budysinska",
+        "error": "invalid literal for int() with base 10: '6 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/JuHSjTagrvp/frank-zicher-prenajimame-prakticky-3-izbovy-byt-na-svetlej",
+        "error": "invalid literal for int() with base 10: '9 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/JuDnpABZr-j/frank-zicher-prenajimame-3-izbovy-na-ulici-pri-hrubej-luke-s-parkovacim-miestom-v-garazi-domaci-milacikovia-su-vitani",
+        "error": "invalid literal for int() with base 10: '1 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/Ju74QqTR0Sk/b-a-j-k-a-l-s-k-a-3i-byt-71m2-s-balkonom-parkovacie-statie-baii-n-i-v-y",
+        "error": "invalid literal for int() with base 10: '2 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/JuKbPjei-Nv/k-v-a-c-a-l-o-v-a-2i-byt-57m2-s-lodziou-a-francuzskym-balkonom-baii-ruzinov",
+        "error": "invalid literal for int() with base 10: '3 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/JustH58p8Ti/prenajom-10-izbovej-luxusnej-novostavby",
+        "error": "unsupported operand type(s) for +: 'NoneType' and 'int'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/JuwRA-L1sJU/exkluzivny-4i-byt-v-novostavbe-s-terasou-a-parkovanim-na-prenajom-v-zahorskej-bystrici",
+        "error": "invalid literal for int() with base 10: '2 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/JuNRi8NS8WS/luxusny-2-izbovy-byt-v-novostavbe-skypark-s-lodziou-na-prenajom-v-starom-meste",
+        "error": "invalid literal for int() with base 10: '4 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/JuwRA-L1sJU/exkluzivny-4i-byt-v-novostavbe-s-terasou-a-parkovanim-na-prenajom-v-zahorskej-bystrici",
+        "error": "invalid literal for int() with base 10: '2 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/JuNRi8NS8WS/luxusny-2-izbovy-byt-v-novostavbe-skypark-s-lodziou-na-prenajom-v-starom-meste",
+        "error": "invalid literal for int() with base 10: '4 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/Jur2F0_h30s/nove-byvanie-v-srdci-bratislavy-new-and-modern-flat-in-the-heart-of-bratislava",
+        "error": "invalid literal for int() with base 10: '7 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/Jud9P7Nfhht/prenajom-moderneho-2-izboveho-bytu-s-velkou-terasou-a-zahradou-sabinovska-ulica-presov",
+        "error": "invalid literal for int() with base 10: '1 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/Jur2F0_h30s/nove-byvanie-v-srdci-bratislavy-new-and-modern-flat-in-the-heart-of-bratislava",
+        "error": "invalid literal for int() with base 10: '7 + výťah'"
+    },
+    {
+        "link": "https://www.nehnutelnosti.sk/detail/Jud9P7Nfhht/prenajom-moderneho-2-izboveho-bytu-s-velkou-terasou-a-zahradou-sabinovska-ulica-presov",
+        "error": "invalid literal for int() with base 10: '1 + výťah'"
+    }
+]

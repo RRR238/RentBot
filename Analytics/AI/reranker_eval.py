@@ -24,16 +24,18 @@ print("All rerankers loaded.\n")
 llm = LLM()
 vdb = Vector_DB_Qdrant('rent-bot-index')
 
-TOP_N = 20
+TOP_N = 50
 
 # ---------------------------------------------------------------------------
 # Main loop
 # ---------------------------------------------------------------------------
 
-while True:
-    query = input("Query: ").strip()
-    if not query:
-        continue
+QUERY = """
+ NADPIS: 2-izbový byt na prenájom v Bratislave - moderná výšková budova \nOPIS: Ponúkame na prenájom moderný 2 \nizbový byt v prestížnej výškovej budove v srdci Bratislavy. Byt sa nachádza na jednom z najvyšších poschodí, čo \nzaručuje nádherný výhľad na panorámu mesta. Súčasťou bytu je priestranný balkón, ideálny na relaxáciu po náročnom dni. K bytu patrí aj jedno parkovacie miesto, čo je v tejto modernej štvrti plnej mrakodrapov veľkou výhodou.
+"""
+
+query = " ".join(QUERY.strip().splitlines())
+if query:
 
     # Embed and search
     embedding = llm.get_embedding(query, model='text-embedding-3-large')
@@ -41,7 +43,6 @@ while True:
 
     if not results.points:
         print("No results.\n")
-        continue
 
     print(f"\n[{len(results.points)} results retrieved from vector DB]\n")
 

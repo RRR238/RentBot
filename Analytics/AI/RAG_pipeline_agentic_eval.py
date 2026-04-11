@@ -5,7 +5,7 @@ from datetime import datetime
 
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, AIMessage
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.prompts import ChatPromptTemplate
 
 from .Prompts import (
     agentic_flow_prompt_v2 as agentic_flow_prompt,
@@ -56,8 +56,7 @@ agentic_chain = create_chain(
 
 _extract_prompt = ChatPromptTemplate.from_messages([
     ("system", extract_preferences_from_conversation_prompt),
-    MessagesPlaceholder(variable_name="messages"),
-    ("human", "Extrahuj preferencie používateľa z vyššie uvedenej konverzácie."),
+    ("human", "{chat_history}\n\nExtrahuj preferencie používateľa z vyššie uvedenej konverzácie."),
 ])
 extract_chain = _extract_prompt | llm_langchain_deterministic.with_structured_output(KeyAttributes)
 
@@ -89,7 +88,8 @@ while True:
         t_start = time.time()
 
         # --- Step 1: extract structured preferences directly from conversation ---
-        key_attributes: KeyAttributes = extract_chain.invoke({"messages": chat_history})
+        formatted_history = format_chat_history(extract_chat_history_as_dict(chat_history))
+        key_attributes: KeyAttributes = extract_chain.invoke({"chat_history": formatted_history})
         key_attributes = normalize_key_attributes(key_attributes)
         print(f"\n[key attributes]: {key_attributes}")
 
@@ -117,7 +117,6 @@ while True:
 
         t_total = time.time() - t_start
         print(f"\n[results] ({len(reranked_points)} total, {t_total:.1f}s):")
-        formatted_history = format_chat_history(extract_chat_history_as_dict(chat_history))
 
         result_entries = []
         for i, point in enumerate(reranked_points, 1):
