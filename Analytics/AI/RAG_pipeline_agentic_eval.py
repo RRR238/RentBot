@@ -162,7 +162,7 @@ while True:
             offer = repository.get_offer_by_id_or_url(int(db_id)) if db_id else None
             titles.append(offer.title if offer else "")
 
-        reranked_points = rerank(query_text, results.points, reranker, texts=titles)
+        reranked_points = rerank(query_title, results.points, reranker, texts=titles)
 
         t_total = time.time() - t_start
         print(f"\n[results] ({len(reranked_points)} total, {t_total:.1f}s):")

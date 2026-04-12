@@ -149,7 +149,7 @@ Pravidlá:
 - Ak používateľ uvádza viacero alternatív pre jednu charakteristiku (napr. "Draždiak alebo Kuchajda", "výhľad na hrad alebo Dunaj"), zovšeobecni na nadradený pojem ("pri jazere", "s panoramatickým výhľadom").
 - Použi IBA informácie ktoré sú explicitne v preferenciách — nič nevymýšľaj.
 - Ak nie je žiadna výrazná charakteristika, napíš len typ nehnuteľnosti.
-- Odpoveď: iba samotný nadpis, žiadne úvodzovky ani vysvetlivky."""
+- Odpoveď: iba samotný nadpis, žiadne úvodzovky ani vysvetlivky. Neupravuj ani zbytočne nerozvádzaj používateľov dopyt, použi hlavne jeho slová (napr. keď povie "pet friendly", nepíš "vhodné pre domácich miláčikov")."""
 
 generate_synthetic_listing_prompt = """Si realitný agent na Slovensku. Na základe doplnkových preferencií klienta napíš krátky inzerát prenájmu nehnuteľnosti (3-5 viet) tak, ako by ho napísal skutočný realitný agent.
 
