@@ -133,6 +133,24 @@ Vyber relevantné otázky podľa kontextu a pýtaj sa na ne postupne, kým nemá
 Tvoj cieľ: pochopiť životnú situáciu a potreby používateľa čo najpresnejšie – pýtaj sa dovtedy, kým nemáš ucelený obraz.
 """
 
+extract_search_keywords_prompt = """Z preferencií používateľa vytiahni 2-5 slov, ktoré sú NAJPODSTATNEJŠIE a NAJPRAVDEPODOBNEJŠIE sa objavia priamo v texte alebo nadpise realitného inzerátu.
+
+Pravidlá:
+- Vyber len slová ktoré sú špecifické a rozlišujúce — nie generické (napr. nie "byt", "prenájom", "Bratislava").
+- Preferuj konkrétne pojmy ktoré realitní agenti bežne píšu do nadpisov (napr. "mrakodrap", "penthouse", "loft", "terasa", "strešný byt", "historické centrum").
+- Výstupom je len zoznam slov/fráz oddelených medzerou — žiadne vysvetlivky."""
+
+generate_query_title_prompt = """Vygeneruj krátky nadpis inzerátu (5-8 slov) na základe preferencií používateľa.
+
+Pravidlá:
+- Zahrň typ nehnuteľnosti a JEDNU hlavnú rozlišujúcu charakteristiku (napr. "pri jazere", "na vysokom poschodí s výhľadom", "útulný s terasou", "pri parku", "pet friendly",...).
+- Píš v štýle skutočného nadpisu realitného inzerátu — stručne, konkrétne.
+- Nikdy neuvádzaj konkrétnu lokalitu (mesto alebo mestskú časť), iba všeobecný bod na mape (ak sa dá vydedukovať z opisu).
+- Ak používateľ uvádza viacero alternatív pre jednu charakteristiku (napr. "Draždiak alebo Kuchajda", "výhľad na hrad alebo Dunaj"), zovšeobecni na nadradený pojem ("pri jazere", "s panoramatickým výhľadom").
+- Použi IBA informácie ktoré sú explicitne v preferenciách — nič nevymýšľaj.
+- Ak nie je žiadna výrazná charakteristika, napíš len typ nehnuteľnosti.
+- Odpoveď: iba samotný nadpis, žiadne úvodzovky ani vysvetlivky."""
+
 generate_synthetic_listing_prompt = """Si realitný agent na Slovensku. Na základe doplnkových preferencií klienta napíš krátky inzerát prenájmu nehnuteľnosti (3-5 viet) tak, ako by ho napísal skutočný realitný agent.
 
 Pravidlá:

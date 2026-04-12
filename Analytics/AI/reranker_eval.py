@@ -52,6 +52,6 @@ if query:
         reranked = rerank(query, results.points, model)
         t_total = time.time() - t_start
         print(f"--- {name} ({t_total:.2f}s) ---")
-        for i, point in enumerate(reranked[:TOP_N], 1):
-            print(f"{i:2}. [{point.score:.4f}] {point.payload.get('source_url', 'N/A')}")
+        for i, (score, point) in enumerate(reranked[:TOP_N], 1):
+            print(f"{i:2}. [{score:.4f}] {point.payload.get('source_url', 'N/A')}")
         print()

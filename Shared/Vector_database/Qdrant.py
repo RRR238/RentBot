@@ -8,6 +8,7 @@ from qdrant_client.models import (
     Distance, VectorParams, PayloadSchemaType,
     SparseVector,
     Prefetch, FusionQuery, Fusion,
+    SearchParams,
 )
 from qdrant_client.http.models import PointStruct
 import uuid
@@ -181,7 +182,10 @@ class Vector_DB_Qdrant(Vector_DB_interface):
                                filter_input,
                                score_threshold: float = None,
                                use_hybrid: bool = False,
-                               sparse_vector: SparseVector = None):
+                               sparse_vector: SparseVector = None,
+                               hnsw_ef: int = 128,
+                               exact: bool = False,
+                               prefetch_multiplier: int = 2):
         # Determine whether the input is already a Filter object
         if isinstance(filter_input, Filter):
             filters = filter_input
@@ -220,15 +224,16 @@ class Vector_DB_Qdrant(Vector_DB_interface):
             prefetch = [
                 Prefetch(
                     query=vector_query,
-                    using="",          # default dense vector
+                    using="",
                     filter=filters,
-                    limit=k * 2,
+                    limit=k * prefetch_multiplier,
+                    params=SearchParams(hnsw_ef=hnsw_ef, exact=exact),
                 ),
                 Prefetch(
                     query=sparse_vector,
                     using=SPARSE_VECTOR_NAME,
                     filter=filters,
-                    limit=k * 2,
+                    limit=k * prefetch_multiplier,
                 ),
             ]
             # query_points returns a single QueryResponse; wrap in list for consistent API

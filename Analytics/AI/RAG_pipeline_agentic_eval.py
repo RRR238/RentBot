@@ -7,10 +7,14 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.prompts import ChatPromptTemplate
 
+import re
+
 from .Prompts import (
     agentic_flow_prompt_v2 as agentic_flow_prompt,
     extract_preferences_from_conversation_prompt,
     generate_synthetic_listing_prompt,
+    extract_search_keywords_prompt,
+    generate_query_title_prompt,
 )
 from .Schemas import KeyAttributes
 from fastembed import SparseTextEmbedding
@@ -69,12 +73,35 @@ synthetic_listing_chain = create_chain(
     human_template="{key_attributes}",
 )
 
+_keywords_prompt = ChatPromptTemplate.from_messages([
+    ("system", extract_search_keywords_prompt),
+    ("human", "{ostatne_preferencie}"),
+])
+keywords_chain = _keywords_prompt | llm_langchain_deterministic
+
+_query_title_prompt = ChatPromptTemplate.from_messages([
+    ("system", generate_query_title_prompt),
+    ("human", "Typ nehnuteľnosti: {typ_nehnutelnosti}\nNovostavba: {novostavba}\nPreferencie: {ostatne_preferencie}"),
+])
+query_title_chain = _query_title_prompt | llm_langchain_deterministic
+
+SOFT_QUALIFIERS_RE = re.compile(
+    r'\b(ideálne|skôr|aspoň|najlepšie|určite|nejaký|nejakú|nejaké|nejakého|'
+    r'prípadne|možno|keby|pokiaľ možno|nejak[oý]?)\b',
+    flags=re.IGNORECASE,
+)
+
 # ---------------------------------------------------------------------------
 # Main loop
 # ---------------------------------------------------------------------------
 
 SEARCH_TRIGGER = "P"
 SAVE_TRIGGER = "S"
+
+# --- Search hyperparameters (tune here) ---
+HNSW_EF             = 256    # higher = more accurate HNSW (default 128)
+EXACT               = False  # True = brute force exact search (slow but 100% accurate)
+PREFETCH_MULTIPLIER = 3      # prefetch k*N candidates per source before RRF
 
 chat_history: list = []
 eval_records: list = []
@@ -96,9 +123,18 @@ while True:
         key_attributes = normalize_key_attributes(key_attributes)
         print(f"\n[key attributes]: {key_attributes}")
 
-        # --- Step 2: query text (HyDE disabled — embed preferences directly) ---
-        query_text = key_attributes.ostatne_preferencie or ""
-        print(f"[query text]: {query_text}")
+        # --- Step 2: build NADPIS/OPIS query matching listing embedding format ---
+        raw_opis = key_attributes.ostatne_preferencie or ""
+        cleaned_opis = SOFT_QUALIFIERS_RE.sub("", raw_opis).strip(" ,")
+
+        query_title = query_title_chain.invoke({
+            "typ_nehnutelnosti": ", ".join(key_attributes.typ_nehnutelnosti) if key_attributes.typ_nehnutelnosti else "byt",
+            "novostavba": key_attributes.novostavba,
+            "ostatne_preferencie": raw_opis,
+        }).content.strip()
+
+        query_text = f"NADPIS:\n{query_title}\n\nOPIS:\n{cleaned_opis}"
+        print(f"[query text]:\n{query_text}")
 
         # --- Step 3: vector search (hybrid: dense + BM42 sparse) ---
         filters = prepare_enriched_filters_from_key_attributes(key_attributes)
@@ -114,16 +150,26 @@ while True:
             filters,
             use_hybrid=True,
             sparse_vector=sparse_vec,
+            hnsw_ef=HNSW_EF,
+            exact=EXACT,
+            prefetch_multiplier=PREFETCH_MULTIPLIER,
         )[0]
 
-        reranked_points = rerank(query_text, results.points, reranker, field="title")
+        # fetch titles from DB for reranking
+        titles = []
+        for point in results.points:
+            db_id = point.payload.get('id')
+            offer = repository.get_offer_by_id_or_url(int(db_id)) if db_id else None
+            titles.append(offer.title if offer else "")
+
+        reranked_points = rerank(query_text, results.points, reranker, texts=titles)
 
         t_total = time.time() - t_start
         print(f"\n[results] ({len(reranked_points)} total, {t_total:.1f}s):")
 
         result_entries = []
-        for i, point in enumerate(reranked_points, 1):
-            print(f"{i:2}. [{point.score:.4f}] {point.payload['source_url']}")
+        for i, (rerank_score, point) in enumerate(reranked_points, 1):
+            print(f"{i:2}. [{rerank_score:.4f}] {point.payload['source_url']}")
             db_id = point.payload.get('id')
             description = None
             if db_id is not None:
@@ -133,7 +179,7 @@ while True:
 
             result_entries.append({
                 "description": description,
-                "similarity_score": point.score,
+                "rerank_score": rerank_score,
             })
 
         eval_records.append({
