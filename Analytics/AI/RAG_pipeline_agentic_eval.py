@@ -45,7 +45,7 @@ llm_langchain = ChatOpenAI(temperature=0.9,
                            model="gpt-4.1")
 llm_langchain_deterministic = ChatOpenAI(temperature=0.0,
                                          model="gpt-4o")
-reranker = CrossEncoder("cross-encoder/mmarco-mMiniLMv2-L12-H384-v1",)
+reranker = CrossEncoder("cross-encoder/mmarco-mMiniLMv2-L12-H384-v1",) #TRY: cross-encoder/ms-marco-MiniLM-L-6-v2
 sparse_model = SparseTextEmbedding(model_name="Qdrant/bm42-all-minilm-l6-v2-attentions")
 llm = LLM()
 vdb = Vector_DB_Qdrant('rent-bot-index')
@@ -90,6 +90,15 @@ SOFT_QUALIFIERS_RE = re.compile(
     r'prípadne|možno|keby|pokiaľ možno|nejak[oý]?)\b',
     flags=re.IGNORECASE,
 )
+# Removes negative constraints: "hlavne nie X", "nie X", "okrem X", "len nie X"
+NEGATION_RE = re.compile(
+    r'(hlavne\s+)?'           # optional "hlavne"
+    r'(len\s+)?'              # optional "len"
+    r'\b(nie|okrem|bez)\b'    # negation keyword
+    r'[^,;.]*',               # everything until next delimiter
+    flags=re.IGNORECASE,
+)
+
 
 # ---------------------------------------------------------------------------
 # Main loop
@@ -125,7 +134,8 @@ while True:
 
         # --- Step 2: build NADPIS/OPIS query matching listing embedding format ---
         raw_opis = key_attributes.ostatne_preferencie or ""
-        cleaned_opis = SOFT_QUALIFIERS_RE.sub("", raw_opis).strip(" ,")
+        cleaned_opis = NEGATION_RE.sub("", raw_opis)
+        cleaned_opis = SOFT_QUALIFIERS_RE.sub("", cleaned_opis).strip(" ,")
 
         query_title = query_title_chain.invoke({
             "typ_nehnutelnosti": ", ".join(key_attributes.typ_nehnutelnosti) if key_attributes.typ_nehnutelnosti else "byt",
@@ -146,7 +156,7 @@ while True:
         )
         results = vdb.enriched_filtered_vector_search(
             embedding,
-            50,
+            50, #ROOM FOR EXPERIMENTING
             filters,
             use_hybrid=True,
             sparse_vector=sparse_vec,

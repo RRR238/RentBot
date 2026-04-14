@@ -76,6 +76,9 @@ class KeyAttributes(BaseModel):
             "Volný text s ostatnými preferenciami používateľa, ktoré nepatria do iných polí "
             "(napr. balkón, parkovanie, poschodie, zariadenie, blízkosť MHD, domáce zviera, životný štýl). "
             "Nezahŕňaj sem cenu, počet izieb, rozlohu, typ nehnuteľnosti, novostavbu ani lokalitu — "
-            "tie patria do vlastných polí. Ak žiadne ostatné preferencie nie sú, použi prázdny reťazec."
+            "tie patria do vlastných polí. "
+            "DÔLEŽITÉ: nezahŕňaj sem negatívne vymedzenia — čo používateľ NECHCE alebo čomu sa chce VYHNÚŤ "
+            "(napr. 'nie Vrakuňa', 'bez výťahu', 'nie prízemie'). Tieto informácie jednoducho ignoruj. "
+            "Ak žiadne ostatné preferencie nie sú, použi prázdny reťazec."
         ),
     )
