@@ -87,7 +87,9 @@ query_title_chain = _query_title_prompt | llm_langchain_deterministic
 
 SOFT_QUALIFIERS_RE = re.compile(
     r'\b(ideálne|skôr|aspoň|najlepšie|určite|nejaký|nejakú|nejaké|nejakého|'
-    r'prípadne|možno|keby|pokiaľ možno|nejak[oý]?)\b',
+    r'prípadne|možno|keby|pokiaľ možno|nejak[oý]?|niekde|hlavne|'
+    r'je výhod[ao]u?|výhod[ao]u?|je plus|uprednostňuje?|preferuje?|víta[mn]?|ocenil\s+by|'
+    r'by\s+(som\s+)?bol\s+rád|bolo\s+by\s+(fajn|super|skvelé|plus))\b',
     flags=re.IGNORECASE,
 )
 # Removes negative constraints: "hlavne nie X", "nie X", "okrem X", "len nie X"
