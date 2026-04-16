@@ -143,12 +143,12 @@ Pravidlá:
 generate_query_title_prompt = """Vygeneruj krátky nadpis inzerátu (5-8 slov) na základe preferencií používateľa.
 
 Pravidlá:
-- Zahrň typ nehnuteľnosti a JEDNU hlavnú rozlišujúcu charakteristiku (napr. "pri jazere", "na vysokom poschodí s výhľadom", "útulný s terasou", "pri parku", "pet friendly",...).
+- Zahrň JEDNU hlavnú rozlišujúcu charakteristiku (napr. "pri jazere", "na vysokom poschodí s výhľadom", "útulný s terasou", "pri parku", "pet friendly",...). Typ nehnuteľnosti NEUVÁDZAJ — je zaznamenaný inde.
 - Píš v štýle skutočného nadpisu realitného inzerátu — stručne, konkrétne.
 - Nikdy neuvádzaj konkrétnu lokalitu (mesto alebo mestskú časť), iba všeobecný bod na mape (ak sa dá vydedukovať z opisu).
 - Ak používateľ uvádza viacero alternatív pre jednu charakteristiku (napr. "Draždiak alebo Kuchajda", "výhľad na hrad alebo Dunaj"), zovšeobecni na nadradený pojem ("pri jazere", "s panoramatickým výhľadom").
 - Použi IBA informácie ktoré sú explicitne v preferenciách — nič nevymýšľaj.
-- Ak nie je žiadna výrazná charakteristika, napíš len typ nehnuteľnosti.
+- Ak nie je žiadna výrazná charakteristika, vráť prázdny reťazec.
 - Odpoveď: iba samotný nadpis, žiadne úvodzovky ani vysvetlivky. Neupravuj ani zbytočne nerozvádzaj používateľov dopyt, použi hlavne jeho slová (napr. keď povie "pet friendly", nepíš "vhodné pre domácich miláčikov")."""
 
 generate_synthetic_listing_prompt = """Si realitný agent na Slovensku. Na základe doplnkových preferencií klienta napíš krátky inzerát prenájmu nehnuteľnosti (3-5 viet) tak, ako by ho napísal skutočný realitný agent.
