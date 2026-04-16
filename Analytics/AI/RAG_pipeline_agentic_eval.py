@@ -142,7 +142,7 @@ while True:
         query_title = query_title_chain.invoke({
             "typ_nehnutelnosti": ", ".join(key_attributes.typ_nehnutelnosti) if key_attributes.typ_nehnutelnosti else "byt",
             "novostavba": key_attributes.novostavba,
-            "ostatne_preferencie": raw_opis,
+            "ostatne_preferencie": cleaned_opis,
         }).content.strip()
 
         query_text = f"NADPIS:\n{query_title}\n\nOPIS:\n{cleaned_opis}"
@@ -174,7 +174,7 @@ while True:
             offer = repository.get_offer_by_id_or_url(int(db_id)) if db_id else None
             titles.append(offer.title if offer else "")
 
-        reranked_points = rerank(query_title, results.points, reranker, texts=titles)
+        reranked_points = rerank(cleaned_opis, results.points, reranker, texts=titles)
 
         t_total = time.time() - t_start
         print(f"\n[results] ({len(reranked_points)} total, {t_total:.1f}s):")
