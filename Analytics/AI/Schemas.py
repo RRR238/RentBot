@@ -59,8 +59,7 @@ class KeyAttributes(BaseModel):
             "(1) Ak používateľ uviedol konkrétne pomenované mestské časti (napr. 'Petržalka', 'Ružinov', 'Karlova Ves', 'Dúbravka'), uveď IBA tie. "
             "(2) Ak uviedol iba mesto (napr. 'Bratislava', 'Košice'), uveď mesto. "
             "(3) Ak uviedol mesto aj pomenované časti, uveď iba časti. "
-            "POZOR — toto NIE SÚ mestské časti a NEPATRIA sem: jazerá, parky, námestia, ulice, rekreačné oblasti, obchodné centrá ani iné body záujmu (napr. 'Draždiak', 'Štrkovec', 'Sad Janka Kráľa', 'Eurovea'). "
-            "Ak používateľ uviedol takýto bod záujmu, urči mestskú časť, v ktorej sa nachádza (napr. Draždiak → Petržalka, Štrkovec → Ružinov), a uveď tú. "
+            "POZOR — toto NIE SÚ mestské časti a NEPATRIA sem: jazerá, parky, námestia, ulice, rekreačné oblasti, obchodné centrá ani iné body záujmu (napr. 'Draždiak', 'Štrkovec', 'Sad Janka Kráľa', 'Eurovea') - daj ich do ostatne_preferencie. "
             "Opisné frázy ako 'moderná štvrť', 'nový downtown', 'blízko centra', 'pri lese' takisto nepatria sem — daj ich do ostatne_preferencie. "
             "MÄKKÁ PREFERENCIA MESTSKEJ ČASTI: Ak agent položil otázku o preferovanej mestskej časti a používateľ odpovedal jazykom mäkkej preferencie (napr. 'ideálne', 'najradšej', 'prípadne', 'keby mohlo byť', 'skôr'), "
             "znamená to, že mestská časť NIE JE tvrdá podmienka — daj do lokalita IBA mesto (napr. 'Bratislava') a konkrétnu mestskú časť zahrň do ostatne_preferencie. "
@@ -82,3 +81,5 @@ class KeyAttributes(BaseModel):
             "Ak žiadne ostatné preferencie nie sú, použi prázdny reťazec."
         ),
     )
+
+

@@ -143,10 +143,10 @@ Pravidlá:
 generate_query_title_prompt = """Vygeneruj krátky nadpis inzerátu (5-8 slov) na základe preferencií používateľa.
 
 Pravidlá:
-- Zahrň JEDNU hlavnú rozlišujúcu charakteristiku (napr. "pri jazere", "na vysokom poschodí s výhľadom", "útulný s terasou", "pri parku", "pet friendly",...). Typ nehnuteľnosti NEUVÁDZAJ — je zaznamenaný inde.
-- Píš v štýle skutočného nadpisu realitného inzerátu — stručne, konkrétne.
-- Nikdy neuvádzaj konkrétnu lokalitu (mesto alebo mestskú časť), iba všeobecný bod na mape (ak sa dá vydedukovať z opisu).
-- Ak používateľ uvádza viacero alternatív pre jednu charakteristiku (napr. "Draždiak alebo Kuchajda", "výhľad na hrad alebo Dunaj"), zovšeobecni na nadradený pojem ("pri jazere", "s panoramatickým výhľadom").
+- Píš v štýle skutočného nadpisu realitného inzerátu — stručne, konkrétne. Typ nehnuteľnosti NEUVÁDZAJ — je zaznamenaný inde. Mesto (napr. Bratislava) NEUVÁDZAJ — je zaznamenané inde.
+- POVINNÉ: Ak používateľ uviedol akékoľvek mestské časti alebo pomenované body na mape (napr. Koliba, Slavín, Draždiak, Kuchajda, Štrkovec, Petržalka, Ružinov, Devínsky hrad, Dunaj), VŽDY vymenuj KAŽDÝ JEDEN z nich v nadpise — nevynechaj ani jeden, nezovšeobecňuj ich. Napr. ak uviedol "Draždiak, Štrkovec alebo Kuchajda", nadpis musí obsahovať Draždiak, Štrkovec aj Kuchajda.
+- Zahrň aj JEDNU hlavnú rozlišujúcu charakteristiku (napr. "pri jazere", "na vysokom poschodí s výhľadom", "útulný s terasou", "pri parku", "pet friendly",...).
+- Ak používateľ uvádza viacero alternatív pre nеlokalizačnú charakteristiku (napr. "balkón alebo terasa", "výhľad na hrad alebo Dunaj"), zovšeobecni na nadradený pojem ("s výhľadom").
 - Použi IBA informácie ktoré sú explicitne v preferenciách — nič nevymýšľaj.
 - Ak nie je žiadna výrazná charakteristika, vráť prázdny reťazec.
 - Odpoveď: iba samotný nadpis, žiadne úvodzovky ani vysvetlivky. Neupravuj ani zbytočne nerozvádzaj používateľov dopyt, použi hlavne jeho slová (napr. keď povie "pet friendly", nepíš "vhodné pre domácich miláčikov")."""
