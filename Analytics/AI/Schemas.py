@@ -56,9 +56,9 @@ class KeyAttributes(BaseModel):
         description=(
             "Zoznam lokalít: iba mestá alebo mestské časti (administratívne obvody). "
             "Pravidlá v poradí priority: "
-            "(1) Ak používateľ uviedol konkrétne pomenované mestské časti (napr. 'Petržalka', 'Ružinov', 'Karlova Ves', 'Dúbravka'), uveď IBA tie. "
-            "(2) Ak uviedol iba mesto (napr. 'Bratislava', 'Košice'), uveď mesto. "
-            "(3) Ak uviedol mesto aj pomenované časti, uveď iba časti. "
+            "(1) Ak používateľ uviedol konkrétne pomenované mestské časti (napr. 'Petržalka', 'Ružinov', 'Karlova Ves', 'Dúbravka'), uveď IBA tie — vždy vo formáte 'Mesto - Mestská časť' (napr. 'Bratislava - Petržalka', 'Bratislava - Ružinov', 'Žilina - Považský Chlmec'). "
+            "(2) Ak uviedol iba mesto (napr. 'Bratislava', 'Košice'), uveď iba mesto (napr. 'Bratislava'). "
+            "(3) Ak uviedol mesto aj pomenované časti, uveď iba časti vo formáte 'Mesto - Mestská časť'. "
             "POZOR — toto NIE SÚ mestské časti a NEPATRIA sem: jazerá, parky, námestia, ulice, rekreačné oblasti, obchodné centrá ani iné body záujmu (napr. 'Draždiak', 'Štrkovec', 'Sad Janka Kráľa', 'Eurovea') - daj ich do ostatne_preferencie. "
             "Opisné frázy ako 'moderná štvrť', 'nový downtown', 'blízko centra', 'pri lese' takisto nepatria sem — daj ich do ostatne_preferencie. "
             "MÄKKÁ PREFERENCIA MESTSKEJ ČASTI: Ak agent položil otázku o preferovanej mestskej časti a používateľ odpovedal jazykom mäkkej preferencie (napr. 'ideálne', 'najradšej', 'prípadne', 'keby mohlo byť', 'skôr'), "
