@@ -78,6 +78,7 @@ class KeyAttributes(BaseModel):
             "tie patria do vlastných polí. "
             "DÔLEŽITÉ: nezahŕňaj sem negatívne vymedzenia — čo používateľ NECHCE alebo čomu sa chce VYHNÚŤ "
             "(napr. 'nie Vrakuňa', 'bez výťahu', 'nie prízemie'). Tieto informácie jednoducho ignoruj. "
+            "DOMÁCE ZVIERA: Ak používateľ akýmkoľvek spôsobom naznačil, že chce mať v byte domáce zviera (napr. 'mám psa', 'mám mačku', 'hľadám pet friendly', 'mám zviera'), VŽDY pridaj do textu výraz 'pet friendly'. "
             "Ak žiadne ostatné preferencie nie sú, použi prázdny reťazec."
         ),
     )
