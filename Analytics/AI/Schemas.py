@@ -73,11 +73,14 @@ class KeyAttributes(BaseModel):
         "",
         description=(
             "Volný text s ostatnými preferenciami používateľa, ktoré nepatria do iných polí "
-            "(napr. balkón, parkovanie, poschodie, zariadenie, blízkosť MHD, domáce zviera, životný štýl). "
+            "(napr. balkón, parkovanie, poschodie, nadštandardné vybavenie, blízkosť MHD, občianska vybavenosť, životný štýl). "
             "Nezahŕňaj sem cenu, počet izieb, rozlohu, typ nehnuteľnosti, novostavbu ani lokalitu — "
             "tie patria do vlastných polí. "
-            "DÔLEŽITÉ: nezahŕňaj sem negatívne vymedzenia — čo používateľ NECHCE alebo čomu sa chce VYHNÚŤ "
-            "(napr. 'nie Vrakuňa', 'bez výťahu', 'nie prízemie'). Tieto informácie jednoducho ignoruj. "
+            "NEGATÍVNE VYMEDZENIA: Ignoruj konkrétne vylúčenia. VÝNIMKA: Ak negatívne vyjadrenie implikuje jasnú pozitívnu požiadavku na charakter prostredia, zahrň ju v pozitívnej forme (napr. 'nechce hluk' → 'tiché prostredie'). "
+            "VYBAVENIE — zahŕňaj IBA nadštandardné alebo špecifické vybavenie (napr. klimatizácia, podlahové kúrenie, vírivka, sauna, krb, smart home). "
+            "NIKDY nezahŕňaj: práčka, chladnička, sporák, rúra, umývačka, mikrovlnka, žehlička, kanvica, nábytok, posteľ, TV, 'plne vybavená kuchyňa', 'klasická vybavenosť', 'štandardné vybavenie' a žiadne iné bežné spotrebiče. "
+            "DISPOZÍCIA — zahŕňaj IBA neštandardné požiadavky: samostatná/oddelená kuchyňa, pracovňa, šatník. "
+            "NIKDY nezahŕňaj: 'kuchyňa spojená s obývačkou', 'otvorená kuchyňa', 'open plan', 'predsieň' — to je štandard väčšiny bytov. "
             "DOMÁCE ZVIERA: Ak používateľ akýmkoľvek spôsobom naznačil, že chce mať v byte domáce zviera (napr. 'mám psa', 'mám mačku', 'hľadám pet friendly', 'mám zviera'), VŽDY pridaj do textu výraz 'pet friendly'. "
             "Ak žiadne ostatné preferencie nie sú, použi prázdny reťazec."
         ),
