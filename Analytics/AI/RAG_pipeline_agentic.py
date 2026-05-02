@@ -1,17 +1,18 @@
 import warnings
 
-from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationBufferMemory
-from langchain.schema import HumanMessage
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.prompts import ChatPromptTemplate
 
-from Prompts import (
+from .Prompts import (
     agentic_flow_prompt,
-    get_key_attributes_system_prompt,
+    get_key_attributes_structured_prompt,
     summarize_preferences_system_prompt,
 )
+from .Schemas import KeyAttributes
 from Shared.LLM import LLM
 from Shared.Vector_database.Qdrant import Vector_DB_Qdrant
-from utils import create_chain, parse_json_from_markdown, prepare_multiple_filters_qdrant
+from .utils import create_chain, prepare_enriched_filters_from_key_attributes
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -22,10 +23,8 @@ gen_model = "gpt-4o"
 # Models / services
 # ---------------------------------------------------------------------------
 
-llm_langchain = ChatOpenAI(
-    temperature=0.2,
-    model_name=gen_model,
-)
+llm_langchain = ChatOpenAI(temperature=0.9, model=gen_model)
+llm_langchain_deterministic = ChatOpenAI(temperature=0.0, model=gen_model)
 llm = LLM()
 vdb = Vector_DB_Qdrant('rent-bot-index')
 
@@ -33,30 +32,26 @@ vdb = Vector_DB_Qdrant('rent-bot-index')
 # Chains
 # ---------------------------------------------------------------------------
 
-memory = ConversationBufferMemory(
-    memory_key="chat_history",
-    return_messages=True,
-)
-
-# Agentic chain — conversational, driven by memory; invoke via .predict(input=query)
+# Agentic chain — pass chat_history manually on each invoke
 agentic_chain = create_chain(
     llm_langchain, agentic_flow_prompt,
     messages_placeholder="chat_history",
     human_template="{input}",
-    memory=memory,
 )
 
-# Summarization chain — invoked with {"messages": [HumanMessage, AIMessage, ...]}
+# Summarization chain — conversation history + explicit instruction as final human message
 summarization_chain = create_chain(
-    llm_langchain, summarize_preferences_system_prompt,
+    llm_langchain_deterministic, summarize_preferences_system_prompt,
     messages_placeholder="messages",
+    human_template="Zhrň preferencie používateľa z vyššie uvedenej konverzácie podľa inštrukcií v systémovej správe.",
 )
 
-# Key-attributes chain — invoked with {"input": "<summary text>"}
-key_attributes_chain = create_chain(
-    llm_langchain, get_key_attributes_system_prompt,
-    human_template="{input}",
-)
+# Key-attributes chain — returns a KeyAttributes Pydantic object directly
+_key_attributes_prompt = ChatPromptTemplate.from_messages([
+    ("system", get_key_attributes_structured_prompt),
+    ("human", "{input}"),
+])
+key_attributes_chain = _key_attributes_prompt | llm_langchain_deterministic.with_structured_output(KeyAttributes)
 
 # ---------------------------------------------------------------------------
 # Main loop
@@ -69,17 +64,21 @@ org_summary = (
 
 SEARCH_TRIGGER = "P"
 
+# Conversation history — list of HumanMessage / AIMessage
+chat_history = []
+
 # Kick off the conversation
-opening = agentic_chain.predict(input="Začni konverzáciu.")
-print(f"🤖: {opening}")
+opening = agentic_chain.invoke({"chat_history": chat_history, "input": "Začni konverzáciu."})
+print(f"🤖: {opening.content}")
+chat_history.append(HumanMessage(content="Začni konverzáciu."))
+chat_history.append(AIMessage(content=opening.content))
 
 while True:
     query = input("You: ").strip()
 
     if query == SEARCH_TRIGGER:
         # --- Step 1: summarize preferences from the full conversation so far ---
-        messages_for_summary = memory.chat_memory.messages
-        summary_response = summarization_chain.invoke({"messages": messages_for_summary})
+        summary_response = summarization_chain.invoke({"messages": chat_history})
         response_summary = summary_response.content
         print(f"\n[summary]: {response_summary}")
 
@@ -97,15 +96,11 @@ while True:
         print(f"[summary to embedd]: {summary_to_embedd}")
 
         # --- Step 2: extract structured key attributes from the summary ---
-        key_attr_response = key_attributes_chain.invoke({"input": response_summary})
-        response_key_attr = key_attr_response.content
-        print(f"[key attributes]: {response_key_attr}")
-
-        p = parse_json_from_markdown(response_key_attr)
-        print(f"[parsed]: {p}")
+        key_attributes: KeyAttributes = key_attributes_chain.invoke({"input": processed_summary})
+        print(f"[key attributes]: {key_attributes}")
 
         # --- Step 3: vector search with extracted filters ---
-        filters = prepare_multiple_filters_qdrant(p)
+        filters = prepare_enriched_filters_from_key_attributes(key_attributes)
         embedding = llm.get_embedding(summary_to_embedd, model='text-embedding-3-large')
         results = vdb.enriched_filtered_vector_search(embedding, 10, filters)[0]
         print("\n[results]:")
@@ -114,5 +109,7 @@ while True:
 
     else:
         # Normal conversation turn — agent asks the next question
-        response = agentic_chain.predict(input=query)
-        print(f"🤖: {response}")
+        response = agentic_chain.invoke({"chat_history": chat_history, "input": query})
+        print(f"🤖: {response.content}")
+        chat_history.append(HumanMessage(content=query))
+        chat_history.append(AIMessage(content=response.content))

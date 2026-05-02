@@ -40,3 +40,9 @@ def get_bounding_box_from_location(location_name: str):
                 "east_lon":bbox_tuple[3]}
     else:
         return None
+
+
+if __name__ == "__main__":
+    location = input("Tell location: ")
+    print(f"coordinates: {get_coordinates(location)}")
+    print(f"bounding box: {get_bounding_box_from_location(location)}")

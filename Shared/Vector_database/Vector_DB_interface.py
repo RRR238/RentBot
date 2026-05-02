@@ -15,6 +15,10 @@ class Vector_DB_interface(ABC):
         pass
 
     @abstractmethod
+    def delete_by_qdrant_id(self, qdrant_id: str) -> None:
+        pass
+
+    @abstractmethod
     def delete_all_documents(self):
         pass
 
@@ -49,5 +53,8 @@ class Vector_DB_interface(ABC):
     def update_metadata_by_url(self,
                                source_url:str,
                                updated_metadata: dict):
+        pass
 
+    @abstractmethod
+    def get_all_metadata(self, batch_size: int = 100) -> list:
         pass

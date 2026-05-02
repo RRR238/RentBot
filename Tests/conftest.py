@@ -23,6 +23,7 @@ _STUBS = [
     # LangChain
     "langchain",
     "langchain.chat_models",
+    "langchain_openai",
     # Selenium + driver manager
     "selenium",
     "selenium.webdriver",

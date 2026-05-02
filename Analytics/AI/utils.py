@@ -3,24 +3,21 @@ import math
 import re
 from typing import Optional, Union
 
-from langchain.chains import LLMChain
-from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationBufferMemory
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.schema import AIMessage, HumanMessage
+from sentence_transformers import CrossEncoder
+
+from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from Shared.Geolocation import get_bounding_box_from_location
 from qdrant_client.http.models import Filter, FieldCondition, Match, Range, MatchValue
 
 
 def create_chain(
-    llm: ChatOpenAI,
+    llm,
     system_prompt: str,
     *,
     messages_placeholder: Optional[str] = None,
     human_template: Optional[str] = None,
-    memory: Optional[ConversationBufferMemory] = None,
-) -> Union[LLMChain, object]:
-
+):
     message_templates = [("system", system_prompt)]
 
     if messages_placeholder is not None:
@@ -30,9 +27,6 @@ def create_chain(
         message_templates.append(("human", human_template))
 
     prompt = ChatPromptTemplate.from_messages(message_templates)
-
-    if memory is not None:
-        return LLMChain(llm=llm, prompt=prompt, memory=memory)
 
     return prompt | llm
 
@@ -243,11 +237,102 @@ def prepare_enriched_filters_qdrant(processed_dict):
             )
         )
 
-    # Final filter with must + should
+    # If no bbox resolved, omit should entirely — empty should=[] in Qdrant = zero results
     return Filter(
         must=must_conditions,
-        should=should_conditions
+        should=should_conditions if should_conditions else None
     )
+
+def normalize_key_attributes(ka):
+    """Post-process extracted KeyAttributes:
+    - cena:       if max - min <= 200  → keep only MAX (narrow price band = treat as upper bound)
+    - rozloha:    if max - min <= 20   → keep only MIN (narrow size band = treat as lower bound)
+    - pocet_izieb: if min == max       → keep only MIN (single value, not a range)
+    """
+    c = ka.cena
+    if c.min is not None and c.max is not None and (c.max - c.min) <= 200:
+        ka.cena.min = None
+
+    r = ka.rozloha
+    if r.min is not None and r.max is not None and (r.max - r.min) <= 20:
+        ka.rozloha.max = None
+
+    p = ka.pocet_izieb
+    if p.min is not None and p.max is not None and p.min == p.max:
+        ka.pocet_izieb.max = None
+
+    return ka
+
+
+def prepare_enriched_filters_from_key_attributes(key_attributes) -> Filter:
+    """Build a Qdrant Filter from a KeyAttributes Pydantic object."""
+    must_conditions = []
+    roomless_mapped = {'loft', 'penthouse', 'mezonet', 'studio'}
+
+    # Price
+    if key_attributes.cena.min is not None:
+        must_conditions.append(FieldCondition(key="price_total", range=Range(gte=key_attributes.cena.min)))
+    if key_attributes.cena.max is not None:
+        must_conditions.append(FieldCondition(key="price_total", range=Range(lte=key_attributes.cena.max)))
+
+    # Property type — needed before rooms to check roomless
+    mapped_types = [
+        property_type_mappings[t]
+        for t in key_attributes.typ_nehnutelnosti
+        if t in property_type_mappings
+    ]
+    if mapped_types:
+        must_conditions.append(
+            Filter(should=[
+                FieldCondition(key="property_type", match=MatchValue(value=t))
+                for t in mapped_types
+            ])
+        )
+
+    # Rooms (skip if all selected types are roomless)
+    is_all_roomless = bool(mapped_types) and set(mapped_types).issubset(roomless_mapped)
+    if not is_all_roomless:
+        if key_attributes.pocet_izieb.min is not None:
+            must_conditions.append(FieldCondition(key="rooms", range=Range(gte=key_attributes.pocet_izieb.min)))
+        if key_attributes.pocet_izieb.max is not None:
+            must_conditions.append(FieldCondition(key="rooms", range=Range(lte=key_attributes.pocet_izieb.max)))
+
+    # Size
+    if key_attributes.rozloha.min is not None:
+        must_conditions.append(FieldCondition(key="size", range=Range(gte=key_attributes.rozloha.min)))
+    if key_attributes.rozloha.max is not None:
+        must_conditions.append(FieldCondition(key="size", range=Range(lte=key_attributes.rozloha.max)))
+
+    # New build
+    if key_attributes.novostavba:
+        must_conditions.append(FieldCondition(key="property_status", match=MatchValue(value="novostavba")))
+
+    # Location — multiple bounding boxes in should (OR logic)
+    MIN_BBOX_SIZE = 0.01  # ~1km — smaller bboxes are POIs/buildings, expand them
+    EXPAND_DEGREES = 0.018  # ~2km padding on each side
+    should_conditions = []
+    locations = key_attributes.lokalita or ['Slovakia']
+    for loc in locations:
+        bbox = get_bounding_box_from_location(loc)
+        if bbox is None:
+            continue
+        lat_range = bbox["north_lat"] - bbox["south_lat"]
+        lon_range = bbox["east_lon"] - bbox["west_lon"]
+        if lat_range < MIN_BBOX_SIZE or lon_range < MIN_BBOX_SIZE:
+            bbox = {
+                "south_lat": bbox["south_lat"] - EXPAND_DEGREES,
+                "north_lat": bbox["north_lat"] + EXPAND_DEGREES,
+                "west_lon":  bbox["west_lon"]  - EXPAND_DEGREES,
+                "east_lon":  bbox["east_lon"]  + EXPAND_DEGREES,
+            }
+        should_conditions.append(Filter(must=[
+            FieldCondition(key="latitude", range=Range(gte=bbox["south_lat"], lte=bbox["north_lat"])),
+            FieldCondition(key="longtitude", range=Range(gte=bbox["west_lon"], lte=bbox["east_lon"])),
+        ]))
+
+    # If no bbox resolved, omit should entirely — empty should=[] in Qdrant = zero results
+    return Filter(must=must_conditions, should=should_conditions if should_conditions else None)
+
 
 def extract_chat_history_as_dict(memory):
     chat_history = []
@@ -269,3 +354,25 @@ def format_chat_history(chat_history):
         elif message["role"] == "assistant":
             formatted_history += f"Asistent: {message['content']}\n"
     return formatted_history
+
+
+def rerank(query: str, points: list, model: CrossEncoder,
+           field: str = "description", texts: list[str] | None = None) -> list:
+    """Rerank Qdrant result points by relevance using a cross-encoder.
+
+    Args:
+        query: the query text
+        points: list of Qdrant ScoredPoint objects
+        model: a loaded CrossEncoder instance
+        field: payload field to compare against (used only if texts is None)
+        texts: pre-fetched list of strings to compare against (overrides field lookup)
+
+    Returns:
+        points reordered from most to least relevant
+    """
+    if texts is None:
+        texts = [p.payload.get(field) or "" for p in points]
+    pairs = [(query, t) for t in texts]
+    scores = model.predict(pairs)
+    reranked = sorted(zip(scores, points), key=lambda x: x[0], reverse=True)
+    return [(float(score), point) for score, point in reranked]

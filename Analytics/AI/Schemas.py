@@ -1,0 +1,89 @@
+from typing import Optional, Literal
+from pydantic import BaseModel, Field
+
+PropertyType = Literal["dom", "loft", "mezonet", "penthouse", "byt", "garzónka"]
+
+
+class NumberRange(BaseModel):
+    min: Optional[float] = Field(
+        None,
+        description=(
+            "Dolná hranica rozsahu, null ak nie je určená. "
+            "Ak je zadané jediné číslo bez spodnej hranice (napr. 'do 700€', 'max 700'), "
+            "priraď ho do max a min nastav na null."
+        ),
+    )
+    max: Optional[float] = Field(None, description="Horná hranica rozsahu, null ak nie je určená.")
+
+
+class KeyAttributes(BaseModel):
+    cena: NumberRange = Field(
+        default_factory=NumberRange,
+        description=(
+            "Cenový rozsah mesačného nájmu. "
+            "Ak používateľ uvedie jediné číslo alebo hornú hranicu (napr. '700 eur', 'do 800', 'max 900'), priraď ho ako MAX a MIN nastav na null. "
+            "Ak používateľ uvedie rozsah (napr. '600-800', 'okolo 600-700'), priraď nižšie číslo ako MIN a vyššie ako MAX. "
+            "Ak rozsah navrhol agent a používateľ ho len neurčito potvrdil (napr. 'hej', 'môže byť', 'tak nejako', 'dobre'), "
+            "priraď IBA vyššie číslo ako MAX a MIN nastav na null — používateľ nevyjadril pevnú dolnú hranicu. "
+            "NIKDY nepriraďuj rovnakú hodnotu obom. Ak nie je možné určiť žiadne číslo, priraď obom null."
+        ),
+    )
+    pocet_izieb: NumberRange = Field(
+        default_factory=NumberRange,
+        description="Uveď rozsah počtu izieb. Ak nie je možné určiť rozsah, ale iba jediné číslo, priraď toto číslo ako hodnotu MIN a hodnote MAX priraď null. Ak je v popise uvedený počet izieb nepriamo (napr. 'dve spálne a pracovňa' alebo '2 spálne a 1 pracovňa'), uveď počet izieb na základe uvedených miestností. Ak nie je možné určiť rozsah ani konkrétne číslo, priraď obom hodnotám null.",
+    )
+    rozloha: NumberRange = Field(
+        default_factory=NumberRange,
+        description=(
+            "Rozsah rozlohy v m². "
+            "Ak používateľ uvedie jediné číslo alebo spodnú hranicu (napr. 'aspoň 60 m²', 'min 50'), priraď ho ako MIN a MAX nastav na null. "
+            "Ak používateľ uvedie vlastný rozsah s jasným vymedzením oboch hraníc (napr. 'od 50 do 70 m²'), priraď nižšie ako MIN a vyššie ako MAX. "
+            "Ak rozsah navrhol agent a používateľ ho len neurčito potvrdil (napr. 'hej', 'môže byť', 'tak nejako', 'pre dvoch ľudí'), "
+            "priraď IBA nižšie číslo ako MIN a MAX nastav na null — používateľ nevyjadril pevnú hornú hranicu. "
+            "NIKDY nepriraďuj rovnakú hodnotu obom. Ak nie je možné určiť žiadne číslo, priraď obom null."
+        ),
+    )
+    typ_nehnutelnosti: list[PropertyType] = Field(
+        default_factory=list,
+        description="Typy nehnuteľností. Vyber všetky relevantné z: dom, loft, mezonet, penthouse, byt, garzónka. Prázdny zoznam ak typ nie je určený.",
+    )
+    novostavba: bool = Field(
+        False,
+        description="True len ak je jednoznačne jasné, že ide o novostavbu. Inak False.",
+    )
+    lokalita: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Zoznam lokalít: iba mestá alebo mestské časti (administratívne obvody). "
+            "Pravidlá v poradí priority: "
+            "(1) Ak používateľ uviedol konkrétne pomenované mestské časti (napr. 'Petržalka', 'Ružinov', 'Karlova Ves', 'Dúbravka'), uveď IBA tie — vždy vo formáte 'Mesto - Mestská časť' (napr. 'Bratislava - Petržalka', 'Bratislava - Ružinov', 'Žilina - Považský Chlmec'). "
+            "(2) Ak uviedol iba mesto (napr. 'Bratislava', 'Košice'), uveď iba mesto (napr. 'Bratislava'). "
+            "(3) Ak uviedol mesto aj pomenované časti, uveď iba časti vo formáte 'Mesto - Mestská časť'. "
+            "POZOR — toto NIE SÚ mestské časti a NEPATRIA sem: jazerá, parky, námestia, ulice, rekreačné oblasti, obchodné centrá ani iné body záujmu (napr. 'Draždiak', 'Štrkovec', 'Sad Janka Kráľa', 'Eurovea') - daj ich do ostatne_preferencie. "
+            "Opisné frázy ako 'moderná štvrť', 'nový downtown', 'blízko centra', 'pri lese' takisto nepatria sem — daj ich do ostatne_preferencie. "
+            "MÄKKÁ PREFERENCIA MESTSKEJ ČASTI: Ak agent položil otázku o preferovanej mestskej časti a používateľ odpovedal jazykom mäkkej preferencie (napr. 'ideálne', 'najradšej', 'prípadne', 'keby mohlo byť', 'skôr'), "
+            "znamená to, že mestská časť NIE JE tvrdá podmienka — daj do lokalita IBA mesto (napr. 'Bratislava') a konkrétnu mestskú časť zahrň do ostatne_preferencie. "
+            "VÝNIMKA: Ak používateľ sám od seba (nie v odpovedi na agentovu otázku) uvedie mestskú časť bez mesta, považuj ju za tvrdú podmienku a daj ju do lokalita. "
+            "Prázdny zoznam len ak lokalita nie je vôbec určená. "
+            "NIKDY nevyvodzuj mesto z opisných pojmov ako 'downtown', 'centrum', 'mrakodrap' — mesto musí byť explicitne pomenované. "
+            "NIKDY nepreberaj názvy lokalít z otázok agenta — ber IBA hodnoty ktoré používateľ sám potvrdil alebo uviedol."
+        ),
+    )
+    ostatne_preferencie: str = Field(
+        "",
+        description=(
+            "Volný text s ostatnými preferenciami používateľa, ktoré nepatria do iných polí "
+            "(napr. balkón, parkovanie, poschodie, nadštandardné vybavenie, blízkosť MHD, občianska vybavenosť, životný štýl). "
+            "Nezahŕňaj sem cenu, počet izieb, rozlohu, typ nehnuteľnosti, novostavbu ani lokalitu — "
+            "tie patria do vlastných polí. "
+            "NEGATÍVNE VYMEDZENIA: Ignoruj konkrétne vylúčenia. VÝNIMKA: Ak negatívne vyjadrenie implikuje jasnú pozitívnu požiadavku na charakter prostredia, zahrň ju v pozitívnej forme (napr. 'nechce hluk' → 'tiché prostredie'). "
+            "VYBAVENIE — zahŕňaj IBA nadštandardné alebo špecifické vybavenie (napr. klimatizácia, podlahové kúrenie, vírivka, sauna, krb, smart home). "
+            "NIKDY nezahŕňaj: práčka, chladnička, sporák, rúra, umývačka, mikrovlnka, žehlička, kanvica, nábytok, posteľ, TV, 'plne vybavená kuchyňa', 'klasická vybavenosť', 'štandardné vybavenie' a žiadne iné bežné spotrebiče. "
+            "DISPOZÍCIA — zahŕňaj IBA neštandardné požiadavky: samostatná/oddelená kuchyňa, pracovňa, šatník. "
+            "NIKDY nezahŕňaj: 'kuchyňa spojená s obývačkou', 'otvorená kuchyňa', 'open plan', 'predsieň' — to je štandard väčšiny bytov. "
+            "DOMÁCE ZVIERA: Ak používateľ akýmkoľvek spôsobom naznačil, že chce mať v byte domáce zviera (napr. 'mám psa', 'mám mačku', 'hľadám pet friendly', 'mám zviera'), VŽDY pridaj do textu výraz 'pet friendly'. "
+            "Ak žiadne ostatné preferencie nie sú, použi prázdny reťazec."
+        ),
+    )
+
+

@@ -1,13 +1,21 @@
 import os
+import qdrant_client.models
 from dotenv import load_dotenv
 from qdrant_client import QdrantClient, AsyncQdrantClient
 
 load_dotenv()
-from qdrant_client.models import Distance, VectorParams, PayloadSchemaType
+from qdrant_client.models import (
+    Distance, VectorParams, PayloadSchemaType,
+    SparseVector,
+    Prefetch, FusionQuery, Fusion,
+    SearchParams,
+)
 from qdrant_client.http.models import PointStruct
 import uuid
 from qdrant_client.http.models import Filter, FieldCondition, MatchValue, FilterSelector, SearchParams, Range, QueryRequest
 from Shared.Vector_database.Vector_DB_interface import Vector_DB_interface
+
+SPARSE_VECTOR_NAME = "text-sparse"
 
 class Vector_DB_Qdrant(Vector_DB_interface):
     def __init__(self,
@@ -171,7 +179,13 @@ class Vector_DB_Qdrant(Vector_DB_interface):
     def enriched_filtered_vector_search(self,
                                vector_query: list,
                                k: int,
-                               filter_input):
+                               filter_input,
+                               score_threshold: float = None,
+                               use_hybrid: bool = False,
+                               sparse_vector: SparseVector = None,
+                               hnsw_ef: int = 128,
+                               exact: bool = False,
+                               prefetch_multiplier: int = 2):
         # Determine whether the input is already a Filter object
         if isinstance(filter_input, Filter):
             filters = filter_input
@@ -205,23 +219,48 @@ class Vector_DB_Qdrant(Vector_DB_interface):
 
             filters = Filter(must=filters)
 
-        # Prepare the query
-        search_query = [
-            QueryRequest(
-                query=vector_query,
-                filter=filters,
+        if use_hybrid and sparse_vector is not None:
+            # Hybrid search: dense + sparse via RRF fusion
+            prefetch = [
+                Prefetch(
+                    query=vector_query,
+                    using="",
+                    filter=filters,
+                    limit=k * prefetch_multiplier,
+                    params=SearchParams(hnsw_ef=hnsw_ef, exact=exact),
+                ),
+                Prefetch(
+                    query=sparse_vector,
+                    using=SPARSE_VECTOR_NAME,
+                    filter=filters,
+                    limit=k * prefetch_multiplier,
+                ),
+            ]
+            # query_points returns a single QueryResponse; wrap in list for consistent API
+            response = self.__client.query_points(
+                collection_name=self.index_name,
+                prefetch=prefetch,
+                query=FusionQuery(fusion=Fusion.RRF),
                 limit=k,
-                with_payload=True
+                with_payload=True,
+                score_threshold=score_threshold,
             )
-        ]
-
-        # Perform the search
-        response = self.__client.query_batch_points(
-            collection_name=self.index_name,
-            requests=search_query
-        )
-
-        return response
+            return [response]
+        else:
+            # Dense-only search (original behaviour)
+            search_query = [
+                QueryRequest(
+                    query=vector_query,
+                    filter=filters,
+                    limit=k,
+                    with_payload=True,
+                    score_threshold=score_threshold,
+                )
+            ]
+            return self.__client.query_batch_points(
+                collection_name=self.index_name,
+                requests=search_query
+            )
 
     async def filtered_vector_search_async(self,
                                      vector_query: list,
@@ -272,7 +311,9 @@ class Vector_DB_Qdrant(Vector_DB_interface):
     async def enriched_filtered_vector_search_async(self,
                                                    vector_query: list,
                                                    k: int,
-                                                   filter_input):
+                                                   filter_input,
+                                                   use_hybrid: bool = False,
+                                                   sparse_vector: SparseVector = None):
         # If already a Filter (i.e., from prepare_multiple_filters_qdrant)
         if isinstance(filter_input, Filter):
             filters = filter_input
@@ -306,21 +347,42 @@ class Vector_DB_Qdrant(Vector_DB_interface):
 
             filters = Filter(must=filters)
 
-        search_query = [
-            QueryRequest(
-                query=vector_query,
-                filter=filters,
+        if use_hybrid and sparse_vector is not None:
+            prefetch = [
+                Prefetch(
+                    query=vector_query,
+                    using="",
+                    filter=filters,
+                    limit=k * 2,
+                ),
+                Prefetch(
+                    query=sparse_vector,
+                    using=SPARSE_VECTOR_NAME,
+                    filter=filters,
+                    limit=k * 2,
+                ),
+            ]
+            response = await self.__async_client.query_points(
+                collection_name=self.index_name,
+                prefetch=prefetch,
+                query=FusionQuery(fusion=Fusion.RRF),
                 limit=k,
-                with_payload=True
+                with_payload=True,
             )
-        ]
-
-        response = await self.__async_client.query_batch_points(
-            collection_name=self.index_name,
-            requests=search_query
-        )
-
-        return response
+            return [response]
+        else:
+            search_query = [
+                QueryRequest(
+                    query=vector_query,
+                    filter=filters,
+                    limit=k,
+                    with_payload=True
+                )
+            ]
+            return await self.__async_client.query_batch_points(
+                collection_name=self.index_name,
+                requests=search_query
+            )
 
     def get_element(self,
                     postgres_id=None,
@@ -371,6 +433,12 @@ class Vector_DB_Qdrant(Vector_DB_interface):
         )
         return True
 
+    def delete_by_qdrant_id(self, qdrant_id: str) -> None:
+        self.__client.delete(
+            collection_name=self.index_name,
+            points_selector=qdrant_client.models.PointIdsList(points=[qdrant_id]),
+        )
+
     def get_all_metadata(self,
                          batch_size: int = 100):
         all_payloads = []
@@ -390,7 +458,7 @@ class Vector_DB_Qdrant(Vector_DB_interface):
 
             points_batch, scroll_offset = response
             for point in points_batch:
-                all_payloads.append(point.payload)
+                all_payloads.append({"qdrant_id": point.id, **point.payload})
 
             if scroll_offset is None:
                 break
